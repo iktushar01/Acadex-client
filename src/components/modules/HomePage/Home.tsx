@@ -1,5 +1,5 @@
-import Banner from "../banner";
-import HowItWork from "../howitwork";
+import Banner from "./banner";
+import HowItWork from "./howitwork";
 
 const Home = () => {
     return (

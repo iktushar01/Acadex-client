@@ -1,6 +1,9 @@
+import { Toaster } from "@/components/ui/sonner";
+import QueryProviders from "@/providers/QueryProvider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Acadex",
-  description: "Acadex is a platform for students to share notes and resources and learn from each other.",
+  description: "Acadex is a classroom-based note-sharing platform where users can upload, organize, and access study materials with approval, favorites, and comments.",
 };
 
 export default function RootLayout({
@@ -23,12 +26,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
+      >
+        <QueryProviders>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+          <Toaster position="top-right" richColors />
+        </QueryProviders>
       </body>
     </html>
   );
