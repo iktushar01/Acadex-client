@@ -54,7 +54,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                     backgroundSize: '100% 2.5rem',
                 }}
             />
-            <div className="absolute top-0 left-[8%] h-full w-[1px] bg-destructive/10 z-0 md:left-[12%]" />
+            <div className="absolute top-0 left-[8%] h-full bg-destructive/10 z-0 md:left-[12%]" />
 
             {/* 2. HOME NAVIGATION */}
             <nav className="absolute top-6 left-6 z-20">
@@ -124,7 +124,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
 
             {/* 4. FORM CARD (RIGHT-CENTERED) */}
             <div className="relative flex flex-1 items-center justify-center p-6 z-10 lg:justify-center lg:pr-32">
-                <div className="w-full max-w-[440px] rounded-[2.5rem] border border-border bg-card/80 p-8 md:p-10 shadow-2xl backdrop-blur-xl">
+                <div className="w-full rounded-[2.5rem] border border-border bg-card/80 p-8 md:p-10 shadow-2xl backdrop-blur-xl">
 
                     <div className="mb-8 text-center lg:text-left">
                         <h2 className="text-3xl font-bold tracking-tight text-foreground">Sign In</h2>
