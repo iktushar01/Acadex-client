@@ -47,7 +47,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
     return (
         <main className="relative flex min-h-screen w-full flex-col lg:flex-row overflow-hidden bg-background">
             {/* 1. NOTEPAD BACKGROUND EFFECT */}
-            <div 
+            <div
                 className="absolute inset-0 z-0 opacity-30 dark:opacity-10 pointer-events-none"
                 style={{
                     backgroundImage: `linear-gradient(var(--muted) 1px, transparent 1px)`,
@@ -67,25 +67,65 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
             </nav>
 
             {/* 3. LEFT BRANDING (DESKTOP) */}
-            <div className="hidden lg:flex flex-1 flex-col items-start justify-center p-20 z-10">
-                <div className="space-y-6">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20">
-                        <GraduationCap className="h-10 w-10 text-primary-foreground" />
+            <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-20 z-10 relative">
+
+                {/* Subtle Decorative Element: Floating "Note" Blobs */}
+                <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-primary/5 blur-[100px] animate-pulse" />
+
+                <div className="relative space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
+
+                    {/* Animated Icon Container */}
+                    <div className="group relative flex h-20 w-20 items-center justify-center rounded-3xl bg-primary shadow-2xl shadow-primary/20 transition-transform hover:rotate-3">
+                        <GraduationCap className="h-12 w-12 text-primary-foreground transition-transform group-hover:scale-110" />
+                        {/* Glossy overlay effect */}
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
                     </div>
-                    <h1 className="text-6xl font-black tracking-tighter text-foreground">
-                        Study <br /> 
-                        <span className="text-primary underline decoration-primary/30 underline-offset-8">Together.</span>
-                    </h1>
-                    <p className="max-w-sm text-lg font-medium text-muted-foreground leading-relaxed">
-                        Join the central hub for classroom collaboration. Access notes, sync with classmates, and ace your exams.
-                    </p>
+
+                    <div className="space-y-4">
+                        <h1 className="text-7xl font-black tracking-tighter text-foreground leading-[1.1]">
+                            Study <br />
+                            <span className="relative inline-block text-primary">
+                                Together.
+                                {/* Hand-drawn style underline (SVG or Border) */}
+                                <svg className="absolute -bottom-2 left-0 w-full h-3 text-primary/30" viewBox="0 0 100 10" preserveAspectRatio="none">
+                                    <path d="M0 5 Q 25 0 50 5 T 100 5" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                                </svg>
+                            </span>
+                        </h1>
+
+                        <div className="flex items-center gap-3">
+                            <div className="h-px w-12 bg-primary/50" />
+                            <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                                Classroom Excellence
+                            </span>
+                        </div>
+
+                        <p className="max-w-md text-xl font-medium text-muted-foreground leading-relaxed">
+                            The central hub for classroom collaboration. Access
+                            <span className="text-foreground font-semibold"> shared notes</span>,
+                            sync with classmates, and ace your exams with collective intelligence.
+                        </p>
+                    </div>
+
+                    {/* Feature Highlights (Mini Icons) */}
+                    <div className="flex items-center gap-6 pt-4">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-2xl font-bold text-foreground">10k+</span>
+                            <span className="text-xs text-muted-foreground font-medium uppercase">Active Students</span>
+                        </div>
+                        <div className="h-8 w-px bg-border" />
+                        <div className="flex flex-col gap-1">
+                            <span className="text-2xl font-bold text-foreground">500+</span>
+                            <span className="text-xs text-muted-foreground font-medium uppercase">Classrooms</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {/* 4. FORM CARD (RIGHT-CENTERED) */}
             <div className="relative flex flex-1 items-center justify-center p-6 z-10 lg:justify-center lg:pr-32">
                 <div className="w-full max-w-[440px] rounded-[2.5rem] border border-border bg-card/80 p-8 md:p-10 shadow-2xl backdrop-blur-xl">
-                    
+
                     <div className="mb-8 text-center lg:text-left">
                         <h2 className="text-3xl font-bold tracking-tight text-foreground">Sign In</h2>
                         <p className="mt-2 text-sm text-muted-foreground">Welcome back to Acadex!</p>
@@ -142,7 +182,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                         </form.Field>
 
                         <div className="text-right">
-                            <Link href="/forgot-password"  className="text-xs font-bold text-primary hover:underline underline-offset-4">
+                            <Link href="/forgot-password" className="text-xs font-bold text-primary hover:underline underline-offset-4">
                                 Forgot password?
                             </Link>
                         </div>
@@ -155,9 +195,9 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
 
                         <form.Subscribe selector={(s) => [s.canSubmit] as const}>
                             {([canSubmit]) => (
-                                <AppSubmitButton 
-                                    isPending={isPending} 
-                                    pendingLabel="Checking Credentials..." 
+                                <AppSubmitButton
+                                    isPending={isPending}
+                                    pendingLabel="Checking Credentials..."
                                     disabled={!canSubmit}
                                 >
                                     Log In
@@ -175,9 +215,9 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                     </div>
 
                     {/* GOOGLE LOGIN */}
-                    <Button 
-                        variant="outline" 
-                        className="w-full h-11 rounded-xl font-semibold gap-3 border-border hover:bg-secondary transition-all" 
+                    <Button
+                        variant="outline"
+                        className="w-full h-11 rounded-xl font-semibold gap-3 border-border hover:bg-secondary transition-all"
                         onClick={() => {
                             const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
                             window.location.href = `${baseUrl}/auth/login/google${redirectPath ? `?redirect=${redirectPath}` : ''}`;
@@ -201,7 +241,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                 </div>
             </div>
         </main>
-    
+
     );
 }
 
