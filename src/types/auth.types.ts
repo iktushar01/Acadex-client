@@ -49,3 +49,10 @@ export interface IVerifyEmailResponse {
         };
     };
 }
+
+export interface UserFromCookie {
+    name: string;
+    email: string;
+    role: string;
+    avatar: string;
+}

@@ -1,14 +1,8 @@
-const DashboardLayout = ({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) => {
-    return (
-        <>
-            dashboard layout
-            {children}
-        </>
-    );
+import { Sidebar1 } from "@/components/sidebar1";
+ 
+const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+  return <Sidebar1>{children}</Sidebar1>;
 };
-
+ 
 export default DashboardLayout;
+ 

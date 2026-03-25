@@ -1,0 +1,33 @@
+import { SidebarData } from "@/types/sidebar";
+
+export const adminSidebar: SidebarData = {
+  logo: {
+    src: "/logo.png",
+    alt: "Acadex logo",
+    title: "Acadex",
+    description: "Admin Panel",
+  },
+  navGroups: [
+    {
+      title: "Overview",
+      items: [
+        { label: "Dashboard",      icon: "LayoutDashboard", href: "/dashboard" },
+        { label: "Analytics",      icon: "BarChart3",       href: "/dashboard/admin/analytics" },
+        { label: "Notifications",  icon: "Bell",            href: "/dashboard/admin/notifications", badge: 3 },
+      ],
+    },
+    {
+      title: "Management",
+      items: [
+        { label: "Users",               icon: "Users",       href: "/dashboard/admin/users" },
+        { label: "Roles & Permissions", icon: "ShieldCheck", href: "/dashboard/admin/roles" },
+      ],
+    },
+    {
+      title: "System",
+      items: [
+        { label: "Settings", icon: "Settings", href: "/dashboard/admin/settings" },
+      ],
+    },
+  ],
+};

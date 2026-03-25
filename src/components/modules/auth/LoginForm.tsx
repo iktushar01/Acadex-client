@@ -78,7 +78,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                     <div className="group relative flex h-20 w-20 items-center justify-center rounded-3xl bg-primary shadow-2xl shadow-primary/20 transition-transform hover:rotate-3">
                         <GraduationCap className="h-12 w-12 text-primary-foreground transition-transform group-hover:scale-110" />
                         {/* Glossy overlay effect */}
-                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 rounded-3xl bg-linear-to-tr from-white/10 to-transparent pointer-events-none" />
                     </div>
 
                     <div className="space-y-4">

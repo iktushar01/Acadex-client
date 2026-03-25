@@ -18,25 +18,24 @@ import { useMutation } from "@tanstack/react-query";
 import { logoutAction } from "./_action";
 import { useRouter } from "next/navigation";
 import { getCookie, deleteCookie } from "cookies-next";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Logo from "@/components/shared/logo/logo";
 
 const Navbar = () => {
   const router = useRouter();
 
-  // ✅ Fix 1: Use state so the navbar re-renders when the cookie changes.
-  // Reading getCookie() directly at render time is not reactive —
-  // the component won't update when the cookie is deleted after logout.
-  const [user, setUser] = useState<Record<string, string> | null>(null);
-
-  useEffect(() => {
+  // ✅ Fix 1: Use lazy initialization to set initial state from cookie
+  // This avoids setState calls in useEffect and only runs once on mount
+  const [user, setUser] = useState<Record<string, string> | null>(() => {
     const userCookie = getCookie("user");
+    if (!userCookie) return null;
+    
     try {
-      setUser(userCookie ? JSON.parse(userCookie as string) : null);
+      return JSON.parse(userCookie as string);
     } catch {
-      setUser(null);
+      return null;
     }
-  }, []); // Runs once on mount — sufficient because logout triggers a full navigation
+  });
 
   // ✅ Fix 2: Delete the cookie client-side immediately, then push to "/".
   // router.refresh() only re-runs server components; it does NOT reset
@@ -90,7 +89,7 @@ const Navbar = () => {
 
           <ModeToggle />
 
-          <div className="h-6 w-[1px] bg-border mx-1 hidden sm:block" />
+          <div className="h-6 w-px bg-border mx-1 hidden sm:block" />
 
           {user ? (
             <DropdownMenu>
