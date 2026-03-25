@@ -8,6 +8,7 @@ import {
 } from "@/lib/authUtils";
 import { httpClient } from "@/lib/axios/httpClient";
 import { setTokenInCookies } from "@/lib/tokenUtils";
+import { setCookie } from "@/lib/cookieUtils";
 import { ApiErrorResponse } from "@/types/api.types";
 import { ILoginResponse } from "@/types/auth.types";
 import {
@@ -57,6 +58,7 @@ export const loginAction = async (
       token,
       24 * 60 * 60
     );
+    await setCookie("user", JSON.stringify(user), 7 * 24 * 60 * 60, false);
 
     // 🔐 Force password change
     if (needPasswordChange) {

@@ -6,11 +6,12 @@ export const setCookie = async (
     name : string,
     value : string,
     maxAgeInSeconds : number,
+    httpOnly : boolean = true
 ) => {
     const cookieStore = await cookies();
 
     cookieStore.set(name, value, {
-        httpOnly : true,
+        httpOnly : httpOnly,
         secure : true,
         sameSite : "lax",
         path : "/",
