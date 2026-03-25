@@ -21,7 +21,7 @@ export async function createClassroomAction(values: z.infer<typeof createClassVa
 
     // Backend auth is cookie-based (Express `checkAuth` middleware),
     // so forward required cookies to the API.
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const betterAuthSessionToken = cookieStore.get("better-auth.session_token")?.value;
     const accessToken = cookieStore.get("accessToken")?.value;
     const cookieParts = [
@@ -45,9 +45,19 @@ export async function createClassroomAction(values: z.infer<typeof createClassVa
     const result = await response.json();
 
     if (!response.ok) {
+      const errorSources = result?.errorSources as Array<{ path?: string; message: string }> | undefined;
+      const fallbackIssues = result?.error as Array<{ path?: Array<string | number>; message?: string }> | undefined;
+      const errorDetail =
+        errorSources && errorSources.length
+          ? `Validation failed: ${errorSources.map((e) => `${e.path || "field"}: ${e.message}`).join(", ")}`
+          : fallbackIssues && fallbackIssues.length
+            ? `Validation failed: ${fallbackIssues
+                .map((e) => `${(e.path || []).join(".") || "field"}: ${e.message || "Invalid value"}`)
+                .join(", ")}`
+            : result?.message || "Validation failed";
       return {
         success: false,
-        message: result?.message || "Deployment failed: Infrastructure error.",
+        message: errorDetail,
       };
     }
 

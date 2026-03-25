@@ -12,7 +12,7 @@ export const studentSidebar: SidebarData = {
       title: "Overview",
       items: [
         { label: "Dashboard", icon: "LayoutDashboard", href: "/dashboard" },
-        { label: "Progress",  icon: "BarChart3",       href: "/dashboard/progress" },
+        { label: "Classroom",  icon: "BarChart3",       href: "/dashboard/classroom" },
       ],
     },
     {

@@ -2,6 +2,7 @@
 
 import { ArrowRight, Sparkles, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const Banner = () => {
   return (
@@ -56,12 +57,14 @@ const Banner = () => {
 
         {/* Action Buttons */}
         <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-500">
-          <Button size="lg" className="h-16 rounded-2xl bg-orange-500 px-10 text-lg font-black shadow-xl shadow-orange-500/20 hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all">
+          <Link href="/login">
+          <Button size="lg" className="h-16 rounded-2xl bg-orange-500 px-10 text-lg font-black shadow-xl shadow-orange-500/20 hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all cursor-pointer">
             Enter Dashboard
             <ArrowRight className="ml-2 size-5" />
           </Button>
+        </Link>
           
-          <Button variant="ghost" size="lg" className="h-16 rounded-2xl px-8 text-lg font-bold border border-transparent hover:border-orange-500/20 hover:bg-orange-500/5 transition-all">
+          <Button variant="ghost" size="lg" className="h-16 rounded-2xl px-8 text-lg font-bold border border-transparent hover:border-orange-500/20 hover:bg-orange-500/5 transition-all cursor-pointer">
             Watch Demo
           </Button>
         </div>
