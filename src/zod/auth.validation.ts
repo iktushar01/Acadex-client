@@ -12,3 +12,15 @@ export const loginZodSchema = z.object({
 })
 
 export type ILoginPayload = z.infer<typeof loginZodSchema>;
+
+
+export const registerZodSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email address"),
+    password: z.string()
+        .min(1, "Password is required")
+        .min(8, "Password must be at least 8 characters long"),
+    image: z.string().optional(),
+});
+
+export type IRegisterPayload = z.infer<typeof registerZodSchema>;
