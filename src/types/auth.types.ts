@@ -31,3 +31,21 @@ export interface IRegisterResponse {
         };
     };
 }
+
+
+export interface IVerifyEmailResponse {
+    success: boolean;
+    message: string;
+    data?: {
+        user?: {
+            id: string;
+            email: string;
+            name: string;
+            role: string;
+            image: string;
+            status : string;
+            isDeleted : boolean;
+            emailVerified : boolean;
+        };
+    };
+}

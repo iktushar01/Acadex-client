@@ -1,28 +1,27 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import VerifyEmailForm from "@/components/modules/auth/VerifyEmailFrom";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
 
+  return <VerifyEmailForm />;
+}
+
+export default function VerifyEmailPage() {
   return (
-    <div className="container mx-auto flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-6">Verify Email</h1>
-        
-        {email && (
-          <p className="text-sm text-muted-foreground mb-4">
-            Verification email sent to: <span className="font-semibold">{email}</span>
-          </p>
-        )}
-        
-        <div className="p-6 border rounded-lg bg-card">
-          <p className="text-muted-foreground">
-            Email verification form component coming soon...
-          </p>
-        </div>
+    /* Next.js requires Suspense when using useSearchParams() 
+       to prevent de-opting into client-side rendering for the whole page.
+    */
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
-    </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
