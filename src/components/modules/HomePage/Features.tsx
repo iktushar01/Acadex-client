@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
   BookOpen,
   Cloud,
@@ -12,76 +12,22 @@ import {
   Zap,
   FolderTree,
 } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 
 const features = [
-  {
-    title: 'Smart Note Sharing',
-    description: 'Upload and share study materials instantly. Support for PDFs, images, documents, and more.',
-    icon: BookOpen,
-    gradient: 'from-blue-500 to-cyan-500',
-    color: 'blue',
-  },
-  {
-    title: 'Cloud Storage',
-    description: 'Secure cloud storage for all your notes. Access them anywhere, anytime, on any device.',
-    icon: Cloud,
-    gradient: 'from-purple-500 to-pink-500',
-    color: 'purple',
-  },
-  {
-    title: 'Course Organization',
-    description: 'Organize notes by courses with custom categories. Keep everything structured and easy to find.',
-    icon: FolderTree,
-    gradient: 'from-green-500 to-emerald-500',
-    color: 'green',
-  },
-  {
-    title: 'Powerful Search',
-    description: 'Find any note instantly with intelligent search. Filter by course, title, or content.',
-    icon: Search,
-    gradient: 'from-orange-500 to-red-500',
-    color: 'orange',
-  },
-  {
-    title: 'Smart Tagging',
-    description: 'Tag and categorize notes for better organization. Create custom tags for quick access.',
-    icon: Tag,
-    gradient: 'from-pink-500 to-rose-500',
-    color: 'pink',
-  },
-  {
-    title: 'Secure & Private',
-    description: 'Your data is encrypted and secure. Control access and maintain your privacy.',
-    icon: Shield,
-    gradient: 'from-indigo-500 to-purple-500',
-    color: 'indigo',
-  },
-  {
-    title: 'Multiple Files',
-    description: 'Upload multiple files at once. Support for PDFs, Word docs, images, and presentations.',
-    icon: FileText,
-    gradient: 'from-violet-500 to-purple-500',
-    color: 'violet',
-  },
-  {
-    title: 'Lightning Fast',
-    description: 'Optimized for speed. Upload, download, and browse notes with minimal loading times.',
-    icon: Zap,
-    gradient: 'from-yellow-500 to-orange-500',
-    color: 'yellow',
-  },
-  {
-    title: 'Collaborative',
-    description: 'Work together with classmates. Share notes, organize study groups, and learn together.',
-    icon: Users,
-    gradient: 'from-teal-500 to-cyan-500',
-    color: 'teal',
-  },
+  { title: 'Smart Note Sharing', description: 'Upload and share study materials instantly. Support for PDFs, images, and documents.', icon: BookOpen, gradient: 'from-blue-500 to-cyan-500' },
+  { title: 'Cloud Storage', description: 'Secure cloud storage for all your notes. Access them anywhere, anytime, on any device.', icon: Cloud, gradient: 'from-purple-500 to-pink-500' },
+  { title: 'Course Organization', description: 'Organize notes by courses with custom categories. Keep everything structured.', icon: FolderTree, gradient: 'from-green-500 to-emerald-500' },
+  { title: 'Powerful Search', description: 'Find any note instantly with intelligent search. Filter by course, title, or content.', icon: Search, gradient: 'from-orange-500 to-red-500' },
+  { title: 'Smart Tagging', description: 'Tag and categorize notes for better organization. Create custom tags for quick access.', icon: Tag, gradient: 'from-pink-500 to-rose-500' },
+  { title: 'Secure & Private', description: 'Your data is encrypted and secure. Control access and maintain your privacy.', icon: Shield, gradient: 'from-indigo-500 to-purple-500' },
+  { title: 'Multiple Files', description: 'Upload multiple files at once. Support for PDFs, Word docs, and presentations.', icon: FileText, gradient: 'from-violet-500 to-purple-500' },
+  { title: 'Lightning Fast', description: 'Optimized for speed. Upload, download, and browse notes with minimal loading times.', icon: Zap, gradient: 'from-yellow-500 to-orange-500' },
+  { title: 'Collaborative', description: 'Work together with classmates. Share notes and organize study groups.', icon: Users, gradient: 'from-teal-500 to-cyan-500' },
 ]
 
 function Features() {
-  const [visibleItems, setVisibleItems] = useState<number[]>([])
+  const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set())
+  const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -89,14 +35,12 @@ function Features() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const index = parseInt(entry.target.getAttribute('data-index') || '0')
-            setTimeout(() => {
-              setVisibleItems((prev) => [...prev, index])
-            }, index * 80)
+            setVisibleItems((prev) => new Set([...prev, index]))
           }
-        })
+        });
       },
-      { threshold: 0.1 }
-    )
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
 
     const elements = document.querySelectorAll('[data-feature-card]')
     elements.forEach((el) => observer.observe(el))
@@ -105,61 +49,37 @@ function Features() {
   }, [])
 
   return (
-    <section id="features" className="py-24 md:py-32 relative overflow-hidden">
+    <section id="features" ref={sectionRef} className="py-24 md:py-32 relative overflow-hidden bg-background">
       
-      {/* Floating Decorative Elements */}
-      <div className="absolute top-32 right-20 w-40 h-40 bg-yellow-200/20 dark:bg-yellow-900/10 rounded-lg rotate-12 animate-float hidden xl:block" style={{
-        animation: 'float 8s ease-in-out infinite',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-      }} />
-      <div className="absolute bottom-40 left-24 w-32 h-32 bg-pink-200/20 dark:bg-pink-900/10 rounded-lg -rotate-12 animate-float-delayed hidden xl:block" style={{
-        animation: 'float 10s ease-in-out infinite 2s',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-      }} />
-      
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      {/* Dynamic Background Auras */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/5 blur-[120px] -z-10 animate-pulse" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] -z-10 animate-pulse" style={{ animationDelay: '2s' }} />
+
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-7xl mx-auto">
-          {/* Header - Notebook Style */}
-          <div className="text-center space-y-6 mb-20 pl-0 sm:pl-4 lg:pl-0">
-            {/* Sticky Note Badge */}
-            <div 
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-yellow-300 dark:bg-yellow-900/40 border-2 border-yellow-400 dark:border-yellow-700 shadow-lg rotate-[-1deg] hover:rotate-0 transition-transform duration-300"
-              style={{
-                boxShadow: '0 4px 8px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)'
-              }}
-            >
-              <span className="text-sm font-bold text-yellow-900 dark:text-yellow-100">Features</span>
+          
+          {/* Header */}
+          <div className="text-center space-y-6 mb-24">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-orange-500/10 border border-orange-500/20 shadow-sm transition-transform hover:-rotate-2">
+              <span className="text-xs font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">Toolkit</span>
             </div>
             
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold">
-              <span className="text-foreground">Everything You Need to</span>
-              <br />
-              <span 
-                className="bg-linear-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent inline-block relative"
-                style={{
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
-                  transform: 'rotate(-0.5deg)',
-                  display: 'inline-block'
-                }}
-              >
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter">
+              Everything You Need to <br />
+              <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent italic">
                 Excel Together
               </span>
-              {/* Decorative underline */}
-              <span className="block mt-3 w-40 h-1 bg-linear-to-r from-orange-500 to-yellow-500 rounded-full mx-auto" />
             </h2>
-            
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto border-l-0 sm:border-l-4 pl-0 sm:pl-4 border-primary/30">
-              Powerful features designed to make collaborative studying effortless and productive.
+            <p className="text-muted-foreground font-medium max-w-2xl mx-auto text-lg">
+              Powerful features designed to make collaborative studying effortless.
             </p>
           </div>
           
-          {/* Features Grid - Notebook Style Cards */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pl-0 sm:pl-4 lg:pl-0">
+          {/* Grid */}
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => {
               const Icon = feature.icon
-              const isVisible = visibleItems.includes(index)
-              
-              // Random rotation for each card (notebook style)
+              const isVisible = visibleItems.has(index)
               const rotation = index % 3 === 0 ? '-rotate-1' : index % 3 === 1 ? 'rotate-1' : 'rotate-0'
               
               return (
@@ -167,74 +87,33 @@ function Features() {
                   key={feature.title}
                   data-feature-card
                   data-index={index}
-                  className={`transition-all duration-700 ${
-                    isVisible
-                      ? 'opacity-100 translate-y-0 scale-100'
-                      : 'opacity-0 translate-y-12 scale-95'
+                  className={`transition-all duration-1000 ease-out ${
+                    isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-20 scale-95'
                   }`}
+                  style={{ transitionDelay: `${index * 50}ms` }}
                 >
-                  {/* Notebook Style Card */}
-                  <div 
-                    className={`group relative h-full bg-white dark:bg-amber-950/20 rounded-lg shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-rotate-1 ${rotation}`}
-                    style={{
-                      boxShadow: '0 8px 16px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 0 1px rgba(0,0,0,0.05)',
-                      transform: isVisible ? 'none' : 'translateY(50px) scale(0.9)',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.05) rotate(0deg) translateY(-8px)'
-                      e.currentTarget.style.zIndex = '10'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = ''
-                      e.currentTarget.style.zIndex = '1'
-                    }}
-                  >
-                    {/* Content */}
-                    <div className="relative p-6 z-10">
-                      {/* Icon - Sticky Note Style */}
-                      <div 
-                        className={`mb-4 w-16 h-16 rounded-lg bg-linear-to-br ${feature.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 relative`}
-                        style={{
-                          boxShadow: '0 4px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2)'
-                        }}
-                      >
-                        <Icon className="h-8 w-8 text-white relative z-10" />
-                        {/* Decorative corner fold */}
-                        <div className="absolute top-0 right-0 w-4 h-4 bg-black/10 rounded-bl-lg" />
-                      </div>
-                      
-                      {/* Title - Handwritten Style */}
-                      <h3 
-                        className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors relative inline-block"
-                        style={{
-                          transform: 'rotate(-0.3deg)',
-                        }}
-                      >
-                        {feature.title}
-                        {/* Underline decoration */}
-                        <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-linear-to-r ${feature.gradient} opacity-30 group-hover:opacity-60 transition-opacity`} />
-                      </h3>
-                      
-                      {/* Description */}
-                      <p className="text-muted-foreground leading-relaxed text-sm">
-                        {feature.description}
-                      </p>
-                      
-                      {/* Decorative Dots (Notebook Style) */}
-                      <div className="flex gap-1 mt-4 opacity-30">
-                        {[...Array(3)].map((_, i) => (
-                          <div 
-                            key={i}
-                            className={`w-1.5 h-1.5 rounded-full bg-linear-to-br ${feature.gradient}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
+                  <div className={`group relative h-full bg-card/40 backdrop-blur-md rounded-[2rem] border border-border p-8 shadow-sm hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 hover:-translate-y-2 ${rotation}`}>
                     
-                    {/* Corner Tear Effect */}
-                    <div className="absolute top-2 right-2 w-6 h-6 opacity-20">
-                      <div className="w-full h-full border-t-2 border-r-2 border-gray-400 dark:border-gray-600 rounded-tr-lg" />
+                    {/* Icon Container */}
+                    <div className={`mb-6 w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white shadow-lg transition-transform group-hover:rotate-6 group-hover:scale-110`}>
+                      <Icon className="h-7 w-7" />
                     </div>
+
+                    <h3 className="text-xl font-black tracking-tight mb-3 group-hover:text-orange-500 transition-colors">
+                      {feature.title}
+                    </h3>
+                    
+                    <p className="text-muted-foreground font-medium text-sm leading-relaxed">
+                      {feature.description}
+                    </p>
+
+                    {/* Decorative Notebook "Holes" */}
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 opacity-0 group-hover:opacity-20 transition-opacity">
+                       {[1, 2, 3].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-foreground" />)}
+                    </div>
+
+                    {/* Corner Accent */}
+                    <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 blur-2xl transition-opacity rounded-full`} />
                   </div>
                 </div>
               )
@@ -243,22 +122,12 @@ function Features() {
         </div>
       </div>
 
-      {/* CSS Animations */}
-      <style>{`
+      <style jsx global>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(5deg); }
+          0%, 100% { transform: translateY(0px) rotate(12deg); }
+          50% { transform: translateY(-20px) rotate(15deg); }
         }
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(-5deg); }
-        }
-        .animate-float {
-          animation: float 8s ease-in-out infinite;
-        }
-        .animate-float-delayed {
-          animation: float 10s ease-in-out infinite 2s;
-        }
+        .animate-float { animation: float 8s ease-in-out infinite; }
       `}</style>
     </section>
   )

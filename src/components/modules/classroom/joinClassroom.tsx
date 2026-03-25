@@ -111,10 +111,6 @@ const JoinClassroom = () => {
           </div>
         </div>
 
-        {/* HELP LINK */}
-        <p className="mt-6 text-center text-sm font-medium text-muted-foreground">
-          Don&apos;t have a code? <button className="text-orange-500 font-bold hover:underline">Contact your instructor</button>
-        </p>
       </div>
     </div>
   );
