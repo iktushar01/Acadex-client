@@ -13,6 +13,7 @@ export const logoutAction = async (): Promise<{ success: boolean }> => {
     const cookieStore = await cookies();
     cookieStore.delete("accessToken");
     cookieStore.delete("refreshToken");
+    cookieStore.delete("better-auth.session_token");
     cookieStore.delete("user");
   }
 

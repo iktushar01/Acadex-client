@@ -56,6 +56,7 @@ const axiosInstance = async (customConfig?: AxiosRequestConfig) => {
         headers: {
             'Content-Type': 'application/json',
             Cookie: cookieHeader,
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
             ...customConfig?.headers
         }
     });
