@@ -19,6 +19,7 @@ import { logoutAction } from "./_action";
 import { useRouter } from "next/navigation";
 import { getCookie, deleteCookie } from "cookies-next";
 import { useState, useEffect } from "react";
+import Logo from "@/components/shared/logo/logo";
 
 const Navbar = () => {
   const router = useRouter();
@@ -62,14 +63,7 @@ const Navbar = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
 
         {/* LOGO */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 shadow-lg shadow-orange-500/20 transition-transform group-hover:scale-105">
-            <span className="text-xl font-black text-white">A</span>
-          </div>
-          <span className="text-xl font-black tracking-tighter text-foreground hidden sm:block">
-            Aca<span className="text-orange-500">dex</span>
-          </span>
-        </Link>
+        <Logo />
 
         {/* NAVIGATION */}
         <div className="hidden md:flex items-center gap-8">
