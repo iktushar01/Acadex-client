@@ -63,13 +63,20 @@ onSubmit: async ({ value }) => {
     });
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
-        const files = Array.from(e.target.files || []);
-        if (files.length > 0) {
-            field.handleChange(files[0]); // Set the first file for upload
-            const newPreviews = files.slice(0, 4).map(file => URL.createObjectURL(file));
-            setPreviews(newPreviews);
-        }
-    };
+    const file = e.target.files?.[0];
+    if (file) {
+        field.handleChange(file);
+        const url = URL.createObjectURL(file);
+        setPreviews([url]); // We only need one preview for a profile pic
+    }
+};
+
+const removeImage = (field: any) => {
+    if (previews[0]) URL.revokeObjectURL(previews[0]);
+    setPreviews([]);
+    field.handleChange(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+};
 
     return (
         <main className="relative flex min-h-screen w-full flex-col lg:flex-row overflow-hidden bg-background">
@@ -136,46 +143,66 @@ onSubmit: async ({ value }) => {
                         }}
                         className="space-y-5"
                     >
-                        {/* IMAGE UPLOAD WITH SIDE PREVIEW */}
                         <form.Field name="image">
-                            {(field) => (
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Profile Picture</Label>
-                                    <div className="flex items-center gap-4 p-2 rounded-2xl bg-secondary/30 border border-dashed border-border">
-                                        <button
-                                            type="button"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all"
-                                        >
-                                            <Camera className="h-6 w-6" />
-                                        </button>
+    {(field) => (
+        <div className="flex flex-col items-center justify-center space-y-4 py-4">
+            <div className="relative group">
+                {/* THE AVATAR CIRCLE */}
+                <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="relative h-28 w-28 cursor-pointer rounded-full border-2 border-dashed border-muted-foreground/30 bg-secondary/20 transition-all hover:border-primary hover:bg-secondary/40 overflow-hidden"
+                >
+                    {previews[0] ? (
+                        <Image 
+                            src={previews[0]} 
+                            alt="Profile" 
+                            fill 
+                            className="object-cover animate-in fade-in duration-300" 
+                        />
+                    ) : (
+                        <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                            <User className="h-10 w-10 opacity-50" />
+                        </div>
+                    )}
 
-                                        <div className="flex gap-2 overflow-x-auto py-1 scrollbar-hide">
-                                            {previews.map((src, idx) => (
-                                                <div key={idx} className="relative h-16 w-16 flex-shrink-0 rounded-lg overflow-hidden border border-border">
-                                                    <Image src={src} alt="preview" fill className="object-cover" />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setPreviews(prev => prev.filter((_, i) => i !== idx))}
-                                                        className="absolute top-0.5 right-0.5 bg-destructive rounded-full p-0.5 text-white"
-                                                    >
-                                                        <X className="h-3 w-3" />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        className="hidden"
-                                        accept="image/*"
-                                        multiple
-                                        onChange={(e) => handleImageChange(e, field)}
-                                    />
-                                </div>
-                            )}
-                        </form.Field>
+                    {/* OVERLAY ON HOVER */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Camera className="h-6 w-6 text-white" />
+                    </div>
+                </div>
+
+                {/* REMOVE BUTTON (Only shows if image exists) */}
+                {previews[0] && (
+                    <button
+                        type="button"
+                        onClick={() => removeImage(field)}
+                        className="absolute -top-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-white shadow-lg hover:bg-destructive/90 transition-transform active:scale-90"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
+                )}
+            </div>
+
+            {/* STATUS TEXT */}
+            <div className="text-center">
+                <p className="text-sm font-semibold text-foreground">
+                    {previews[0] ? "Looking sharp!" : "Upload Profile Photo"}
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                    Recommended: Square JPG or PNG
+                </p>
+            </div>
+
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => handleImageChange(e, field)}
+            />
+        </div>
+    )}
+</form.Field>
 
                         <form.Field name="name" validators={{ onChange: registerZodSchema.shape.name }}>
                             {(field) => (
