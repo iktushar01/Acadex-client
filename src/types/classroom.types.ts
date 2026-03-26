@@ -13,4 +13,3 @@ export interface Classroom {
   createdAt: string;
   creator?: { id: string; name: string; email: string; image?: string };
 }
- 
