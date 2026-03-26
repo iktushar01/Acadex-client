@@ -37,7 +37,7 @@ const Sidebar1 = async ({ className, children }: Sidebar1Props) => {
   }
 
   const userRole = user?.role ?? "STUDENT";
-  const sidebarData = getSidebarData(userRole as "ADMIN" | "STUDENT");
+  const sidebarData = await getSidebarData(userRole as "ADMIN" | "STUDENT");
 
   return (
     <SidebarProvider className={cn(className)}>

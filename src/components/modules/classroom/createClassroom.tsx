@@ -13,7 +13,7 @@ import ReUsableField from "@/components/shared/form/ReUsableField";
 import AppSubmitButton from "@/components/shared/form/AppSubmitButton";
 import { Button } from "@/components/ui/button";
 import { createClassroomAction } from "@/app/(dashboardLayout)/dashboard/classroom/create/_action";
-import { createClassValidation } from "@/zod/classroom.validation";
+import { createClassValidation, CreateClassroomValues } from "@/zod/classroom.validation";
 
 const CreateClassroomPage = () => {
   const [submittedData, setSubmittedData] = useState<any>(null);
@@ -22,7 +22,7 @@ const CreateClassroomPage = () => {
     defaultValues: {
       name: "",
       institutionName: "",
-      level: "",
+      level: "" as CreateClassroomValues["level"],
       className: "",
       department: "",
       groupName: "",
@@ -30,7 +30,7 @@ const CreateClassroomPage = () => {
     },
     validators: { onChange: createClassValidation },
     onSubmit: async ({ value }) => {
-      const result = await createClassroomAction(value);
+      const result = await createClassroomAction(value as CreateClassroomValues);
       if (result.success) {
         setSubmittedData(result.data);
         toast.success("Classroom request sent!");
@@ -142,7 +142,7 @@ const CreateClassroomPage = () => {
                 </label>
                 <select 
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  onChange={(e) => field.handleChange(e.target.value as CreateClassroomValues["level"])}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="" disabled>Select Level</option>
