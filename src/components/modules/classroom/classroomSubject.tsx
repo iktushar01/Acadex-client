@@ -15,60 +15,50 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { fetchSubjectsAction } from "@/app/(dashboardLayout)/dashboard/classroom/[id]/_action";
-import { fetchMyClassroomsAction } from "@/app/(dashboardLayout)/dashboard/classroom/_action"; // Import this
+import { useClassroomRole } from "@/hooks/useClassroomRole"; 
 import { Subject } from "@/types/classroomSubject.types";
 import Link from "next/link";
 
 const ClassroomSubject = () => {
   const { id } = useParams();
+  const classroomId = id as string;
+
+  // Use the separate hook for CR logic
+  const { isCR, roleLoading } = useClassroomRole(classroomId);
+
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [isCR, setIsCR] = useState(false); // CR state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   const loadData = useCallback(async () => {
-    if (!id) return;
+    if (!classroomId) return;
+    
     setLoading(true);
     setError(null);
 
     try {
-      // 1. Fetch Subjects and Memberships in parallel
-      const [subjectsResult, membershipsResult] = await Promise.all([
-        fetchSubjectsAction(id as string),
-        fetchMyClassroomsAction()
-      ]);
+      const result = await fetchSubjectsAction(classroomId);
       
-      // 2. Handle Subjects
-      if (subjectsResult.success) {
-        setSubjects(subjectsResult.data || []);
+      if (result.success) {
+        setSubjects(result.data || []);
       } else {
-        setError(subjectsResult.error as string);
-      }
-
-      // 3. Handle CR Logic
-      if (membershipsResult.success && membershipsResult.data) {
-        // Find the membership matching this specific classroom ID
-        const currentMembership = membershipsResult.data.find(
-          (m: any) => m.classroom.id === id
-        );
-        
-        if (currentMembership?.memberRole === "CR") {
-          setIsCR(true);
-        }
+        setError(result.error as string);
       }
     } catch (err) {
-      setError("An unexpected error occurred.");
+      setError("An unexpected error occurred while fetching subjects.");
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [classroomId]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  // Filter logic
+  // Combine subject loading and role checking for the UI state
+  const isInitialLoading = loading || roleLoading;
+
   const filteredSubjects = subjects.filter(s => 
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -89,9 +79,9 @@ const ClassroomSubject = () => {
             </h1>
           </div>
 
-          {/* ADD SUBJECT BUTTON: Visible only to CRs */}
+          {/* ADD SUBJECT BUTTON: Controlled by hook state */}
           {isCR && (
-            <Link href={`/dashboard/classroom/subject/${id}/add`}>
+            <Link href={`/dashboard/classroom/subject/${classroomId}/add`}>
               <Button className="rounded-2xl font-bold h-12 px-6 bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all active:scale-95">
                 <Plus className="mr-2 h-5 w-5" /> Add Subject
               </Button>
@@ -110,7 +100,7 @@ const ClassroomSubject = () => {
           />
         </div>
 
-        {loading ? (
+        {isInitialLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-10 w-10 text-orange-500 animate-spin" />
             <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading Curriculum</p>

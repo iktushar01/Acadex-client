@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { fetchFoldersAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/_action";
 import { 
@@ -17,55 +17,36 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { fetchMyClassroomsAction } from "@/app/(dashboardLayout)/dashboard/classroom/_action";
+import { useClassroomRole } from "@/hooks/useClassroomRole"; 
 
 const SubjectMaterialsPage = () => {
   const params = useParams();
   const subjectId = (params?.id ?? params?.subjectId) as string;
 
   const [folders, setFolders] = useState<any[]>([]);
-  const [isCR, setIsCR] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [subjectMeta, setSubjectMeta] = useState<{ name?: string; classroomId?: string } | null>(null);
 
-  // Safely get subject name from state or folders
-  const subjectName = subjectMeta?.name || (folders.length > 0 ? folders[0].subject?.name : "Subject");
+  // Integrate the hook
+  const { isCR, roleLoading } = useClassroomRole(subjectMeta?.classroomId);
 
   const loadData = useCallback(async () => {
-    if (!subjectId) {
-      setLoading(false);
-      return;
-    }
+    if (!subjectId) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      // 1. Fetch Folders and My Classrooms in parallel
-      const [foldersResult, classroomsResult] = await Promise.all([
-        fetchFoldersAction(subjectId),
-        fetchMyClassroomsAction()
-      ]);
+      const foldersResult = await fetchFoldersAction(subjectId);
       
       if (foldersResult.success) {
         setFolders(foldersResult.data || []);
         
-        // 2. Extract metadata (Ensure your action returns 'subject' even if 'data' is empty)
-        const meta = foldersResult.data?.[0]?.subject;
-
-        const parentClassroomId = meta?.classroomId;
-        
-        // 3. Match classroomId with your memberships API data
-        if (classroomsResult.success && classroomsResult.data && parentClassroomId) {
-          const membership = classroomsResult.data.find(
-            (m: any) => m.classroom.id === parentClassroomId
-          );
-          
-          if (membership?.memberRole === "CR") {
-            setIsCR(true);
-          }
-        }
+        // Extract meta - handling cases where data might be empty
+        const meta = foldersResult.data?.[0]?.subject
+        if (meta) setSubjectMeta(meta);
       } else {
         setError(foldersResult.error || "Failed to load materials");
       }
@@ -79,6 +60,16 @@ const SubjectMaterialsPage = () => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const filteredFolders = useMemo(() => {
+    return folders.filter(f => 
+      f.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [folders, searchTerm]);
+
+  // Combine loading states for a smoother UI experience
+  const isInitialLoading = loading || (subjectMeta?.classroomId && roleLoading);
+  const subjectName = subjectMeta?.name || "Subject";
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10">
@@ -105,11 +96,13 @@ const SubjectMaterialsPage = () => {
             <p className="text-muted-foreground font-medium mt-1">Manage notes and materials for this subject.</p>
           </div>
 
-          {/* ADD FOLDER BTN: Only shows if user is CR */}
-          {isCR && (
-            <Button className="rounded-2xl font-bold h-12 px-6 bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all active:scale-95">
-              <Plus className="mr-2 h-5 w-5" /> Create Folder
-            </Button>
+          {/* ADD FOLDER: Hidden while loading role, then shown if isCR */}
+          {!roleLoading && isCR && (
+            <Link href={`/dashboard/classroom/subject/${subjectId}/folder/add`}>
+              <Button className="rounded-2xl font-bold h-12 px-6 bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all active:scale-95">
+                <Plus className="mr-2 h-5 w-5" /> Create Folder
+              </Button>
+            </Link>
           )}
         </header>
 
@@ -118,12 +111,13 @@ const SubjectMaterialsPage = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-orange-500 transition-colors" />
           <Input 
             placeholder={`Search in ${subjectName}...`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="h-14 pl-12 rounded-[1.5rem] border-border bg-card/50 backdrop-blur-sm focus-visible:ring-orange-500/20 transition-all"
           />
         </div>
 
-        {/* STATES */}
-        {loading ? (
+        {isInitialLoading ? (
           <div className="flex flex-col items-center justify-center py-24">
             <Loader2 className="h-12 w-12 text-orange-500 animate-spin" />
             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-4 animate-pulse">Syncing Library</p>
@@ -135,7 +129,7 @@ const SubjectMaterialsPage = () => {
               Try Again
             </Button>
           </Card>
-        ) : folders.length === 0 ? (
+        ) : filteredFolders.length === 0 ? (
           <div className="text-center py-24 border-2 border-dashed border-border rounded-[2.5rem] bg-card/20">
             <FolderIcon className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-muted-foreground">No Folders Found</h3>
@@ -145,7 +139,7 @@ const SubjectMaterialsPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {folders.map((folder) => (
+            {filteredFolders.map((folder) => (
               <Card 
                 key={folder.id} 
                 className="group relative overflow-hidden rounded-[2rem] p-6 bg-card/50 hover:bg-card hover:shadow-2xl hover:shadow-orange-500/5 transition-all border-border hover:border-orange-500/30 cursor-pointer"
