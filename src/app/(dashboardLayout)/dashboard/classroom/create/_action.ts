@@ -2,36 +2,32 @@
 
 import { createClassValidation } from "@/zod/classroom.validation";
 import { z } from "zod";
-import { cookies } from "next/headers";
+import { getCookie } from "@/lib/cookieUtils";
 
 export async function createClassroomAction(values: z.infer<typeof createClassValidation>) {
   try {
-    // Validate the schema on the server for security
+    // 1. Validate the schema
     const validatedData = createClassValidation.parse(values);
 
-    const apiBaseUrl =
-      process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_URL;
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
     if (!apiBaseUrl) {
-      return {
-        success: false,
-        message: "API base URL is not configured.",
-      };
+      return { success: false, message: "API base URL is not configured." };
     }
 
-    // Backend auth is cookie-based (Express `checkAuth` middleware),
-    // so forward required cookies to the API.
-    const cookieStore = await cookies();
-    const betterAuthSessionToken = cookieStore.get("better-auth.session_token")?.value;
-    const accessToken = cookieStore.get("accessToken")?.value;
+    // 2. Use your utility to get tokens
+    const sessionToken = await getCookie("better-auth.session_token");
+    const accessToken = await getCookie("accessToken");
+
+    // 3. Build the cookie header string
     const cookieParts = [
-      betterAuthSessionToken
-        ? `better-auth.session_token=${betterAuthSessionToken}`
-        : null,
+      sessionToken ? `better-auth.session_token=${sessionToken}` : null,
       accessToken ? `accessToken=${accessToken}` : null,
     ].filter(Boolean) as string[];
+    
     const cookieHeader = cookieParts.join("; ");
 
+    // 4. Execute the fetch
     const response = await fetch(`${apiBaseUrl}/classrooms`, {
       method: "POST",
       headers: {
@@ -44,21 +40,18 @@ export async function createClassroomAction(values: z.infer<typeof createClassVa
 
     const result = await response.json();
 
+    // 5. Handle Error Responses
     if (!response.ok) {
-      const errorSources = result?.errorSources as Array<{ path?: string; message: string }> | undefined;
-      const fallbackIssues = result?.error as Array<{ path?: Array<string | number>; message?: string }> | undefined;
-      const errorDetail =
-        errorSources && errorSources.length
-          ? `Validation failed: ${errorSources.map((e) => `${e.path || "field"}: ${e.message}`).join(", ")}`
-          : fallbackIssues && fallbackIssues.length
-            ? `Validation failed: ${fallbackIssues
-                .map((e) => `${(e.path || []).join(".") || "field"}: ${e.message || "Invalid value"}`)
-                .join(", ")}`
-            : result?.message || "Validation failed";
-      return {
-        success: false,
-        message: errorDetail,
-      };
+      const errorSources = result?.errorSources;
+      const fallbackIssues = result?.error;
+      
+      const errorDetail = errorSources?.length
+        ? `Validation failed: ${errorSources.map((e: any) => `${e.path || "field"}: ${e.message}`).join(", ")}`
+        : fallbackIssues?.length
+          ? `Validation failed: ${fallbackIssues.map((e: any) => `${(e.path || []).join(".")}: ${e.message}`).join(", ")}`
+          : result?.message || "Validation failed";
+
+      return { success: false, message: errorDetail };
     }
 
     return {
@@ -66,11 +59,14 @@ export async function createClassroomAction(values: z.infer<typeof createClassVa
       data: result.data,
       message: "Classroom initialized on the Acadex Grid.",
     };
+
   } catch (error) {
     console.error("Action Error:", error);
     return {
       success: false,
-      message: error instanceof z.ZodError ? "Invalid configuration parameters." : "Internal System Failure.",
+      message: error instanceof z.ZodError 
+        ? "Invalid configuration parameters." 
+        : "Internal System Failure.",
     };
   }
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { getCookie } from "@/lib/cookieUtils";
 
 export async function joinClassroomAction(joinCode: string) {
   try {
@@ -14,13 +14,13 @@ export async function joinClassroomAction(joinCode: string) {
       };
     }
 
-    // 1. Forward Required Cookies (Better Auth + Access Token)
-    const cookieStore = await cookies();
-    const betterAuthSessionToken = cookieStore.get("better-auth.session_token")?.value;
-    const accessToken = cookieStore.get("accessToken")?.value;
+    // 1. Fetch tokens using your utility functions
+    const sessionToken = await getCookie("better-auth.session_token");
+    const accessToken = await getCookie("accessToken");
 
+    // 2. Build the Cookie Header
     const cookieParts = [
-      betterAuthSessionToken ? `better-auth.session_token=${betterAuthSessionToken}` : null,
+      sessionToken ? `better-auth.session_token=${sessionToken}` : null,
       accessToken ? `accessToken=${accessToken}` : null,
     ].filter(Boolean) as string[];
 
@@ -33,12 +33,12 @@ export async function joinClassroomAction(joinCode: string) {
       };
     }
 
-    // 2. Execute Join Request to the Dynamic URL
+    // 3. Execute Join Request
     const response = await fetch(`${apiBaseUrl}/classrooms/join`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Cookie": cookieHeader, // Send as Cookie header instead of Authorization
+        "Cookie": cookieHeader,
       },
       body: JSON.stringify({ joinCode }),
       cache: "no-store",
@@ -46,7 +46,7 @@ export async function joinClassroomAction(joinCode: string) {
 
     const result = await response.json();
 
-    // 3. Handle Errors with the same robust logic as your Create Action
+    // 4. Handle Response
     if (!response.ok) {
       return {
         success: false,
@@ -59,6 +59,7 @@ export async function joinClassroomAction(joinCode: string) {
       data: result.data, 
       message: "Connection established successfully.",
     };
+    
   } catch (error) {
     console.error("JOIN_CLASS_ERROR:", error);
     return {
