@@ -201,7 +201,7 @@ const ProfilePage = () => {
 const InfoRow = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: string | null | undefined }) => (
   <div className="flex items-center gap-4 p-4 rounded-2xl hover:bg-muted/50 transition-colors group">
     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-      {cloneElement(icon as React.ReactElement, { size: 18 })}
+      {cloneElement(icon as React.ReactElement)}
     </div>
     <div>
       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 leading-none mb-1">{label}</p>
