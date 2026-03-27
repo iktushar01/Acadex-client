@@ -3,11 +3,11 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { fetchFoldersAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/_action";
-import { 
-  Loader2, 
-  FolderIcon, 
-  Plus, 
-  ArrowLeft, 
+import {
+  Loader2,
+  FolderIcon,
+  Plus,
+  ArrowLeft,
   Search,
   MoreVertical,
   FileText,
@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useClassroomRole } from "@/hooks/useClassroomRole"; 
+import { useClassroomRole } from "@/hooks/useClassroomRole";
 
 const SubjectMaterialsPage = () => {
   const params = useParams();
@@ -40,10 +40,10 @@ const SubjectMaterialsPage = () => {
 
     try {
       const foldersResult = await fetchFoldersAction(subjectId);
-      
+
       if (foldersResult.success) {
         setFolders(foldersResult.data || []);
-        
+
         // Extract meta - handling cases where data might be empty
         const meta = foldersResult.data?.[0]?.subject
         if (meta) setSubjectMeta(meta);
@@ -62,7 +62,7 @@ const SubjectMaterialsPage = () => {
   }, [loadData]);
 
   const filteredFolders = useMemo(() => {
-    return folders.filter(f => 
+    return folders.filter(f =>
       f.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [folders, searchTerm]);
@@ -74,10 +74,10 @@ const SubjectMaterialsPage = () => {
   return (
     <div className="min-h-screen bg-background p-6 md:p-10">
       <div className="mx-auto max-w-6xl">
-        
+
         {/* TOP NAV */}
-        <Link 
-          href={`/dashboard/classroom/${subjectMeta?.classroomId || ""}`} 
+        <Link
+          href={`/dashboard/classroom/${subjectMeta?.classroomId || ""}`}
           className="flex items-center gap-2 text-muted-foreground hover:text-orange-500 transition-colors mb-6 group w-fit"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
@@ -109,7 +109,7 @@ const SubjectMaterialsPage = () => {
         {/* SEARCH */}
         <div className="relative mb-10 group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-orange-500 transition-colors" />
-          <Input 
+          <Input
             placeholder={`Search in ${subjectName}...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -140,8 +140,8 @@ const SubjectMaterialsPage = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredFolders.map((folder) => (
-              <Card 
-                key={folder.id} 
+              <Card
+                key={folder.id}
                 className="group relative overflow-hidden rounded-[2rem] p-6 bg-card/50 hover:bg-card hover:shadow-2xl hover:shadow-orange-500/5 transition-all border-border hover:border-orange-500/30 cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-4">

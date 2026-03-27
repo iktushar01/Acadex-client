@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getNewTokensWithRefreshToken } from '@/services/auth.services';
+import { getNewTokensWithRefreshToken } from '@/services/auth/auth.services';
 import { ApiResponse } from '@/types/api.types';
 import axios, { AxiosRequestConfig } from 'axios';
 import { cookies, headers } from 'next/headers';
@@ -22,7 +22,7 @@ async function tryRefreshToken(
     const requestHeader = await headers();
 
     if (requestHeader.get("x-token-refreshed") === "1") {
-        return; 
+        return;
     }
 
     try {
@@ -52,7 +52,7 @@ const axiosInstance = async (customConfig?: AxiosRequestConfig) => {
     return axios.create({
         baseURL: API_BASE_URL,
         // Default to 60s to prevent 'ECONNABORTED' during image/email processing
-        timeout: customConfig?.timeout || 60000, 
+        timeout: customConfig?.timeout || 60000,
         headers: {
             'Content-Type': 'application/json',
             Cookie: cookieHeader,
