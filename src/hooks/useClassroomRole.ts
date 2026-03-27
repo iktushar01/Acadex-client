@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchMyClassroomsAction } from "@/actions/_fetchMyClassroomsAction";
+import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
 
 /**
  * Custom hook to determine if the current user is a CR for a specific classroom.

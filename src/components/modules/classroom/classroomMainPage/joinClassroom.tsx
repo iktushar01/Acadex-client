@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { joinClassroomAction } from "@/actions/_joinClassroomAction";
+import { joinClassroomAction } from "@/actions/classroomActions/_joinClassroomAction";
 
 const JoinClassroom = () => {
   const [code, setCode] = useState("");

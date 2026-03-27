@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 // Import the Server Action
-import { fetchMyClassroomsAction } from "@/actions/_fetchMyClassroomsAction";
+import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
 
 const ClassroomDashboard = () => {
   const [memberships, setMemberships] = useState<any[]>([]);

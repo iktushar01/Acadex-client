@@ -1,4 +1,4 @@
-import { fetchMyClassroomsAction } from "@/actions/_fetchMyClassroomsAction";
+import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
 import { SidebarData, NavItem } from "@/types/sidebar";
 
 export const getStudentSidebarData = async (): Promise<SidebarData> => {

@@ -12,7 +12,7 @@ import Link from "next/link";
 import ReUsableField from "@/components/shared/form/ReUsableField";
 import AppSubmitButton from "@/components/shared/form/AppSubmitButton";
 import { Button } from "@/components/ui/button";
-import { createClassroomAction } from "@/actions/_createClassroomAction";
+import { createClassroomAction } from "@/actions/classroomActions/_createClassroomAction";
 import { createClassValidation, CreateClassroomValues } from "@/zod/classroom.validation";
 
 const CreateClassroomPage = () => {
