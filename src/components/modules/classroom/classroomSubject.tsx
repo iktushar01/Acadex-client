@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { 
   BookOpen, 
   Plus, 
@@ -9,7 +9,10 @@ import {
   Loader2, 
   ArrowRight, 
   LayoutGrid,
-  FileText
+  FileText,
+  MoreVertical,
+  Edit,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,12 +21,33 @@ import { fetchSubjectsAction } from "@/app/(dashboardLayout)/dashboard/classroom
 import { useClassroomRole } from "@/hooks/useClassroomRole"; 
 import { Subject } from "@/types/classroomSubject.types";
 import Link from "next/link";
+import { toast } from "sonner";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { deleteSubjectAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/add/_action";
 
 const ClassroomSubject = () => {
   const { id } = useParams();
+  const router = useRouter();
   const classroomId = id as string;
 
-  // Use the separate hook for CR logic
   const { isCR, roleLoading } = useClassroomRole(classroomId);
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -56,7 +80,20 @@ const ClassroomSubject = () => {
     loadData();
   }, [loadData]);
 
-  // Combine subject loading and role checking for the UI state
+  const handleDelete = async (subjectId: string) => {
+    try {
+      const result = await deleteSubjectAction(subjectId, classroomId);
+      if (result.success) {
+        toast.success("Subject deleted successfully");
+        loadData(); // Refresh list
+      } else {
+        toast.error(result.error || "Failed to delete subject");
+      }
+    } catch (err) {
+      toast.error("Something went wrong");
+    }
+  };
+
   const isInitialLoading = loading || roleLoading;
 
   const filteredSubjects = subjects.filter(s => 
@@ -79,7 +116,6 @@ const ClassroomSubject = () => {
             </h1>
           </div>
 
-          {/* ADD SUBJECT BUTTON: Controlled by hook state */}
           {isCR && (
             <Link href={`/dashboard/classroom/subject/${classroomId}/add`}>
               <Button className="rounded-2xl font-bold h-12 px-6 bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all active:scale-95">
@@ -124,6 +160,55 @@ const ClassroomSubject = () => {
                   <div className="h-12 w-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-all shadow-inner">
                     <FileText className="h-6 w-6" />
                   </div>
+
+                  {/* ACTION MENU FOR CR */}
+                  {isCR && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-orange-500/10 z-20">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="rounded-xl w-40 p-2">
+                        <DropdownMenuItem 
+                          className="rounded-lg font-bold cursor-pointer"
+                          onClick={() => router.push(`/dashboard/classroom/subject/edit/${subject.id}`)}
+                        >
+                          <Edit className="mr-2 h-4 w-4" /> Edit
+                        </DropdownMenuItem>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem 
+                              className="rounded-lg font-bold text-destructive focus:text-destructive cursor-pointer"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" /> Delete
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-[2rem]">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-2xl font-black italic">
+                                Are you <span className="text-orange-500">sure?</span>
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="font-medium">
+                                This will permanently delete <span className="font-bold text-foreground">"{subject.name}"</span> and all its resource folders.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="rounded-xl font-bold">Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleDelete(subject.id)}
+                                className="rounded-xl bg-destructive hover:bg-destructive/90 font-bold"
+                              >
+                                Delete Subject
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
 
                 <div className="mb-6">
