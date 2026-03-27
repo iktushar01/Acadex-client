@@ -1,9 +1,11 @@
-const AddSubjectPage = () => {
+import AddSubjectPage from "@/components/modules/classroom/AddSubjectPage";
+
+const AddSubject = () => {
     return (
         <div>
-            <h1>Add Subject</h1>
+            <AddSubjectPage/>
         </div>
     );
 };
 
-export default AddSubjectPage;
+export default AddSubject;
