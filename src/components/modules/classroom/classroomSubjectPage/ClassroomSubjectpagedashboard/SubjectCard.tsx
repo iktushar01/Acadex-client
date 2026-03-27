@@ -118,7 +118,7 @@ export const SubjectCard = ({ subject, isCR, onDelete }: SubjectCardProps) => {
           </div>
         </div>
 
-        <Link href={`/dashboard/classroom/subject/${subject.id}`}>
+        <Link href={`/dashboard/classroom/subject/${subject.id}?classroomId=${subject.classroomId}`}>
           <Button variant="outline" className="w-full h-12 rounded-2xl font-bold group/btn border-orange-500/20 bg-orange-500/5 hover:bg-orange-500 hover:text-white transition-all duration-300">
             View Materials
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />

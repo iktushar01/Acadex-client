@@ -1,65 +1,148 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { fetchFoldersAction } from "@/actions/_fetchFoldersAction";
+import { fetchSubjectByIdAction } from "@/actions/classroomSubject/_fetchSubjectByIdAction";
+import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
+import { fetchSubjectsAction } from "@/actions/classroomSubject/_fetchSubjectsAction";
 import {
   Loader2,
   FolderIcon,
   Plus,
   ArrowLeft,
   Search,
-  MoreVertical,
-  FileText,
   BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useClassroomRole } from "@/hooks/useClassroomRole";
+import { FolderCard } from "./FolderCard";
 
-const SubjectMaterialsPage = () => {
+const SubjectFolderPage = () => {
   const params = useParams();
+  const searchParams = useSearchParams();
   const subjectId = (params?.id ?? params?.subjectId) as string;
+  const classroomIdFromQuery = searchParams?.get("classroomId") || undefined;
 
   const [folders, setFolders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [foldersLoading, setFoldersLoading] = useState(true);
+  const [subjectLoading, setSubjectLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [subjectMeta, setSubjectMeta] = useState<{ name?: string; classroomId?: string } | null>(null);
-
-  // Integrate the hook
-  const { isCR, roleLoading } = useClassroomRole(subjectMeta?.classroomId);
+  const [subjectMeta, setSubjectMeta] = useState<{ name?: string; classroomId?: string } | null>(() =>
+    classroomIdFromQuery ? { classroomId: classroomIdFromQuery } : null
+  );
+  const [isCR, setIsCR] = useState(false);
+  const [roleLoading, setRoleLoading] = useState(true);
 
   const loadData = useCallback(async () => {
     if (!subjectId) return;
-
-    setLoading(true);
+    setFoldersLoading(true);
+    setSubjectLoading(true);
     setError(null);
 
-    try {
-      const foldersResult = await fetchFoldersAction(subjectId);
+    const subjectPromise = fetchSubjectByIdAction(subjectId);
+    const foldersPromise = fetchFoldersAction(subjectId);
 
+    // Subject meta fetch should never block folders rendering
+    (async () => {
+      try {
+        const subjectResult = await subjectPromise;
+        if (subjectResult?.success) {
+          setSubjectMeta({
+            name: subjectResult.data?.name,
+            classroomId: subjectResult.data?.classroomId,
+          });
+        }
+      } finally {
+        setSubjectLoading(false);
+      }
+    })();
+
+    try {
+      const foldersResult = await foldersPromise;
       if (foldersResult.success) {
         setFolders(foldersResult.data || []);
-
-        // Extract meta - handling cases where data might be empty
-        const meta = foldersResult.data?.[0]?.subject
-        if (meta) setSubjectMeta(meta);
       } else {
         setError(foldersResult.error || "Failed to load materials");
       }
     } catch (err) {
       setError("Connection to server failed");
     } finally {
-      setLoading(false);
+      setFoldersLoading(false);
     }
   }, [subjectId]);
+
+  const resolveRoleBySubject = useCallback(async () => {
+    if (!subjectId) {
+      setRoleLoading(false);
+      setIsCR(false);
+      return;
+    }
+
+    setRoleLoading(true);
+    try {
+      const membershipsResult = await fetchMyClassroomsAction();
+      if (!membershipsResult.success || !membershipsResult.data) {
+        setIsCR(false);
+        return;
+      }
+
+      const memberships = membershipsResult.data as any[];
+
+      // Fast path: if classroomId is already known, role can be resolved directly.
+      if (subjectMeta?.classroomId) {
+        const membership = memberships.find((m: any) => m.classroom?.id === subjectMeta.classroomId);
+        setIsCR(membership?.memberRole === "CR");
+        return;
+      }
+
+      // Fallback: discover which classroom contains this subject.
+      const subjectSearches = await Promise.all(
+        memberships.map(async (m: any) => {
+          const classId = m?.classroom?.id;
+          if (!classId) return null;
+          const subjectsRes = await fetchSubjectsAction(classId);
+          if (!subjectsRes.success || !subjectsRes.data) return null;
+          const matched = (subjectsRes.data as any[]).find((s: any) => s.id === subjectId);
+          if (!matched) return null;
+          return {
+            classroomId: classId,
+            memberRole: m.memberRole,
+            subjectName: matched.name as string | undefined,
+          };
+        })
+      );
+
+      const match = subjectSearches.find(Boolean) as
+        | { classroomId: string; memberRole: string; subjectName?: string }
+        | undefined;
+
+      if (match) {
+        setSubjectMeta((prev) => ({
+          name: prev?.name || match.subjectName,
+          classroomId: prev?.classroomId || match.classroomId,
+        }));
+        setIsCR(match.memberRole === "CR");
+      } else {
+        setIsCR(false);
+      }
+    } catch {
+      setIsCR(false);
+    } finally {
+      setRoleLoading(false);
+    }
+  }, [subjectId, subjectMeta?.classroomId]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    resolveRoleBySubject();
+  }, [resolveRoleBySubject]);
 
   const filteredFolders = useMemo(() => {
     return folders.filter(f =>
@@ -67,8 +150,7 @@ const SubjectMaterialsPage = () => {
     );
   }, [folders, searchTerm]);
 
-  // Combine loading states for a smoother UI experience
-  const isInitialLoading = loading || (subjectMeta?.classroomId && roleLoading);
+  const isInitialLoading = foldersLoading || subjectLoading || roleLoading;
   const subjectName = subjectMeta?.name || "Subject";
 
   return (
@@ -96,9 +178,9 @@ const SubjectMaterialsPage = () => {
             <p className="text-muted-foreground font-medium mt-1">Manage notes and materials for this subject.</p>
           </div>
 
-          {/* ADD FOLDER: Hidden while loading role, then shown if isCR */}
-          {!roleLoading && isCR && (
-            <Link href={`/dashboard/classroom/subject/${subjectId}/folder/add`}>
+          {/* Header Create Button */}
+          {!roleLoading && isCR && subjectMeta?.classroomId && (
+            <Link href={`/dashboard/classroom/subject/${subjectId}/folder/add?classroomId=${subjectMeta.classroomId}`}>
               <Button className="rounded-2xl font-bold h-12 px-6 bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all active:scale-95">
                 <Plus className="mr-2 h-5 w-5" /> Create Folder
               </Button>
@@ -133,40 +215,23 @@ const SubjectMaterialsPage = () => {
           <div className="text-center py-24 border-2 border-dashed border-border rounded-[2.5rem] bg-card/20">
             <FolderIcon className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-muted-foreground">No Folders Found</h3>
-            <p className="text-muted-foreground/60">
+            <p className="text-muted-foreground/60 mb-6">
               {isCR ? "Start by creating a folder." : "Ask your CR to create folders for this subject."}
             </p>
+            
+            {/* Added Create Button inside the Empty State for CRs */}
+            {isCR && subjectMeta?.classroomId && (
+              <Link href={`/dashboard/classroom/subject/${subjectId}/folder/add?classroomId=${subjectMeta.classroomId}`}>
+                <Button variant="outline" className="rounded-xl font-bold border-orange-500/50 text-orange-500 hover:bg-orange-500 hover:text-white transition-all">
+                  <Plus className="mr-2 h-4 w-4" /> Create First Folder
+                </Button>
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredFolders.map((folder) => (
-              <Card
-                key={folder.id}
-                className="group relative overflow-hidden rounded-[2rem] p-6 bg-card/50 hover:bg-card hover:shadow-2xl hover:shadow-orange-500/5 transition-all border-border hover:border-orange-500/30 cursor-pointer"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="h-12 w-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-all shadow-inner">
-                    <FolderIcon className="h-6 w-6 fill-current" />
-                  </div>
-                  {isCR && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-orange-500/10 z-20">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-
-                <div className="space-y-1">
-                  <h3 className="font-bold text-lg truncate group-hover:text-orange-500 transition-colors">
-                    {folder.name}
-                  </h3>
-                  <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground/60 uppercase">
-                    <FileText className="h-3 w-3" />
-                    <span>{folder._count?.notes || 0} Notes</span>
-                  </div>
-                </div>
-
-                <Link href={`/dashboard/classroom/folder/${folder.id}`} className="absolute inset-0 z-10" />
-              </Card>
+              <FolderCard key={folder.id} folder={folder} isCR={isCR} />
             ))}
           </div>
         )}
@@ -175,4 +240,4 @@ const SubjectMaterialsPage = () => {
   );
 };
 
-export default SubjectMaterialsPage;
+export default SubjectFolderPage;

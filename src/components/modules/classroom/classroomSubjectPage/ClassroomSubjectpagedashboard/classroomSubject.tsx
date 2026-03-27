@@ -4,7 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { BookOpen, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import Link from "next/link";
 
 // Actions & Hooks
 import { fetchSubjectsAction } from "@/actions/classroomSubject/_fetchSubjectsAction";
@@ -87,9 +89,16 @@ export default function ClassroomSubjectPage() {
         ) : filteredSubjects.length === 0 ? (
           <div className="text-center py-20 border-2 border-dashed rounded-[2.5rem] border-border bg-card/10">
             <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-            <p className="text-muted-foreground font-medium">
+            <p className="text-muted-foreground font-medium mb-5">
               {isCR ? "Get started by adding your first subject." : "No subjects added yet."}
             </p>
+            {isCR && (
+              <Link href={`/dashboard/classroom/subject/${classroomId}/add`}>
+                <Button className="rounded-xl font-bold bg-orange-500 hover:bg-orange-600">
+                  Add Subject
+                </Button>
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
