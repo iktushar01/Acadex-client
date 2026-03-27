@@ -1,67 +1,35 @@
 "use server";
 
-import { getCookie } from "@/lib/cookieUtils";
+import { joinClassroomService } from "@/services/classroom/joinClassroom.service";
+import axios from "axios";
 
 export async function joinClassroomAction(joinCode: string) {
   try {
-    const apiBaseUrl =
-      process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_URL;
-
-    if (!apiBaseUrl) {
-      return {
-        success: false,
-        message: "API base URL is not configured.",
-      };
+    // Basic client-side validation
+    if (!joinCode || joinCode.trim().length === 0) {
+      return { success: false, message: "Please enter a valid access code." };
     }
 
-    // 1. Fetch tokens using your utility functions
-    const sessionToken = await getCookie("better-auth.session_token");
-    const accessToken = await getCookie("accessToken");
-
-    // 2. Build the Cookie Header
-    const cookieParts = [
-      sessionToken ? `better-auth.session_token=${sessionToken}` : null,
-      accessToken ? `accessToken=${accessToken}` : null,
-    ].filter(Boolean) as string[];
-
-    const cookieHeader = cookieParts.join("; ");
-
-    if (!cookieHeader) {
-      return {
-        success: false,
-        message: "Authentication required. Please log in.",
-      };
-    }
-
-    // 3. Execute Join Request
-    const response = await fetch(`${apiBaseUrl}/classrooms/join`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Cookie": cookieHeader,
-      },
-      body: JSON.stringify({ joinCode }),
-      cache: "no-store",
-    });
-
-    const result = await response.json();
-
-    // 4. Handle Response
-    if (!response.ok) {
-      return {
-        success: false,
-        message: result?.message || "Invalid access code or classroom full.",
-      };
-    }
+    const response = await joinClassroomService.join(joinCode);
 
     return {
       success: true,
-      data: result.data, 
-      message: "Connection established successfully.",
+      data: response.data,
+      message: response.message || "Connection established successfully.",
     };
-    
-  } catch (error) {
+
+  } catch (error: any) {
     console.error("JOIN_CLASS_ERROR:", error);
+
+    // Handle Axios/API errors
+    if (axios.isAxiosError(error)) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Invalid access code or classroom full.",
+      };
+    }
+
+    // Generic fallback
     return {
       success: false,
       message: "Node communication failure. Check your uplink.",

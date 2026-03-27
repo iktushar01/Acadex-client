@@ -7,8 +7,6 @@ export const institutionLevelEnum = z.enum(["SCHOOL", "COLLEGE", "UNIVERSITY"]);
 // --- Validations ---
 
 export const joinClassValidation = z.object({
-  // Changed to 'joinCode' if that's what your backend expects, 
-  // otherwise keep 'classCode'
   classCode: z.string().min(6, "Class code must be at least 6 characters long"),
 });
 

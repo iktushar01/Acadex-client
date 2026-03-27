@@ -1,12 +1,12 @@
 "use server";
 
-import { classroomService } from "@/services/classroom/createClassroom.service";
+import { createClassroomService } from "@/services/classroom/createClassroom.service";
 import { createClassValidation } from "@/zod/classroom.validation";
 import { z } from "zod";
 
 export async function createClassroomAction(values: z.infer<typeof createClassValidation>) {
   try {
-    const data = await classroomService.create(values);
+    const data = await createClassroomService.create(values);
 
     return {
       success: true,
