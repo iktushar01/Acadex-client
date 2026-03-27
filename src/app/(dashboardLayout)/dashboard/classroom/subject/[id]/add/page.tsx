@@ -1,4 +1,4 @@
-import AddSubjectPage from "@/components/modules/classroom/AddSubjectPage";
+import AddSubjectPage from "@/components/modules/classroom/classroomSubjectPage/AddSubjectPage";
 
 const AddSubject = () => {
     return (

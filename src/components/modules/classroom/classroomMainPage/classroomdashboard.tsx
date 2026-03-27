@@ -162,12 +162,6 @@ const ClassroomDashboard = () => {
               );
             })}
 
-            <Link href="/dashboard/classroom/create" className="flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-dashed border-border p-10 transition-all hover:border-orange-500/40 hover:bg-orange-500/5 group">
-              <div className="h-14 w-14 rounded-full bg-secondary flex items-center justify-center mb-4 transition-all group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white">
-                <Plus className="h-6 w-6" />
-              </div>
-              <p className="font-bold text-muted-foreground group-hover:text-orange-600">Add another space</p>
-            </Link>
           </div>
         )}
       </div>

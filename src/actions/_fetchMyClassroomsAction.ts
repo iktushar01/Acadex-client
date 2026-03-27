@@ -1,6 +1,6 @@
 "use server";
 
-import { getMyClassroomMemberships } from "@/services/classroom.service";
+import { getMyClassroomMemberships } from "@/services/classroom/getMyClassroomMemberships.service";
 
 export const fetchMyClassroomsAction = async () => {
   try {

@@ -1,4 +1,4 @@
-import SubjectMaterialsPage from "@/components/modules/classroom/classroomSubjectFolder";
+import SubjectMaterialsPage from "@/components/modules/classroom/classroomSubjectFolderPage/classroomSubjectFolder";
 
 const SubjectPage = () => {
     return (

@@ -1,4 +1,4 @@
-import ClassroomDashboard from "@/components/modules/classroom/classroomdashboard";
+import ClassroomDashboard from "@/components/modules/classroom/classroomMainPage/classroomdashboard";
 
 const ClassroomPage = () => {
     return (
