@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchMyClassroomsAction } from "@/app/(dashboardLayout)/dashboard/classroom/_action";
+import { fetchMyClassroomsAction } from "@/app/(dashboardLayout)/dashboard/classroom/_fetchMyClassroomsAction";
 
 /**
  * Custom hook to determine if the current user is a CR for a specific classroom.

@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, ArrowLeft, BookOpen, Check, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner"; 
-import { createSubjectAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/add/_action";
+import { toast } from "sonner";
+import { createSubjectAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/add/_createUpdateDeleteSubjectAction";
 
 // These are the 4-5 demo images users can choose from
 const DEMO_COVERS = [
@@ -51,9 +51,9 @@ const AddSubjectPage = () => {
   return (
     <div className="min-h-screen bg-background p-6 md:p-10">
       <div className="mx-auto max-w-2xl">
-        
+
         {/* Navigation */}
-        <Link 
+        <Link
           href={`/dashboard/classroom/${classroomId}`}
           className="flex items-center gap-2 text-muted-foreground hover:text-orange-500 transition-colors mb-8 group w-fit"
         >
@@ -95,17 +95,16 @@ const AddSubjectPage = () => {
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {DEMO_COVERS.map((item) => (
-                <div 
+                <div
                   key={item.id}
                   onClick={() => setSelectedCover(item.url)}
-                  className={`group relative aspect-[4/3] rounded-[1.5rem] overflow-hidden cursor-pointer border-4 transition-all duration-300 active:scale-95 ${
-                    selectedCover === item.url 
-                      ? "border-orange-500 shadow-xl shadow-orange-500/20" 
-                      : "border-transparent grayscale hover:grayscale-0 opacity-70 hover:opacity-100"
-                  }`}
+                  className={`group relative aspect-[4/3] rounded-[1.5rem] overflow-hidden cursor-pointer border-4 transition-all duration-300 active:scale-95 ${selectedCover === item.url
+                    ? "border-orange-500 shadow-xl shadow-orange-500/20"
+                    : "border-transparent grayscale hover:grayscale-0 opacity-70 hover:opacity-100"
+                    }`}
                 >
                   <img src={item.url} alt={item.label} className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110" />
-                  
+
                   {selectedCover === item.url && (
                     <div className="absolute inset-0 bg-orange-500/10 flex items-center justify-center">
                       <div className="bg-orange-500 text-white p-1.5 rounded-full shadow-lg">
@@ -121,7 +120,7 @@ const AddSubjectPage = () => {
           <hr className="border-border/50" />
 
           {/* Submit Button */}
-          <Button 
+          <Button
             type="submit"
             disabled={loading}
             className="w-full rounded-[1.5rem] font-black h-16 text-lg bg-orange-500 hover:bg-orange-600 shadow-2xl shadow-orange-500/30 transition-all active:scale-[0.98]"

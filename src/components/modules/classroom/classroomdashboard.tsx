@@ -1,22 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Plus, Users, ArrowRight, MoreVertical, GraduationCap, 
+import {
+  Plus, Users, ArrowRight, MoreVertical, GraduationCap,
   BookOpen, Search, Zap, Loader2, Building2, BadgeCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { 
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger 
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 // Import the Server Action
-import { fetchMyClassroomsAction } from "@/app/(dashboardLayout)/dashboard/classroom/_action";
+import { fetchMyClassroomsAction } from "@/app/(dashboardLayout)/dashboard/classroom/_fetchMyClassroomsAction";
 
 const ClassroomDashboard = () => {
   const [memberships, setMemberships] = useState<any[]>([]);
@@ -34,7 +34,7 @@ const ClassroomDashboard = () => {
     const fetchData = async () => {
       setLoading(true);
       const result = await fetchMyClassroomsAction();
-      
+
       if (result.success) {
         setMemberships(result.data || []);
       } else {
@@ -49,7 +49,7 @@ const ClassroomDashboard = () => {
   return (
     <div className="min-h-screen bg-background p-6 md:p-10">
       <div className="mx-auto max-w-6xl">
-        
+
         {/* HEADER */}
         <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between mb-12">
           <div>
@@ -76,8 +76,8 @@ const ClassroomDashboard = () => {
         {/* SEARCH BAR */}
         <div className="relative mb-10 group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground transition-colors group-focus-within:text-orange-500" />
-          <Input 
-            placeholder="Search by name, teacher or institution..." 
+          <Input
+            placeholder="Search by name, teacher or institution..."
             className="h-14 pl-12 rounded-[1.5rem] border-border bg-card/50 backdrop-blur-sm focus-visible:ring-orange-500/20 focus-visible:border-orange-500 transition-all"
           />
         </div>
@@ -97,7 +97,7 @@ const ClassroomDashboard = () => {
             {memberships.map((item) => {
               const cls = item.classroom;
               const cardColor = getColor(cls.id);
-              
+
               return (
                 <Card key={cls.id} className="group relative overflow-hidden rounded-[2.5rem] border-border bg-card/50 p-6 transition-all hover:shadow-2xl hover:shadow-orange-500/5 hover:-translate-y-1">
                   <div className={`absolute top-0 left-0 h-1.5 w-full ${cardColor} opacity-80`} />
@@ -150,7 +150,7 @@ const ClassroomDashboard = () => {
                         {cls._count.memberships} Member{cls._count.memberships !== 1 ? 's' : ''}
                       </span>
                     </div>
-                    
+
                     <Link href={`/dashboard/classroom/${cls.id}`}>
                       <Button variant="ghost" className="rounded-xl group/btn font-bold hover:bg-orange-500 hover:text-white transition-all h-9">
                         Enter <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />

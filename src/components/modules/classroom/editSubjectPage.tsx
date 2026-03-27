@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 // Server Actions are okay to import in Client Components
-import { updateSubjectAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/add/_action";
+import { updateSubjectAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/add/_createUpdateDeleteSubjectAction";
 
 const DEMO_COVERS = [
     "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&q=80",
@@ -146,8 +146,8 @@ const EditSubjectPage = () => {
                                     key={idx}
                                     onClick={() => setSelectedCover(url)}
                                     className={`relative aspect-[4/3] rounded-[1.5rem] overflow-hidden cursor-pointer border-4 transition-all duration-300 ${selectedCover === url
-                                            ? "border-orange-500 shadow-xl shadow-orange-500/20"
-                                            : "border-transparent grayscale hover:grayscale-0 opacity-60 hover:opacity-100"
+                                        ? "border-orange-500 shadow-xl shadow-orange-500/20"
+                                        : "border-transparent grayscale hover:grayscale-0 opacity-60 hover:opacity-100"
                                         }`}
                                 >
                                     <img src={url} alt="Cover" className="object-cover w-full h-full" />

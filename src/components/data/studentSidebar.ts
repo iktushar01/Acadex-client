@@ -1,10 +1,10 @@
-import { fetchMyClassroomsAction } from "@/app/(dashboardLayout)/dashboard/classroom/_action";
+import { fetchMyClassroomsAction } from "@/app/(dashboardLayout)/dashboard/classroom/_fetchMyClassroomsAction";
 import { SidebarData, NavItem } from "@/types/sidebar";
 
 export const getStudentSidebarData = async (): Promise<SidebarData> => {
   // 1. Fetch real data from your API via the Server Action
   const result = await fetchMyClassroomsAction();
-  
+
   // 2. Map the API "memberships" to Sidebar "items"
   // Based on your Postman: label = classroom.name, href = classroom.id
   const dynamicClassroomItems: NavItem[] = (result.data || []).map((membership: any) => ({
@@ -34,8 +34,8 @@ export const getStudentSidebarData = async (): Promise<SidebarData> => {
       {
         title: "list of classrooms",
         // INJECT DYNAMIC DATA HERE
-        items: dynamicClassroomItems.length > 0 
-          ? dynamicClassroomItems 
+        items: dynamicClassroomItems.length > 0
+          ? dynamicClassroomItems
           : ([{ label: "No classes joined", icon: "BookOpen", href: "/dashboard/classroom" }] as NavItem[]),
       },
       {

@@ -7,7 +7,7 @@ import {
   getAllClassroomsAction,
   approveClassroomAction,
   rejectClassroomAction,
-} from "@/app/(dashboardLayout)/admin/classrooms-management/_action";
+} from "@/app/(dashboardLayout)/admin/classrooms-management/_getAllClassroomsAction";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 

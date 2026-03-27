@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
-import { fetchFoldersAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/_action";
+import { fetchFoldersAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/_fetchFoldersAction";
 import {
   Loader2,
   FolderIcon,

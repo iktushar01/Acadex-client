@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMutation } from "@tanstack/react-query";
-import { logoutAction } from "./_action";
+import { logoutAction } from "./_logoutAction";
 import { useRouter } from "next/navigation";
 import { getCookie, deleteCookie } from "cookies-next";
 import { useState } from "react";
