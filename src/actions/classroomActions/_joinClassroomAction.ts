@@ -5,9 +5,8 @@ import axios from "axios";
 
 export async function joinClassroomAction(joinCode: string) {
   try {
-    // Basic client-side validation
     if (!joinCode || joinCode.trim().length === 0) {
-      return { success: false, message: "Please enter a valid access code." };
+      return { success: false, message: "Please enter an access code." };
     }
 
     const response = await joinClassroomService.join(joinCode);
@@ -15,13 +14,12 @@ export async function joinClassroomAction(joinCode: string) {
     return {
       success: true,
       data: response.data,
-      message: response.message || "Connection established successfully.",
+      message: response.message || "Classroom joined successfully.",
     };
 
   } catch (error: any) {
-    console.error("JOIN_CLASS_ERROR:", error);
+    console.error("error in join classroom action", error);
 
-    // Handle Axios/API errors
     if (axios.isAxiosError(error)) {
       return {
         success: false,
@@ -29,10 +27,9 @@ export async function joinClassroomAction(joinCode: string) {
       };
     }
 
-    // Generic fallback
     return {
       success: false,
-      message: "Node communication failure. Check your uplink.",
+      message: "Failed to join classroom",
     };
   }
 }

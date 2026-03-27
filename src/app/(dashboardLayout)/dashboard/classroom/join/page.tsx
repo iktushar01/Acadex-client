@@ -1,4 +1,4 @@
-import JoinClassroom from "@/components/modules/classroom/classroomMainPage/joinClassroom";
+import JoinClassroom from "@/components/modules/classroom/classroomMainPage/ClassroomMaindashboardJoin/joinClassroom";
 
 const Page = () => {
     return (
