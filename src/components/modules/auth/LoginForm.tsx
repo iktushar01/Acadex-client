@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 
-import { loginAction } from "@/app/(authRouteGroup)/login/_loginAction";
+import { loginAction } from "@/actions/_loginAction";
 import AppField from "@/components/shared/form/ReUsableField";
 import AppSubmitButton from "@/components/shared/form/AppSubmitButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";

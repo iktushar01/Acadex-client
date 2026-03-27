@@ -15,7 +15,7 @@ import { ChevronLeft, Mail, RefreshCw, ShieldCheck, Timer } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { verifyEmailAction } from "@/app/(authRouteGroup)/verify-email/_verifyEmailAction";
+import { verifyEmailAction } from "@/actions/_verifyEmailAction";
 
 const VerifyEmailForm = () => {
   const searchParams = useSearchParams();

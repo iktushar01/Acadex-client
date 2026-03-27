@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Loader2, ArrowLeft, BookOpen, Check, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { createSubjectAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/add/_createUpdateDeleteSubjectAction";
+import { createSubjectAction } from "@/actions/_createUpdateDeleteSubjectAction";
 
 // These are the 4-5 demo images users can choose from
 const DEMO_COVERS = [

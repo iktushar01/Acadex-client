@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { fetchSubjectsAction } from "@/app/(dashboardLayout)/dashboard/classroom/[id]/_fetchSubjectsAction";
+import { fetchSubjectsAction } from "@/actions/_fetchSubjectsAction";
 import { useClassroomRole } from "@/hooks/useClassroomRole";
 import { Subject } from "@/types/classroomSubject.types";
 import Link from "next/link";
@@ -42,7 +42,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { deleteSubjectAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/add/_createUpdateDeleteSubjectAction";
+import { deleteSubjectAction } from "@/actions/_createUpdateDeleteSubjectAction";
 
 const ClassroomSubject = () => {
   const { id } = useParams();

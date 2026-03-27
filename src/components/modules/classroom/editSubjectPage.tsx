@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 // Server Actions are okay to import in Client Components
-import { updateSubjectAction } from "@/app/(dashboardLayout)/dashboard/classroom/subject/[id]/add/_createUpdateDeleteSubjectAction";
+import { updateSubjectAction } from "@/actions/_createUpdateDeleteSubjectAction";
 
 const DEMO_COVERS = [
     "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&q=80",

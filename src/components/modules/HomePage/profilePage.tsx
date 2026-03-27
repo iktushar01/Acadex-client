@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getCurrentUserAction } from "@/app/(commonLayout)/profile/_getCurrentUserAction";
+import { getCurrentUserAction } from "@/actions/_getCurrentUserAction";
 import {
   Phone, MapPin, Calendar, User, Lock,
   MailCheck, Pencil, Camera, Loader2,
