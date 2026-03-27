@@ -1,6 +1,6 @@
 "use server";
 
-import { getSubjectsByClassroom } from "@/services/classroomSubject";
+import { getSubjectsByClassroom } from "@/services/classroomSubject/getSubjectsByClassroom.service";
 
 export const fetchSubjectsAction = async (classroomId: string) => {
   try {

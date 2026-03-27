@@ -1,6 +1,6 @@
 "use server";
 
-import { ClassroomService } from "@/services/classroomAdmin";
+import { ClassroomService } from "@/services/adminClassroomManage/classroomAdmin.service";
 import { ClassroomFilterValues } from "@/zod/classroom.validation";
 
 // ─── List ─────────────────────────────────────────────────────────────────────

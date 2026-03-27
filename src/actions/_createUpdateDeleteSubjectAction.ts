@@ -1,6 +1,6 @@
 "use server";
 
-import { createSubject, deleteSubject, updateSubject } from "@/services/createsubject.service";
+import { createSubject, deleteSubject, updateSubject } from "@/services/classroomSubject/crudSubject.service";
 import { CreateSubjectInput, UpdateSubjectInput } from "@/types/classroomSubject.types";
 import { revalidatePath } from "next/cache";
 
@@ -20,9 +20,9 @@ export const createSubjectAction = async (data: CreateSubjectInput) => {
       return { success: true, data: response.data };
     }
 
-    return { 
-      success: false, 
-      error: response.message || "Failed to create subject" 
+    return {
+      success: false,
+      error: response.message || "Failed to create subject"
     };
   } catch (error: any) {
     return {

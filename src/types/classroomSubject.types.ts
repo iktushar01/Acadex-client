@@ -40,7 +40,7 @@ export interface Folder {
   name: string;
   description?: string;
   subjectId: string;
-  subject?: Subject; // Added relation
+  subject?: Subject;
   creatorId: string;
   createdAt: string;
   updatedAt: string;

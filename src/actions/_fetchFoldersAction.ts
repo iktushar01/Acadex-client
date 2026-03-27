@@ -1,6 +1,6 @@
 "use server";
 
-import { getFoldersBySubject } from "@/services/subjectFolder";
+import { getFoldersBySubject } from "@/services/classroomSubjectFolder/getFoldersBySubject.service";
 
 export const fetchFoldersAction = async (subjectId: string) => {
   try {

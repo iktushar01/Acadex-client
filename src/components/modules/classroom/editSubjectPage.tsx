@@ -1,6 +1,6 @@
 "use client";
 
-import { getSubjectById } from "@/services/createsubject.service";
+import { getSubjectById } from "@/services/classroomSubject/crudSubject.service";
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
