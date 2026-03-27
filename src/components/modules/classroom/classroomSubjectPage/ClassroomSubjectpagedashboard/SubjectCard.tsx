@@ -34,37 +34,44 @@ export const SubjectCard = ({ subject, isCR, onDelete }: SubjectCardProps) => {
   const router = useRouter();
 
   return (
-    <Card className="group relative overflow-hidden rounded-[2.5rem] bg-card border-none hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 hover:-translate-y-2">
-      {/* SUBJECT COVER IMAGE */}
-      <div className="relative h-40 w-full overflow-hidden">
+    <Card className="group relative flex flex-col overflow-hidden rounded-[2.5rem] bg-card border-none p-0 shadow-lg transition-all duration-500 hover:shadow-primary/5 hover:-translate-y-1">
+      
+      {/* IMAGE SECTION - Pinned to 0,0 with no container padding */}
+      <div className="relative h-48 w-full shrink-0 overflow-hidden">
         {subject.coverImage ? (
           <img
             src={subject.coverImage}
             alt={subject.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center">
-            <Library className="h-12 w-12 text-orange-200" />
+          <div className="w-full h-full bg-muted flex items-center justify-center">
+            <Library className="h-12 w-12 text-muted-foreground/20" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
 
-        <div className="absolute bottom-4 left-6 h-12 w-12 rounded-2xl bg-background/90 backdrop-blur-md flex items-center justify-center text-orange-600 shadow-lg border border-white/20">
-          <FileText className="h-6 w-6" />
+        {/* Floating Icons */}
+        <div className="absolute top-4 left-4 z-10">
+          <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg">
+            <FileText className="h-5 w-5" />
+          </div>
         </div>
 
         {isCR && (
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 z-10">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon" className="h-9 w-9 rounded-xl bg-white/80 backdrop-blur-md hover:bg-orange-500 hover:text-white border-none shadow-sm transition-all">
-                  <MoreVertical className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-10 w-10 rounded-full bg-black/30 backdrop-blur-md hover:bg-primary text-white border-none transition-all"
+                >
+                  <MoreVertical className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="rounded-xl w-40 p-2 border-orange-500/10">
+              <DropdownMenuContent align="end" className="rounded-2xl border-border p-1.5 shadow-xl">
                 <DropdownMenuItem
-                  className="rounded-lg font-bold cursor-pointer"
+                  className="rounded-xl font-bold cursor-pointer py-3"
                   onClick={() => router.push(`/dashboard/classroom/subject/edit/${subject.id}`)}
                 >
                   <Edit className="mr-2 h-4 w-4" /> Edit
@@ -73,19 +80,17 @@ export const SubjectCard = ({ subject, isCR, onDelete }: SubjectCardProps) => {
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <DropdownMenuItem
-                      className="rounded-lg font-bold text-destructive focus:text-destructive cursor-pointer"
+                      className="rounded-xl font-bold text-destructive focus:text-destructive cursor-pointer py-3"
                       onSelect={(e) => e.preventDefault()}
                     >
                       <Trash2 className="mr-2 h-4 w-4" /> Delete
                     </DropdownMenuItem>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="rounded-[2rem]">
+                  <AlertDialogContent className="rounded-[2.5rem]">
                     <AlertDialogHeader>
-                      <AlertDialogTitle className="text-2xl font-black italic">
-                        Are you <span className="text-orange-500">sure?</span>
-                      </AlertDialogTitle>
-                      <AlertDialogDescription className="font-medium">
-                        This will permanently delete <span className="font-bold text-foreground">"{subject.name}"</span>.
+                      <AlertDialogTitle className="text-2xl font-black italic uppercase">Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription className="font-medium text-muted-foreground">
+                        This will delete <span className="text-foreground font-bold">{subject.name}</span>.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -105,25 +110,39 @@ export const SubjectCard = ({ subject, isCR, onDelete }: SubjectCardProps) => {
         )}
       </div>
 
-      <div className="px-6 pb-6 pt-2">
-        <div className="mb-6">
-          <h3 className="text-2xl font-black tracking-tight mb-1 group-hover:text-orange-500 transition-colors truncate italic">
+      {/* CONTENT SECTION - p-6 at the bottom, pt-5 for the text */}
+      <div className="flex flex-col flex-grow px-6 pb-6 pt-5 bg-card">
+        <div className="space-y-1 mb-6">
+          <div className="flex items-center gap-2">
+            <div className="h-1 w-6 rounded-full bg-primary" />
+            <span className="text-[10px] font-black text-primary uppercase tracking-widest">
+              Subject
+            </span>
+          </div>
+          <h3 className="text-2xl font-black tracking-tight group-hover:text-primary transition-colors truncate italic uppercase">
             {subject.name}
           </h3>
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              {subject._count?.notes || 0} Resources Available
+          <div className="flex items-center gap-2 pt-1 opacity-60">
+             <div className="flex -space-x-1">
+                <div className="h-4 w-4 rounded-full bg-muted border border-card" />
+                <div className="h-4 w-4 rounded-full bg-muted border border-card" />
+             </div>
+            <span className="text-[10px] font-bold uppercase tracking-tighter">
+              {subject._count?.notes || 0} Resources
             </span>
           </div>
         </div>
 
-        <Link href={`/dashboard/classroom/subject/${subject.id}?classroomId=${subject.classroomId}`}>
-          <Button variant="outline" className="w-full h-12 rounded-2xl font-bold group/btn border-orange-500/20 bg-orange-500/5 hover:bg-orange-500 hover:text-white transition-all duration-300">
-            View Materials
-            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-          </Button>
-        </Link>
+        <div className="mt-auto">
+          <Link href={`/dashboard/classroom/subject/${subject.id}?classroomId=${subject.classroomId}`}>
+            <Button 
+              className="w-full h-12 rounded-full font-black uppercase italic bg-primary text-primary-foreground hover:scale-[1.02] transition-all shadow-md hover:shadow-primary/20"
+            >
+              Enter Classroom
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </Card>
   );

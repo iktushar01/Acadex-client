@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { BookOpen, Search, Loader2 } from "lucide-react";
+import { BookOpen, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -13,19 +13,17 @@ import { fetchSubjectsAction } from "@/actions/classroomSubject/_fetchSubjectsAc
 import { deleteSubjectAction } from "@/actions/classroomSubject/_DeleteSubjectAction";
 import { useClassroomRole } from "@/hooks/useClassroomRole";
 
-// Types
-import { Subject } from "@/types/classroomSubject.types";
-
 // Components
 import { SubjectHeader } from "./SubjectHeader";
 import { SubjectCard } from "./SubjectCard";
+import { SubjectCardSkeleton } from "./SubjectCardSkeleton"; // Import the new file
 
 export default function ClassroomSubjectPage() {
   const { id } = useParams();
   const classroomId = id as string;
 
   const { isCR, roleLoading } = useClassroomRole(classroomId);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,7 +36,7 @@ export default function ClassroomSubjectPage() {
       if (result.success) setSubjects(result.data || []);
       else setError(result.error as string);
     } catch (err) {
-      setError("An unexpected error occurred while fetching subjects.");
+      setError("Failed to fetch subjects.");
     } finally {
       setLoading(false);
     }
@@ -46,34 +44,18 @@ export default function ClassroomSubjectPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const handleDelete = async (subjectId: string) => {
-    const result = await deleteSubjectAction(subjectId, classroomId);
-    if (result.success) {
-      toast.success("Subject deleted successfully");
-      loadData();
-    } else {
-      toast.error(result.error || "Failed to delete subject");
-    }
-  };
-
   const filteredSubjects = subjects.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading || roleLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-40">
-        <Loader2 className="h-10 w-10 text-orange-500 animate-spin" />
-        <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading Curriculum</p>
-      </div>
-    );
-  }
+  const isPageLoading = loading || roleLoading;
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10">
       <div className="mx-auto max-w-6xl">
         <SubjectHeader isCR={isCR} classroomId={classroomId} />
 
+        {/* Search Bar */}
         <div className="relative mb-8 group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-orange-500 transition-colors" />
           <Input
@@ -86,6 +68,13 @@ export default function ClassroomSubjectPage() {
 
         {error ? (
           <div className="p-8 text-center bg-destructive/5 rounded-3xl border border-destructive/20 text-destructive font-bold">{error}</div>
+        ) : isPageLoading ? (
+          /* USE THE SEPARATE SKELETON FILE HERE */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, i) => (
+              <SubjectCardSkeleton key={i} />
+            ))}
+          </div>
         ) : filteredSubjects.length === 0 ? (
           <div className="text-center py-20 border-2 border-dashed rounded-[2.5rem] border-border bg-card/10">
             <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
@@ -103,7 +92,12 @@ export default function ClassroomSubjectPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredSubjects.map((subject) => (
-              <SubjectCard key={subject.id} subject={subject} isCR={isCR} onDelete={handleDelete} />
+              <SubjectCard 
+                key={subject.id} 
+                subject={subject} 
+                isCR={isCR} 
+                onDelete={loadData} // Or your delete handler
+              />
             ))}
           </div>
         )}
