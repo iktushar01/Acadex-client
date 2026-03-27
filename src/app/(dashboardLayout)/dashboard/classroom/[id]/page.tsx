@@ -1,4 +1,4 @@
-import ClassroomSubject from "@/components/modules/classroom/classroomSubjectPage/classroomSubject";
+import ClassroomSubject from "@/components/modules/classroom/classroomSubjectPage/ClassroomSubjectpagedashboard/classroomSubject";
 
 const ClassroomPage = () => {
     return (

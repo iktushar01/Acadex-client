@@ -4,11 +4,10 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import { Loader2, ArrowLeft, BookOpen, Check, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { createSubjectAction } from "@/actions/_createUpdateDeleteSubjectAction";
+import { createSubjectAction } from "@/actions/classroomSubject/_createSubjectAction";
 
 // These are the 4-5 demo images users can choose from
 const DEMO_COVERS = [
