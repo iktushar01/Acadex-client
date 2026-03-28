@@ -65,7 +65,7 @@ const Navbar = () => {
         <Logo />
 
         {/* NAVIGATION */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* <div className="hidden md:flex items-center gap-8">
           {["Notes", "Courses", "Community"].map((item) => (
             <Link
               key={item}
@@ -75,17 +75,17 @@ const Navbar = () => {
               {item}
             </Link>
           ))}
-        </div>
+        </div> */}
 
         {/* ACTIONS */}
         <div className="flex items-center gap-3">
-          <Button
+          {/* <Button
             variant="ghost"
             size="icon"
             className="text-muted-foreground hover:text-orange-500 rounded-full"
           >
             <Search className="h-5 w-5" />
-          </Button>
+          </Button> */}
 
           <ModeToggle />
 
@@ -167,13 +167,13 @@ const Navbar = () => {
             </div>
           )}
 
-          <Button
+          {/* <Button
             variant="ghost"
             size="icon"
             className="md:hidden rounded-full"
           >
             <Menu className="h-6 w-6" />
-          </Button>
+          </Button> */}
         </div>
       </div>
     </nav>

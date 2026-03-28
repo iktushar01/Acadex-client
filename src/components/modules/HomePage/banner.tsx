@@ -7,7 +7,7 @@ import Link from "next/link";
 const Banner = () => {
   return (
     <section 
-      className="relative flex min-h-[90vh] w-full flex-col items-center justify-center overflow-hidden bg-background pt-20"
+      className="relative flex md:min-h-[100vh] min-h-[40vh] w-full flex-col items-center justify-center overflow-hidden bg-background pt-20 pb-10"
       style={{
         // Modernized Notepad Grid: Thinner lines, more subtle
         backgroundImage: `

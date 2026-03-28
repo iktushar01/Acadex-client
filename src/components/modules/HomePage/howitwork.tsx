@@ -132,17 +132,6 @@ function HowItWorks() {
               );
             })}
           </div>
-
-          {/* CTA Section */}
-          <div className="text-center mt-20">
-            <Button
-              size="lg"
-              className="h-16 px-10 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-lg shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
-            >
-              Start Learning Now
-              <CheckCircle2 className="ml-3 h-6 w-6" />
-            </Button>
-          </div>
         </div>
       </div>
 

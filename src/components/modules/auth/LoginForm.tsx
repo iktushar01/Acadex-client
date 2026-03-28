@@ -106,19 +106,6 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                             sync with classmates, and ace your exams with collective intelligence.
                         </p>
                     </div>
-
-                    {/* Feature Highlights (Mini Icons) */}
-                    <div className="flex items-center gap-6 pt-4">
-                        <div className="flex flex-col gap-1">
-                            <span className="text-2xl font-bold text-foreground">10k+</span>
-                            <span className="text-xs text-muted-foreground font-medium uppercase">Active Students</span>
-                        </div>
-                        <div className="h-8 w-px bg-border" />
-                        <div className="flex flex-col gap-1">
-                            <span className="text-2xl font-bold text-foreground">500+</span>
-                            <span className="text-xs text-muted-foreground font-medium uppercase">Classrooms</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -207,15 +194,15 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                     </form>
 
                     {/* DIVIDER */}
-                    <div className="relative my-8">
+                    {/* <div className="relative my-8">
                         <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                         <div className="relative flex justify-center text-xs uppercase">
                             <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* GOOGLE LOGIN */}
-                    <Button
+                    {/* <Button
                         variant="outline"
                         className="w-full h-11 rounded-xl font-semibold gap-3 border-border hover:bg-secondary transition-all"
                         onClick={() => {
@@ -230,7 +217,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                         </svg>
                         Google Account
-                    </Button>
+                    </Button> */}
 
                     <p className="mt-8 text-center text-sm text-muted-foreground">
                         Don&apos;t have an account?{" "}

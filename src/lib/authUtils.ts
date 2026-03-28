@@ -69,7 +69,7 @@ export const getDefaultDashboardRoute = (role : UserRole) => {
     }
 
     if(role === "STUDENT") {
-        return "/dashboard";
+        return "/dashboard/classroom";
     }
 
     return "/";
