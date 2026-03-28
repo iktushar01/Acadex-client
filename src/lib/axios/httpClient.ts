@@ -80,10 +80,47 @@ const httpGet = async <TData>(endpoint: string, options?: ApiRequestOptions): Pr
     }
 }
 
+const stripContentTypeForMultipart = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    headers: any
+) => {
+    if (!headers) return;
+    if (typeof headers.delete === "function") {
+        headers.delete("Content-Type");
+        headers.delete("content-type");
+    } else {
+        delete headers["Content-Type"];
+        delete headers["content-type"];
+    }
+};
+
+const isFormDataBody = (data: unknown): boolean =>
+    typeof FormData !== "undefined" && data instanceof FormData;
+
+/**
+ * POST helper. When sending FormData (e.g. note upload from a Server Action),
+ * the instance default `Content-Type: application/json` must be removed or
+ * Node/axios will not set a multipart boundary and Express/multer sees no files.
+ */
 const httpPost = async <TData>(endpoint: string, data: unknown, options?: ApiRequestOptions): Promise<ApiResponse<TData>> => {
     try {
         const instance = await axiosInstance(options);
-        const response = await instance.post<ApiResponse<TData>>(endpoint, data, options);
+        const postConfig: AxiosRequestConfig = {
+            ...options,
+            ...(isFormDataBody(data)
+                ? {
+                      transformRequest: [
+                          (body, headers) => {
+                              if (isFormDataBody(body)) {
+                                  stripContentTypeForMultipart(headers);
+                              }
+                              return body;
+                          },
+                      ],
+                  }
+                : {}),
+        };
+        const response = await instance.post<ApiResponse<TData>>(endpoint, data, postConfig);
         return response.data;
     } catch (error: any) {
         console.error(`POST request to ${endpoint} failed:`, error.message);

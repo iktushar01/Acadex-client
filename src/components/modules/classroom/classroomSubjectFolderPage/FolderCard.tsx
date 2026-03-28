@@ -18,10 +18,15 @@ import { DeleteFolderModal } from "./deleteFolderModal";
 interface FolderCardProps {
   folder: { id: string; name: string; _count?: { notes: number } };
   subjectId: string;
+  classroomId?: string;
   isCR: boolean | undefined;
 }
 
-export const FolderCard = ({ folder, subjectId, isCR }: FolderCardProps) => {
+export const FolderCard = ({ folder, subjectId, classroomId, isCR }: FolderCardProps) => {
+  const notesHref =
+    `/dashboard/classroom/folder/${folder.id}` +
+    `?subjectId=${encodeURIComponent(subjectId)}` +
+    (classroomId ? `&classroomId=${encodeURIComponent(classroomId)}` : "");
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -78,10 +83,7 @@ export const FolderCard = ({ folder, subjectId, isCR }: FolderCardProps) => {
           </div>
 
           {/* Content Area */}
-          <Link
-            href={`/dashboard/classroom/folder/${folder.id}`}
-            className="flex-grow flex flex-col group/link"
-          >
+          <Link href={notesHref} className="flex-grow flex flex-col group/link">
             <div className="space-y-4 mt-auto">
               <div className="flex items-end justify-between">
                 <div className="space-y-1">

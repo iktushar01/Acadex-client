@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { fetchFoldersAction } from "@/actions/_fetchFoldersAction";
 import { fetchSubjectByIdAction } from "@/actions/classroomSubject/_fetchSubjectByIdAction";
 import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
-import { FolderIcon, ArrowLeft, Search, LayoutGrid } from "lucide-react";
+import { FolderIcon, ArrowLeft, Search, LayoutGrid, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -127,9 +127,27 @@ const SubjectFolderPage = () => {
             </h1>
           </div>
 
-          {!roleLoading && isCR && (
-            <CreateFolderModal subjectId={subjectId} onSuccess={loadData} />
-          )}
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              asChild
+              variant="outline"
+              className="rounded-2xl font-bold border-orange-500/30 hover:bg-orange-500/10 hover:text-orange-600"
+            >
+              <Link
+                href={`/dashboard/classroom/subject/${subjectId}/notes${
+                  subjectMeta?.classroomId
+                    ? `?classroomId=${encodeURIComponent(subjectMeta.classroomId)}`
+                    : ""
+                }`}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Subject notes
+              </Link>
+            </Button>
+            {!roleLoading && isCR && (
+              <CreateFolderModal subjectId={subjectId} onSuccess={loadData} />
+            )}
+          </div>
         </header>
 
         <div className="relative mb-10">
@@ -158,7 +176,13 @@ const SubjectFolderPage = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredFolders.map((folder) => (
-              <FolderCard key={folder.id} folder={folder} subjectId={subjectId} isCR={isCR} />
+              <FolderCard
+                key={folder.id}
+                folder={folder}
+                subjectId={subjectId}
+                classroomId={subjectMeta?.classroomId}
+                isCR={isCR}
+              />
             ))}
           </div>
         )}

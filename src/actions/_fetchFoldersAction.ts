@@ -1,6 +1,7 @@
 "use server";
 
 import { getFoldersBySubject } from "@/services/classroomSubjectFolder/getFoldersBySubject.service";
+import { getFolderById } from "@/services/classroomSubjectFolder/getFolderById.service";
 
 export const fetchFoldersAction = async (subjectId: string) => {
   try {
@@ -17,6 +18,28 @@ export const fetchFoldersAction = async (subjectId: string) => {
     return {
       success: false,
       error: error.response?.data?.message || "An unexpected error occurred"
+    };
+  }
+};
+
+export const fetchFolderByIdAction = async (folderId: string) => {
+  try {
+    if (!folderId) return { success: false as const, error: "Folder ID is required" };
+
+    const response = await getFolderById(folderId);
+
+    if (response.success) {
+      return { success: true as const, data: response.data };
+    }
+
+    return {
+      success: false as const,
+      error: response.message || "Failed to load folder",
+    };
+  } catch (error: any) {
+    return {
+      success: false as const,
+      error: error.response?.data?.message || "An unexpected error occurred",
     };
   }
 };

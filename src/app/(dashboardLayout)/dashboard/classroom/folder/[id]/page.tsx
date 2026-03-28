@@ -1,7 +1,9 @@
+import NotesPage from "@/components/modules/Notes/NotesMainPage";
+
 const FolderPage = () => {
     return (
         <div>
-            <h1>notes here</h1>
+            <NotesPage/>
         </div>
     );
 };
