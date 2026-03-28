@@ -1,200 +1,206 @@
 "use client";
 
-import { CheckCircle2, XCircle, Trash2, MoreVertical, Loader2, Paperclip, ArrowUpRight } from "lucide-react";
+import React, { memo, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  CheckCircle2, XCircle, Trash2, MoreVertical, 
+  Loader2, Calendar, ShieldCheck, AlertCircle, Clock
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
+import { 
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
+  DropdownMenuTrigger, DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
 import { StatusBadge } from "@/components/modules/Notes/StatusBadge";
-import { FileChip } from "@/components/modules/Notes/FileChip";
 import { UploaderAvatar } from "@/components/modules/Notes/UploaderAvatar";
+import { cn } from "@/lib/utils";
 import type { INote } from "@/types/note.types";
-import { formatDate } from "./NotesMainPage";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Configuration & Constants ---
+
+const STATUS_CONFIG = {
+  APPROVED: { 
+    color: "text-emerald-500", 
+    bg: "bg-emerald-500/10", 
+    blob: "bg-emerald-400/20",
+    icon: ShieldCheck, 
+  },
+  REJECTED: { 
+    color: "text-red-500", 
+    bg: "bg-red-500/10", 
+    blob: "bg-red-400/20",
+    icon: AlertCircle, 
+  },
+  PENDING: { 
+    color: "text-amber-500", 
+    bg: "bg-amber-500/10", 
+    blob: "bg-amber-400/20",
+    icon: Clock, 
+  },
+} as const;
+
+// --- Sub-Components ---
+
+const ActionMenu = memo(({ 
+  note, isCR, onApprove, onReject, onDelete 
+}: Omit<NoteCardProps, "isActioning">) => {
+  const actions = useMemo(() => [
+    {
+      show: isCR && note.status === "PENDING",
+      label: "Approve",
+      icon: CheckCircle2,
+      onClick: () => onApprove(note.id),
+      className: "text-emerald-600 dark:text-emerald-400"
+    },
+    {
+      show: isCR && note.status === "PENDING",
+      label: "Reject",
+      icon: XCircle,
+      onClick: () => onReject(note.id),
+      className: "text-amber-600 dark:text-amber-400"
+    },
+    {
+      show: true,
+      label: "Delete",
+      icon: Trash2,
+      onClick: () => onDelete(note.id),
+      className: "text-destructive",
+      separator: isCR && note.status === "PENDING"
+    }
+  ], [note.id, note.status, isCR, onApprove, onReject, onDelete]);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-background/80">
+          <MoreVertical className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52 p-1.5 backdrop-blur-xl border-border/50 shadow-2xl">
+        {actions.filter(a => a.show).map((action) => (
+          <React.Fragment key={action.label}>
+            {action.separator && <DropdownMenuSeparator />}
+            <DropdownMenuItem 
+              onClick={(e) => { e.stopPropagation(); action.onClick(); }}
+              className={cn("gap-2.5 py-2 px-3 cursor-pointer rounded-lg", action.className)}
+            >
+              <action.icon className="h-4 w-4" />
+              <span className="font-medium text-sm">{action.label}</span>
+            </DropdownMenuItem>
+          </React.Fragment>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+});
+
+// --- Main Component ---
 
 export interface NoteCardProps {
   note: INote;
   isCR: boolean;
-  isActioning: boolean;
+  isActioning?: boolean;
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-// ─── CardActions (internal) ───────────────────────────────────────────────────
-
-const CardActions = ({
-  note,
-  isCR,
-  onApprove,
-  onReject,
-  onDelete,
-}: Pick<NoteCardProps, "note" | "isCR" | "onApprove" | "onReject" | "onDelete">) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button
-        variant="ghost"
-        size="icon"
-        // Stop propagation so clicking the menu doesn't navigate to detail
-        onClick={(e) => e.stopPropagation()}
-        className="h-7 w-7 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/60 shrink-0"
-      >
-        <MoreVertical className="h-3.5 w-3.5" />
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="rounded-xl min-w-[148px]">
-      {isCR && note.status === "PENDING" && (
-        <>
-          <DropdownMenuItem
-            onClick={(e) => { e.stopPropagation(); onApprove(note.id); }}
-            className="text-emerald-500 focus:text-emerald-500 focus:bg-emerald-500/10 cursor-pointer gap-2"
-          >
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            Approve
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => { e.stopPropagation(); onReject(note.id); }}
-            className="text-amber-500 focus:text-amber-500 focus:bg-amber-500/10 cursor-pointer gap-2"
-          >
-            <XCircle className="h-3.5 w-3.5" />
-            Reject
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-        </>
-      )}
-      <DropdownMenuItem
-        onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
-        className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer gap-2"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-        Delete
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
-
-// ─── NoteCard ─────────────────────────────────────────────────────────────────
-
-export const NoteCard = ({
-  note,
-  isCR,
-  isActioning,
-  onApprove,
-  onReject,
-  onDelete,
-}: NoteCardProps) => {
+export const NoteCard = memo(({ note, isActioning, ...props }: NoteCardProps) => {
   const router = useRouter();
-
-  const handleCardClick = () => {
-    router.push(`/dashboard/classroom/notes/${note.id}`);
-  };
+  const config = STATUS_CONFIG[note.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.PENDING;
 
   return (
-    <Card
-      onClick={handleCardClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && handleCardClick()}
-      aria-label={`Open note: ${note.title}`}
-      className="
-        group relative flex flex-col gap-0 cursor-pointer select-none
-        rounded-2xl border border-border/50
-        bg-card/40 backdrop-blur-sm
-        hover:border-orange-500/30 hover:bg-card/80
-        hover:shadow-xl hover:shadow-orange-500/5
-        active:scale-[0.99] transition-all duration-200 overflow-hidden
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40
-      "
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover="hover"
+      className="relative h-full"
     >
-      {/* Status accent strip */}
-      <div
-        className={`h-0.5 w-full shrink-0 transition-all duration-300 ${
-          note.status === "APPROVED"
-            ? "bg-emerald-500/50"
-            : note.status === "REJECTED"
-            ? "bg-red-500/50"
-            : "bg-amber-500/30 group-hover:bg-amber-500/60"
-        }`}
-      />
+      <div 
+        onClick={() => router.push(`/dashboard/classroom/notes/${note.id}`)}
+        className={cn(
+          "relative flex flex-col h-full min-h-[220px] p-6 rounded-3xl border overflow-hidden transition-colors duration-500",
+          "bg-card/40 backdrop-blur-xl border-border/50 cursor-pointer",
+          "hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5",
+          isActioning && "opacity-60 pointer-events-none"
+        )}
+      >
+        {/* --- Advanced Background Element (Animated Blob) --- */}
+        <motion.div
+          variants={{
+            hover: { scale: 1.2, rotate: 15, x: 20, y: -20 }
+          }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className={cn(
+            "absolute -top-10 -right-10 w-40 h-40 rounded-full blur-[60px] -z-10 transition-colors duration-700",
+            config.blob
+          )}
+        />
+        
+        {/* Subtle inner glow */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent pointer-events-none" />
 
-      {/* Action loading overlay */}
-      {isActioning && (
-        <div className="absolute inset-0 bg-background/70 backdrop-blur-sm rounded-2xl flex items-center justify-center z-20">
-          <Loader2 className="h-5 w-5 text-orange-500 animate-spin" />
-        </div>
-      )}
-
-      {/* Open indicator — top-right corner, visible on hover */}
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-        <div className="h-5 w-5 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
-          <ArrowUpRight className="h-3 w-3 text-orange-500" />
-        </div>
-      </div>
-
-      {/* Card body */}
-      <div className="flex flex-col gap-4 p-5">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm leading-snug tracking-tight line-clamp-2 pr-1">
+        {/* Header Section */}
+        <div className="flex items-start justify-between gap-4 z-10">
+          <div className="space-y-3 flex-1">
+            <div className="flex items-center gap-2">
+              <div className={cn("p-2 rounded-xl bg-background shadow-inner border border-border/20", config.color)}>
+                <config.icon className="h-4 w-4" />
+              </div>
+              <StatusBadge status={note.status} compact className="font-bold text-[10px] tracking-widest px-2.5 border-none bg-muted/50" />
+            </div>
+            
+            <h3 className="text-lg font-bold tracking-tight text-foreground leading-[1.2] line-clamp-2 group-hover:text-primary transition-colors">
               {note.title}
             </h3>
-            {note.description && (
-              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-                {note.description}
-              </p>
-            )}
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            <StatusBadge status={note.status} compact />
-            <CardActions
-              note={note}
-              isCR={isCR}
-              onApprove={onApprove}
-              onReject={onReject}
-              onDelete={onDelete}
-            />
-          </div>
+          <ActionMenu note={note} {...props} />
         </div>
 
-        {/* Files summary (non-clickable on card — full download on detail page) */}
-        {note.files.length > 0 && (
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/50 font-semibold uppercase tracking-wider">
-              <Paperclip className="h-2.5 w-2.5" />
-              {note.files.length} attachment{note.files.length !== 1 ? "s" : ""}
-            </div>
-            {/* Show chips but block their link navigation so card click wins */}
-            <div
-              className="flex flex-wrap gap-1.5"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {note.files.map((file) => (
-                <FileChip key={file.id} file={file} />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Description */}
+        <p className="mt-4 text-sm text-muted-foreground/80 line-clamp-2 font-medium leading-relaxed z-10">
+          {note.description || "No summary available for this module."}
+        </p>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-border/30">
-          <UploaderAvatar uploader={note.uploader} />
-          <time
-            dateTime={note.createdAt}
-            className="text-[10px] text-muted-foreground/40 font-medium tabular-nums"
-          >
-            {formatDate(note.createdAt)}
-          </time>
+        <div className="mt-auto pt-6 flex items-center justify-between z-10">
+          <div className="flex items-center gap-3 bg-background/40 p-1 pr-3 rounded-full border border-border/50">
+            <UploaderAvatar uploader={note.uploader} className="h-7 w-7 ring-2 ring-background" />
+            <span className="text-[11px] font-bold text-foreground/70 truncate max-w-[70px]">
+              {note.uploader.name.split(' ')[0]}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/20 shadow-sm">
+            <Calendar className="h-3 w-3 text-muted-foreground" />
+            <span className="text-[10px] font-bold tabular-nums text-muted-foreground">
+              {new Date(note.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            </span>
+          </div>
         </div>
+
+        {/* Loading Overlay */}
+        <AnimatePresence>
+          {isActioning && (
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-md"
+            >
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">Updating</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </Card>
+    </motion.div>
   );
-};
+});
+
+NoteCard.displayName = "NoteCard";
