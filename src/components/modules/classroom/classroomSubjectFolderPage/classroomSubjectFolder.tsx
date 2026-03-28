@@ -19,6 +19,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { FolderCard } from "./FolderCard";
+import { CreateFolderModal } from "./CreateFolderaddModal"; // Import the modal
 
 const SubjectFolderPage = () => {
   const params = useParams();
@@ -46,7 +47,6 @@ const SubjectFolderPage = () => {
     const subjectPromise = fetchSubjectByIdAction(subjectId);
     const foldersPromise = fetchFoldersAction(subjectId);
 
-    // Subject meta fetch should never block folders rendering
     (async () => {
       try {
         const subjectResult = await subjectPromise;
@@ -92,14 +92,12 @@ const SubjectFolderPage = () => {
 
       const memberships = membershipsResult.data as any[];
 
-      // Fast path: if classroomId is already known, role can be resolved directly.
       if (subjectMeta?.classroomId) {
         const membership = memberships.find((m: any) => m.classroom?.id === subjectMeta.classroomId);
         setIsCR(membership?.memberRole === "CR");
         return;
       }
 
-      // Fallback: discover which classroom contains this subject.
       const subjectSearches = await Promise.all(
         memberships.map(async (m: any) => {
           const classId = m?.classroom?.id;
@@ -178,13 +176,12 @@ const SubjectFolderPage = () => {
             <p className="text-muted-foreground font-medium mt-1">Manage notes and materials for this subject.</p>
           </div>
 
-          {/* Header Create Button */}
-          {!roleLoading && isCR && subjectMeta?.classroomId && (
-            <Link href={`/dashboard/classroom/subject/${subjectId}/folder/add?classroomId=${subjectMeta.classroomId}`}>
-              <Button className="rounded-2xl font-bold h-12 px-6 bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all active:scale-95">
-                <Plus className="mr-2 h-5 w-5" /> Create Folder
-              </Button>
-            </Link>
+          {/* FIX: Replaced Link with Modal */}
+          {!roleLoading && isCR && (
+            <CreateFolderModal 
+              subjectId={subjectId} 
+              onSuccess={loadData} // Refreshes folders after creation
+            />
           )}
         </header>
 
@@ -219,13 +216,12 @@ const SubjectFolderPage = () => {
               {isCR ? "Start by creating a folder." : "Ask your CR to create folders for this subject."}
             </p>
             
-            {/* Added Create Button inside the Empty State for CRs */}
-            {isCR && subjectMeta?.classroomId && (
-              <Link href={`/dashboard/classroom/subject/${subjectId}/folder/add?classroomId=${subjectMeta.classroomId}`}>
-                <Button variant="outline" className="rounded-xl font-bold border-orange-500/50 text-orange-500 hover:bg-orange-500 hover:text-white transition-all">
-                  <Plus className="mr-2 h-4 w-4" /> Create First Folder
-                </Button>
-              </Link>
+            {/* FIX: Replaced Link with Modal in empty state */}
+            {isCR && (
+              <CreateFolderModal 
+                subjectId={subjectId} 
+                onSuccess={loadData} 
+              />
             )}
           </div>
         ) : (
