@@ -86,3 +86,10 @@ export interface INotesListResponse {
   data: INote[];
   meta: INotesMeta;
 }
+
+export interface INotesStats {
+  approved: number;
+  pending: number;
+  rejected: number;
+  totalFiles: number;
+}
