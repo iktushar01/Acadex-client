@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FolderIcon, MoreVertical, FileText, Pencil, Trash2, ArrowUpRight } from "lucide-react";
+import { FolderIcon, MoreVertical, Pencil, Trash2, ArrowUpRight, Files } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -10,6 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { UpdateFolderModal } from "./updateFolderaddModal";
 import { DeleteFolderModal } from "./deleteFolderModal";
@@ -26,14 +27,19 @@ export const FolderCard = ({ folder, subjectId, isCR }: FolderCardProps) => {
 
   return (
     <>
-      <Card className="group relative overflow-hidden rounded-[2rem] p-6 bg-card/40 hover:bg-card/60 transition-all duration-500 border-border hover:border-orange-500/50 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1">
-        {/* Advanced Decorative Glow */}
-        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-orange-500/5 blur-2xl group-hover:bg-orange-500/10 transition-colors" />
+      <Card className="group relative flex flex-col overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-card/80 to-card/30 backdrop-blur-md transition-all duration-500 border-border/50 hover:border-orange-500/40 hover:shadow-[0_20px_50px_rgba(249,115,22,_0.15)] hover:-translate-y-2 h-full min-h-[220px]">
         
-        <div className="relative z-20">
-          <div className="flex justify-between items-start mb-6">
-            <div className="h-14 w-14 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-600 group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-all duration-300 shadow-inner">
-              <FolderIcon className="h-7 w-7 fill-current" />
+        {/* Decorative Background Element */}
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-orange-500/10 blur-[50px] group-hover:bg-orange-500/20 transition-all duration-700" />
+
+        <div className="relative p-7 flex flex-col h-full z-10">
+          {/* Top Row: Icon & Menu */}
+          <div className="flex justify-between items-start mb-8">
+            <div className="relative">
+              <div className="absolute inset-0 bg-orange-500/20 blur-xl rounded-full scale-0 group-hover:scale-150 transition-transform duration-700" />
+              <div className="relative h-14 w-14 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/40 transition-all duration-500 group-hover:rotate-3">
+                <FolderIcon className="h-7 w-7 fill-white/20" />
+              </div>
             </div>
 
             {isCR && (
@@ -42,46 +48,75 @@ export const FolderCard = ({ folder, subjectId, isCR }: FolderCardProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full hover:bg-orange-500/10 z-30"
+                    className="h-10 w-10 rounded-xl bg-secondary/50 hover:bg-orange-500/10 hover:text-orange-600 transition-colors"
                     onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
+                      e.preventDefault();
+                      e.stopPropagation();
                     }}
                   >
-                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                    <MoreVertical className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-xl z-50 backdrop-blur-md">
-                  <DropdownMenuItem className="cursor-pointer gap-2" onSelect={() => setShowUpdateModal(true)}>
-                    <Pencil className="h-4 w-4" /> Edit Folder
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer gap-2 text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={() => setShowDeleteModal(true)}>
-                    <Trash2 className="h-4 w-4" /> Delete Folder
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
+                <DropdownMenuPortal>
+                  <DropdownMenuContent align="end" className="rounded-2xl min-w-[180px] p-2 shadow-2xl border-border/50 backdrop-blur-xl bg-background/95">
+                    <DropdownMenuItem
+                      className="rounded-lg cursor-pointer gap-3 py-3 font-medium focus:bg-orange-500/10 focus:text-orange-600 transition-colors"
+                      onSelect={() => setShowUpdateModal(true)}
+                    >
+                      <Pencil className="h-4 w-4" /> Edit Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="rounded-lg cursor-pointer gap-3 py-3 font-medium text-destructive focus:text-destructive focus:bg-destructive/10 transition-colors"
+                      onSelect={() => setShowDeleteModal(true)}
+                    >
+                      <Trash2 className="h-4 w-4" /> Remove Folder
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenuPortal>
               </DropdownMenu>
             )}
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-black text-xl leading-tight group-hover:text-orange-500 transition-colors line-clamp-1">
-                {folder.name}
-              </h3>
-              <ArrowUpRight className="h-4 w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-orange-500" />
-            </div>
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-              <div className="flex -space-x-1.5 overflow-hidden mr-1">
-                 {/* Decorative element: small dots to look "pro" */}
-                 <div className="h-2 w-2 rounded-full bg-orange-500/40" />
-                 <div className="h-2 w-2 rounded-full bg-orange-500/20" />
+          {/* Content Area */}
+          <Link
+            href={`/dashboard/classroom/folder/${folder.id}`}
+            className="flex-grow flex flex-col group/link"
+          >
+            <div className="space-y-4 mt-auto">
+              <div className="flex items-end justify-between">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-500/80 mb-1">Folder</p>
+                  <h3 className="font-bold text-2xl tracking-tight leading-none group-hover/link:text-orange-500 transition-colors duration-300">
+                    {folder.name}
+                  </h3>
+                </div>
+                <div className="h-10 w-10 rounded-full border border-border flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-500 bg-background/50">
+                  <ArrowUpRight className="h-5 w-5 text-orange-500" />
+                </div>
               </div>
-              <span>{folder._count?.notes || 0} Resources</span>
-            </div>
-          </div>
-        </div>
 
-        <Link href={`/dashboard/classroom/folder/${folder.id}`} className="absolute inset-0 z-10" />
+              {/* Progress/Stats bar */}
+              <div className="pt-4 border-t border-border/50">
+                <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground/70">
+                  <div className="flex items-center gap-2">
+                    <Files className="h-3.5 w-3.5 text-orange-500/60" />
+                    <span>{folder._count?.notes || 0} Resources</span>
+                  </div>
+                  <div className="flex gap-1">
+                     {[...Array(3)].map((_, i) => (
+                        <div 
+                          key={i} 
+                          className={`h-1 w-4 rounded-full transition-all duration-500 ${
+                            i === 0 ? "bg-orange-500 w-8" : "bg-orange-500/20 group-hover:bg-orange-500/40"
+                          }`} 
+                        />
+                     ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
       </Card>
 
       <UpdateFolderModal
