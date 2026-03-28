@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createFolderAction } from "@/actions/classroomSubjectFolder/_createFolderAction";
+import { createFolderAction } from "@/actions/classroomSubjectFolder/_crudFolderAction";
 
 const formSchema = z.object({
   name: z.string().min(1, "Folder name is required"),

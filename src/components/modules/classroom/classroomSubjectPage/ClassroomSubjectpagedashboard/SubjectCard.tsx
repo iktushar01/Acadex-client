@@ -138,7 +138,7 @@ export const SubjectCard = ({ subject, isCR, onDelete }: SubjectCardProps) => {
             <Button 
               className="w-full h-12 rounded-full font-black uppercase italic bg-primary text-primary-foreground hover:scale-[1.02] transition-all shadow-md hover:shadow-primary/20"
             >
-              Enter Classroom
+              Folder
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>

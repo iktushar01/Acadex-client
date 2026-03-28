@@ -7,18 +7,24 @@ export interface ICreateFolderPayload {
   coverImage?: string;
 }
 
-export interface IUpdateFolderInput {
+export interface IUpdateFolderPayload {
+  folderId: string;
   name?: string;
-  /** Direct Cloudinary URL (already uploaded) */
-  coverImage?: string;
+  /** URL to set; `null` removes the cover (matches server PATCH body) */
+  coverImage?: string | null;
+  coverImageBase64?: string;
+}
+
+export interface IDeleteFolderPayload {
+  folderId: string;
 }
 
 
 export interface IFolderResponse {
   id: string;
   name: string;
-  description?: string;
   subjectId: string;
+  description?: string;
   subject?: Subject;
   creatorId: string;
   createdAt: string;
