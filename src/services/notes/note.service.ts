@@ -28,6 +28,16 @@ export const getNotesService = async (
   return httpClient.get<INotesListResponse>("/notes", { params: query });
 };
 
+/**
+ * GET /notes/:id
+ * Returns a single note for the detail page.
+ */
+export const getNoteByIdService = async (
+  noteId: string
+): Promise<ApiResponse<INote>> => {
+  return httpClient.get<INote>(`/notes/${noteId}`);
+};
+
 // ─── Create Note ──────────────────────────────────────────────────────────────
 
 /**
