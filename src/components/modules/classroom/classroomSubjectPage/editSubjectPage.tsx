@@ -1,15 +1,16 @@
 "use client";
 
 import { getSubjectById } from "@/services/classroomSubject/crudSubject.service";
+import { EditSubjectPageSkeleton } from "@/components/modules/classroom/classroomSubjectPage/EditSubjectPageSkeleton";
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-    Loader2,
     ArrowLeft,
     BookOpen,
     Check,
     Image as ImageIcon,
+    Loader2,
     Save
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -82,7 +83,7 @@ const EditSubjectPage = () => {
             } else {
                 toast.error(result.error || "Update failed");
             }
-        } catch (error) {
+        } catch {
             toast.error("Something went wrong");
         } finally {
             setUpdating(false);
@@ -90,14 +91,7 @@ const EditSubjectPage = () => {
     };
 
     if (fetching) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                <Loader2 className="h-10 w-10 text-orange-500 animate-spin" />
-                <p className="mt-4 font-black uppercase tracking-widest text-[10px] text-muted-foreground animate-pulse">
-                    Syncing Details...
-                </p>
-            </div>
-        );
+        return <EditSubjectPageSkeleton />;
     }
 
     return (

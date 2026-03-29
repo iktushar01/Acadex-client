@@ -26,7 +26,7 @@ export const adminSidebar: SidebarData = {
     {
       title: "System",
       items: [
-        { label: "Settings", icon: "Settings", href: "/dashboard/admin/settings" },
+        { label: "Settings", icon: "Settings", href: "/admin/dashboard/settings" },
       ],
     },
   ],
