@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { ClassroomLeaderboard } from "@/types/classroom.types";
+import type { ClassroomLeaderboard, ClassroomLeaderboardEntry } from "@/types/classroom.types";
 
 const anim = {
   container: { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } },
@@ -182,7 +182,15 @@ const ClassroomLeaderboardDetailsPage = ({ classroomId }: { classroomId: string 
 
 // --- Sub-Components ---
 
-const PodiumCard = ({ member, rank, color, border, active }: any) => {
+type PodiumCardProps = {
+  member?: ClassroomLeaderboardEntry;
+  rank: number;
+  color: string;
+  border: string;
+  active?: boolean;
+};
+
+const PodiumCard = ({ member, rank, color, border, active }: PodiumCardProps) => {
   if (!member) return null;
   return (
     <motion.div 
@@ -225,7 +233,15 @@ const PodiumCard = ({ member, rank, color, border, active }: any) => {
   );
 };
 
-const StatPill = ({ icon: Icon, label, val }: any) => (
+const StatPill = ({
+  icon: Icon,
+  label,
+  val,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  val: number;
+}) => (
   <div className="p-5 rounded-[1.8rem] bg-background/50 border border-border/50 group hover:border-primary/30 transition-colors">
     <div className="flex items-center gap-2 mb-2 text-muted-foreground group-hover:text-primary transition-colors">
       <Icon className="size-3" />

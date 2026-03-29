@@ -3,20 +3,21 @@ export interface Classroom {
   name: string;
   institutionName: string;
   level: string;
-  className?: string;
-  department?: string;
-  groupName?: string;
-  description?: string;
+  className?: string | null;
+  department?: string | null;
+  groupName?: string | null;
+  description?: string | null;
   joinCode: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
   rejectionReason?: string | null;
   createdAt: string;
-  creator?: { id: string; name: string; email: string; image?: string };
+  creator: { id: string; name: string; email: string; image?: string | null };
+  _count?: { memberships: number };
 }
 
 export interface Membership {
-  id: string;
-  memberRole: "STUDENT" | "CR"
+  memberRole: "STUDENT" | "CR";
+  joinedAt?: string;
   classroom: Classroom;
 }
 

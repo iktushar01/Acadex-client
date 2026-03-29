@@ -94,7 +94,7 @@ const ClassroomLeaderboardPage = () => {
               transition={{ delay: 0.2 }}
               className="max-w-xl font-medium leading-relaxed text-muted-foreground"
             >
-              Access detailed podium rankings and contribution stats for every classroom you're
+              Access detailed podium rankings and contribution stats for every classroom you are
               part of.
             </motion.p>
           </div>

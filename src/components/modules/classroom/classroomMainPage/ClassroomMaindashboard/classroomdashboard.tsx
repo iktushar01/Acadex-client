@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import type { Membership } from "@/types/classroom.types";
 
 // Components
 import { ClassroomCard } from "@/components/modules/classroom/classroomMainPage/ClassroomMaindashboard/ClassroomCard";
@@ -14,7 +15,7 @@ import { ClassroomSkeleton } from "@/components/modules/classroom/classroomMainP
 import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
 
 export default function ClassroomDashboard() {
-  const [memberships, setMemberships] = useState<any[]>([]);
+  const [memberships, setMemberships] = useState<Membership[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,7 +30,7 @@ export default function ClassroomDashboard() {
         } else {
           setError(result.error as string || "Failed to load classrooms.");
         }
-      } catch (err) {
+      } catch {
         setError("A network error occurred. Please try again.");
       } finally {
         setLoading(false);
@@ -79,7 +80,15 @@ export default function ClassroomDashboard() {
           /* DATA GRID */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredMemberships.map((item) => (
-              <ClassroomCard key={item.classroom.id} membership={item} />
+              <ClassroomCard
+                key={item.classroom.id}
+                membership={item}
+                onLeftClassroom={(classroomId) =>
+                  setMemberships((current) =>
+                    current.filter((membership) => membership.classroom.id !== classroomId)
+                  )
+                }
+              />
             ))}
           </div>
         ) : (

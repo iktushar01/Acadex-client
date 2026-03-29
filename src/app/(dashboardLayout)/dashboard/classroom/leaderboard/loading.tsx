@@ -19,7 +19,7 @@ const LeaderboardLoadingPage = () => {
             </h1>
 
             <p className="max-w-xl font-medium leading-relaxed text-muted-foreground">
-              Access detailed podium rankings and contribution stats for every classroom you're part of.
+              Access detailed podium rankings and contribution stats for every classroom you are part of.
             </p>
           </div>
 

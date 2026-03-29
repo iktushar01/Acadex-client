@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { 
-  GraduationCap, MoreVertical, BookOpen, Building2, 
-  ArrowRight, Zap, Layers, FlaskConical, Copy, ExternalLink 
+  GraduationCap, MoreVertical, Building2, 
+  ArrowRight, Zap, Layers, FlaskConical, Copy, LogOut, Loader2
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,11 +15,32 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
   DropdownMenuTrigger, DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { leaveClassroomAction } from "@/actions/classroomActions/_leaveClassroomAction";
+import type { Membership } from "@/types/classroom.types";
 
-const THEMES: Record<string, any> = {
+type ClassroomTheme = {
+  bg: string;
+  text: string;
+  light: string;
+  border: string;
+  shadow: string;
+  glow: string;
+};
+
+const THEMES: Record<string, ClassroomTheme> = {
   orange: { bg: "bg-orange-500", text: "text-orange-500", light: "bg-orange-500/10", border: "border-orange-500/20", shadow: "shadow-orange-500/20", glow: "group-hover:shadow-orange-500/10" },
   blue: { bg: "bg-blue-600", text: "text-blue-600", light: "bg-blue-600/10", border: "border-blue-600/20", shadow: "shadow-blue-600/20", glow: "group-hover:shadow-blue-600/10" },
   purple: { bg: "bg-purple-600", text: "text-purple-600", light: "bg-purple-600/10", border: "border-purple-600/20", shadow: "shadow-purple-600/20", glow: "group-hover:shadow-purple-600/10" },
@@ -30,9 +53,15 @@ const getTheme = (id: string) => {
   return THEMES[keys[index % keys.length]];
 };
 
-export const ClassroomCard = ({ membership }: { membership: any }) => {
+type ClassroomCardProps = {
+  membership: Membership;
+  onLeftClassroom?: (classroomId: string) => void;
+};
+
+export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProps) => {
   const cls = membership.classroom;
   const theme = getTheme(cls.id);
+  const [leaveModalOpen, setLeaveModalOpen] = useState(false);
 
   const copyJoinCode = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,18 +72,38 @@ export const ClassroomCard = ({ membership }: { membership: any }) => {
     });
   };
 
+  const { mutate: handleLeaveClassroom, isPending: isLeaving } = useMutation({
+    mutationFn: leaveClassroomAction,
+    onSuccess: (result) => {
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
+
+      toast.success("Classroom left", {
+        description: `You have left ${cls.name}.`,
+      });
+      setLeaveModalOpen(false);
+      onLeftClassroom?.(cls.id);
+    },
+    onError: () => {
+      toast.error("Failed to leave classroom. Please try again.");
+    },
+  });
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-    >
-      <Card className={cn(
-        "group relative overflow-hidden border-border/40 bg-card/60 backdrop-blur-xl transition-all duration-500",
-        "hover:border-border/80 hover:ring-1 hover:ring-border/50",
-        theme.glow
-      )}>
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -8 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        <Card className={cn(
+          "group relative overflow-hidden border-border/40 bg-card/60 backdrop-blur-xl transition-all duration-500",
+          "hover:border-border/80 hover:ring-1 hover:ring-border/50",
+          theme.glow
+        )}>
         {/* Dynamic Gradient Background Glow */}
         <div className={cn(
           "absolute -right-20 -top-20 h-64 w-64 rounded-full blur-[80px] opacity-0 transition-opacity duration-700 group-hover:opacity-20",
@@ -91,7 +140,15 @@ export const ClassroomCard = ({ membership }: { membership: any }) => {
                     <Copy className="h-4 w-4" /> Copy Join Code
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="opacity-50" />
-                  <DropdownMenuItem className="gap-2 cursor-pointer py-2.5 rounded-lg text-destructive focus:bg-destructive/10 focus:text-destructive">
+                  <DropdownMenuItem
+                    disabled={membership.memberRole === "CR"}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setLeaveModalOpen(true);
+                    }}
+                    className="gap-2 cursor-pointer py-2.5 rounded-lg text-destructive focus:bg-destructive/10 focus:text-destructive disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <LogOut className="h-4 w-4" />
                     Leave Class
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -169,7 +226,37 @@ export const ClassroomCard = ({ membership }: { membership: any }) => {
           "absolute -bottom-10 -right-10 h-40 w-40 rotate-12 transition-all duration-1000 opacity-[0.02] group-hover:opacity-[0.06] group-hover:rotate-[30deg] group-hover:scale-110",
           theme.text
         )} />
-      </Card>
-    </motion.div>
+        </Card>
+      </motion.div>
+
+      <AlertDialog open={leaveModalOpen} onOpenChange={setLeaveModalOpen}>
+        <AlertDialogContent className="rounded-[2rem]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-black">
+              Leave this classroom?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="font-medium text-muted-foreground">
+              You will lose access to <span className="font-bold text-foreground">{cls.name}</span> until you join again with the classroom code.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel
+              disabled={isLeaving}
+              className="rounded-xl font-bold"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isLeaving}
+              onClick={() => handleLeaveClassroom(cls.id)}
+              variant="destructive"
+              className="rounded-xl font-bold"
+            >
+              {isLeaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Leave Classroom"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
