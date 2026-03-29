@@ -11,23 +11,23 @@ export const adminSidebar: SidebarData = {
     {
       title: "Overview",
       items: [
-        { label: "Dashboard",      icon: "LayoutDashboard", href: "/dashboard" },
+        { label: "Dashboard",      icon: "LayoutDashboard", href: "/admin/dashboard" },
         { label: "Classrooms Management",      icon: "BarChart3",       href: "/admin/classrooms-management" },
         { label: "Admin Management",  icon: "Bell",            href: "/admin/admin-management"},
       ],
     },
-    {
-      title: "Management",
-      items: [
-        { label: "Users",               icon: "Users",       href: "/dashboard/admin/users" },
-        { label: "Roles & Permissions", icon: "ShieldCheck", href: "/dashboard/admin/roles" },
-      ],
-    },
-    {
-      title: "System",
-      items: [
-        { label: "Settings", icon: "Settings", href: "/dashboard/admin/settings" },
-      ],
-    },
+    // {
+    //   title: "Management",
+    //   items: [
+    //     { label: "Users",               icon: "Users",       href: "/dashboard/admin/users" },
+    //     { label: "Roles & Permissions", icon: "ShieldCheck", href: "/dashboard/admin/roles" },
+    //   ],
+    // },
+    // {
+    //   title: "System",
+    //   items: [
+    //     { label: "Settings", icon: "Settings", href: "/dashboard/admin/settings" },
+    //   ],
+    // },
   ],
 };

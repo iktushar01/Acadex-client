@@ -83,6 +83,13 @@
   --sidebar-border: oklch(0.92 0.02 85);
   
   --radius: 0.75rem;
+
+  --admin-accent: oklch(0.74 0.16 63);
+  --admin-accent-strong: oklch(0.68 0.19 48);
+  --admin-accent-soft: oklch(0.97 0.03 70);
+  --admin-emerald-soft: oklch(0.96 0.05 160);
+  --admin-sky-soft: oklch(0.96 0.04 235);
+  --admin-slate-soft: oklch(0.95 0.01 255);
 }
 
 .dark {
@@ -115,6 +122,13 @@
   --sidebar-primary: oklch(0.85 0.17 85);
   --sidebar-accent: oklch(1 1 1 / 0.05);
   --sidebar-border: oklch(0.25 0.02 85);
+
+  --admin-accent: oklch(0.78 0.15 63);
+  --admin-accent-strong: oklch(0.72 0.18 48);
+  --admin-accent-soft: oklch(0.27 0.03 70);
+  --admin-emerald-soft: oklch(0.28 0.04 160);
+  --admin-sky-soft: oklch(0.27 0.03 235);
+  --admin-slate-soft: oklch(0.25 0.01 255);
 }
 
 @layer base {
@@ -123,5 +137,39 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .admin-shell {
+    background:
+      radial-gradient(circle at top right, color-mix(in oklab, var(--admin-accent) 18%, transparent), transparent 38%),
+      radial-gradient(circle at bottom left, color-mix(in oklab, var(--admin-accent-strong) 12%, transparent), transparent 32%),
+      var(--background);
+  }
+
+  .admin-panel {
+    @apply rounded-[1.75rem] border border-border/70 bg-card/95 shadow-sm backdrop-blur-sm;
+  }
+
+  .admin-section-label {
+    color: var(--admin-accent-strong);
+    @apply text-xs font-black uppercase tracking-[0.25em];
+  }
+
+  .admin-stat-warm {
+    background-color: var(--admin-accent-soft);
+  }
+
+  .admin-stat-emerald {
+    background-color: var(--admin-emerald-soft);
+  }
+
+  .admin-stat-sky {
+    background-color: var(--admin-sky-soft);
+  }
+
+  .admin-stat-slate {
+    background-color: var(--admin-slate-soft);
   }
 }
