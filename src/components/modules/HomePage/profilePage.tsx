@@ -1,35 +1,91 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { getCurrentUserAction } from "@/actions/_getCurrentUserAction";
+import { useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getCurrentUserAction, type UserProfile } from "@/actions/_getCurrentUserAction";
+import { updateProfileAction } from "@/actions/authActions/_updateProfileAction";
 import {
-  Phone, MapPin, Calendar, User, Lock,
-  MailCheck, Pencil, Camera, Loader2,
-  CheckCircle2, ShieldCheck, Zap, Copy,
-  Globe, BadgeCheck, Mail, ChevronRight
+  BadgeCheck,
+  Globe,
+  Loader2,
+  MailCheck,
+  Pencil,
+  Phone,
+  MapPin,
+  User,
+  ShieldCheck,
+  Save,
+  Calendar,
+  Mail,
+  Camera,
+  X,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type ProfileFormState = {
+  name: string;
+  contactNumber: string;
+  address: string;
+  gender: "MALE" | "FEMALE" | "OTHER" | "";
+};
+
+const mapUserToForm = (user: UserProfile): ProfileFormState => ({
+  name: user.name ?? "",
+  contactNumber: user.student?.contactNumber ?? user.admin?.contactNumber ?? "",
+  address: user.student?.address ?? "",
+  gender: (user.student?.gender as ProfileFormState["gender"]) ?? "",
+});
 
 const ProfilePage = () => {
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["currentUser"],
     queryFn: async () => await getCurrentUserAction(),
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[80vh] flex-col items-center justify-center gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-[10px] font-black tracking-[0.3em] text-muted-foreground uppercase animate-pulse">
-          Decrypting Profile...
-        </p>
-      </div>
-    );
-  }
-
   const user = data?.data;
+  const [draft, setDraft] = useState<ProfileFormState | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const updateMutation = useMutation({
+    mutationFn: updateProfileAction,
+    onSuccess: async (result) => {
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
+
+      toast.success(result.message);
+      setDraft(null);
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+      setSelectedImage(null);
+      setImagePreview(null);
+      await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    },
+    onError: () => {
+      toast.error("Failed to update profile");
+    },
+  });
+
+  if (isLoading) {
+    return <ProfilePageSkeleton />;
+  }
 
   if (isError || !user) {
     return (
@@ -40,9 +96,9 @@ const ProfilePage = () => {
           <p className="text-sm text-muted-foreground font-medium">
             {error?.message || "Internal system sync failure."}
           </p>
-          <Button 
-            variant="outline" 
-            onClick={() => window.location.reload()} 
+          <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
             className="rounded-2xl border-destructive/20 hover:bg-destructive/10 font-bold"
           >
             Re-authenticate
@@ -52,51 +108,126 @@ const ProfilePage = () => {
     );
   }
 
-  const student = user.student;
+  const isStudent = user.role === "STUDENT";
+  const isSaving = updateMutation.isPending;
+  const form = draft ?? mapUserToForm(user);
+  const previewImage =
+    imagePreview ||
+    user.student?.profilePhoto ||
+    user.admin?.profilePhoto ||
+    user.image ||
+    undefined;
+
+  const handleImageChange = (file: File | null) => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    if (!file) {
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    const nextPreview = URL.createObjectURL(file);
+    setSelectedImage(file);
+    setImagePreview(nextPreview);
+  };
+
+  const handleFieldChange = <K extends keyof ProfileFormState>(key: K, value: ProfileFormState[K]) => {
+    setDraft((current) => ({ ...(current ?? form), [key]: value }));
+  };
+
+  const handleSave = async () => {
+    const payload = new FormData();
+    payload.append("name", form.name.trim());
+    payload.append("contactNumber", form.contactNumber.trim());
+    if (isStudent) {
+      payload.append("address", form.address.trim());
+      payload.append("gender", form.gender);
+    }
+    if (selectedImage) {
+      payload.append("image", selectedImage);
+    }
+
+    await updateMutation.mutateAsync(payload);
+  };
+
+  const joinedDate = new Date(user.createdAt).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8 lg:p-12 animate-in fade-in duration-1000">
+    <div className="min-h-screen bg-background p-4 md:p-8 lg:p-12 animate-in fade-in duration-500">
       <div className="mx-auto max-w-6xl space-y-8">
-        
-        {/* --- HEADER BLOCK (BENTO STYLE) --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Identity Card */}
-          <div className="lg:col-span-2 relative overflow-hidden rounded-[3rem] border border-border bg-card p-8 md:p-10 shadow-premium group">
-            <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
-              <Zap className="size-64" />
-            </div>
-            
-            <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 rounded-[3rem] border border-border bg-card p-8 shadow-premium">
+            <div className="flex flex-col gap-8 md:flex-row md:items-center">
               <div className="relative">
-                <Avatar className="h-40 w-40 border-[8px] border-background shadow-2xl transition-transform duration-500 hover:scale-105">
-                  <AvatarImage src={user.image} className="object-cover" />
-                  <AvatarFallback className="bg-primary text-primary-foreground text-5xl font-black">
-                    {user.name?.[0].toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <button className="absolute bottom-2 right-2 p-3 bg-primary text-primary-foreground rounded-2xl shadow-xl hover:scale-110 transition-all border-4 border-background">
-                  <Camera className="size-5" />
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="relative h-40 w-40 cursor-pointer overflow-hidden rounded-full border-[8px] border-background shadow-2xl group"
+                >
+                  {previewImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={previewImage} alt={user.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <Avatar className="h-full w-full">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-5xl font-black">
+                        {user.name?.[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                    <Camera className="size-8 text-white" />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute bottom-2 right-2 rounded-2xl border-4 border-background bg-primary p-3 text-primary-foreground shadow-xl"
+                >
+                  <Pencil className="size-5" />
                 </button>
+                {selectedImage && (
+                  <button
+                    type="button"
+                    onClick={() => handleImageChange(null)}
+                    className="absolute -right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-destructive text-white shadow-lg"
+                  >
+                    <X className="size-4" />
+                  </button>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
+                />
               </div>
 
-              <div className="text-center md:text-left space-y-4">
-                <div className="space-y-1">
-                  <div className="flex items-center justify-center md:justify-start gap-3">
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tighter">{user.name}</h1>
+              <div className="flex-1 space-y-4">
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h1 className="text-4xl font-black tracking-tighter md:text-5xl">{user.name}</h1>
                     {user.emailVerified && <BadgeCheck className="size-8 text-primary fill-primary/10" />}
                   </div>
-                  <p className="text-muted-foreground font-bold flex items-center justify-center md:justify-start gap-2">
-                    {user.email} <Copy className="size-3 cursor-pointer hover:text-primary transition-colors" />
+                  <p className="flex items-center gap-2 font-bold text-muted-foreground">
+                    <Mail className="size-4" />
+                    {user.email}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                  <Badge className="bg-primary text-primary-foreground px-4 py-1.5 rounded-xl font-black tracking-widest text-[10px] uppercase">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Badge className="rounded-xl bg-primary px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary-foreground">
                     {user.role}
                   </Badge>
-                  <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary px-4 py-1.5 rounded-xl font-black tracking-widest text-[10px] uppercase">
-                    <span className="mr-2 h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                  <Badge variant="outline" className="rounded-xl border-primary/20 bg-primary/5 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary">
                     {user.status}
                   </Badge>
                 </div>
@@ -104,114 +235,259 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Quick Stats Bento */}
-          <div className="rounded-[3rem] bg-primary p-8 text-primary-foreground flex flex-col justify-between shadow-glow group">
-            <div className="flex justify-between items-start">
-              <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl">
+          <div className="flex flex-col justify-between rounded-[3rem] bg-primary p-8 text-primary-foreground shadow-glow">
+            <div className="flex items-start justify-between">
+              <div className="rounded-2xl bg-white/20 p-3 backdrop-blur-md">
                 <ShieldCheck className="size-6" />
               </div>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 rounded-full">
-                <Pencil className="size-4" />
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+                variant="ghost"
+                className="rounded-2xl bg-white/10 text-white hover:bg-white/20"
+              >
+                {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                Save
               </Button>
             </div>
-            
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70 mb-1">Account Standing</p>
-              <h3 className="text-3xl font-black italic tracking-tighter">Verified Member</h3>
-              <p className="text-sm font-medium opacity-80 mt-2 leading-tight">
-                Your profile is synchronized with the Acadex Core Registry.
+
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70">Profile Control</p>
+              <h3 className="text-3xl font-black tracking-tighter">Keep Your Details Fresh</h3>
+              <p className="text-sm font-medium leading-tight opacity-80">
+                Update the fields below and save to sync your profile across Acadex.
               </p>
             </div>
           </div>
         </div>
 
-        {/* --- MAIN GRID --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* CORE DATA */}
-          <section className="lg:col-span-1 space-y-6">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary px-4">Core Dossier</h3>
-            <div className="rounded-[2.5rem] border border-border bg-card p-4 space-y-2 shadow-sm">
-              <InfoRow icon={<Phone />} label="Registry Contact" value={student?.contactNumber} />
-              <InfoRow icon={<MapPin />} label="Base Location" value={student?.address} />
-              <InfoRow icon={<User />} label="Gender Identity" value={student?.gender} />
-              <InfoRow 
-                icon={<Calendar />} 
-                label="Enrolled Since" 
-                value={new Date(user.createdAt).toLocaleDateString("en-US", { month: 'long', year: 'numeric' })} 
-              />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <section className="space-y-6 lg:col-span-2">
+            <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-primary">Editable Profile</h3>
+            <div className="grid grid-cols-1 gap-4 rounded-[2.5rem] border border-border bg-card p-6 shadow-sm md:grid-cols-2">
+              <ProfileField label="Full Name" icon={<User className="size-4" />}>
+                <Input
+                  value={form.name}
+                  onChange={(e) => handleFieldChange("name", e.target.value)}
+                  className="h-11 rounded-2xl"
+                  placeholder="Your full name"
+                />
+              </ProfileField>
+
+              <ProfileField label="Contact Number" icon={<Phone className="size-4" />}>
+                <Input
+                  value={form.contactNumber}
+                  onChange={(e) => handleFieldChange("contactNumber", e.target.value)}
+                  className="h-11 rounded-2xl"
+                  placeholder="+8801..."
+                />
+              </ProfileField>
+
+              <ProfileField label="Profile Photo" icon={<Camera className="size-4" />}>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex h-11 w-full items-center justify-between rounded-2xl border border-input bg-transparent px-4 text-sm transition-colors hover:border-primary/50 hover:bg-muted/40"
+                >
+                  <span className="truncate text-left">
+                    {selectedImage ? selectedImage.name : "Choose a new profile image"}
+                  </span>
+                  <span className="font-bold text-primary">Browse</span>
+                </button>
+              </ProfileField>
+
+              {isStudent && (
+                <ProfileField label="Gender" icon={<User className="size-4" />}>
+                  <Select
+                    value={form.gender || "__empty__"}
+                    onValueChange={(value) =>
+                      handleFieldChange("gender", value === "__empty__" ? "" : (value as ProfileFormState["gender"]))
+                    }
+                  >
+                    <SelectTrigger className="h-11 w-full rounded-2xl">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__empty__">Not set</SelectItem>
+                      <SelectItem value="MALE">Male</SelectItem>
+                      <SelectItem value="FEMALE">Female</SelectItem>
+                      <SelectItem value="OTHER">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </ProfileField>
+              )}
+
+              {isStudent && (
+                <div className="md:col-span-2">
+                  <ProfileField label="Address" icon={<MapPin className="size-4" />}>
+                    <Textarea
+                      value={form.address}
+                      onChange={(e) => handleFieldChange("address", e.target.value)}
+                      className="min-h-28 rounded-[1.5rem] px-4 py-3"
+                      placeholder="Add your address"
+                    />
+                  </ProfileField>
+                </div>
+              )}
+
+              <div className="md:col-span-2 flex justify-end">
+                <Button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="h-12 rounded-2xl bg-orange-500 px-6 font-black text-white hover:bg-orange-600"
+                >
+                  {isSaving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}
+                  Save Changes
+                </Button>
+              </div>
             </div>
           </section>
 
-          {/* SYSTEM STATUS */}
-          <section className="lg:col-span-2 space-y-6">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary px-4">System Integration</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
-              <div className="p-6 rounded-[2.5rem] border border-border bg-card/50 backdrop-blur-sm space-y-4 group hover:border-primary/30 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-green-500/10 text-green-600">
-                    <MailCheck className="size-6" />
+          <section className="space-y-6">
+            <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-primary">System Integration</h3>
+
+            <div className="space-y-4">
+              <StatusCard
+                icon={<MailCheck className="size-6" />}
+                title="Email Status"
+                value={user.emailVerified ? "Primary Verified" : "Verification Pending"}
+                tone="success"
+              />
+
+              <StatusCard
+                icon={<Globe className="size-6" />}
+                title="Joined"
+                value={joinedDate}
+                tone="default"
+              />
+
+              <div className="rounded-[2.5rem] border border-border bg-muted/20 p-6">
+                <div className="flex items-start gap-4">
+                  <div className="rounded-2xl bg-card p-3 shadow-sm">
+                    <Calendar className="size-6 text-primary" />
                   </div>
-                  <div>
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Email Status</p>
-                    <p className="font-bold">Primary Verified</p>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Account Email</p>
+                    <p className="font-bold">{user.email}</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Email editing is intentionally locked because it is tied to your authentication identity.
+                    </p>
                   </div>
                 </div>
               </div>
-
-              <div className="p-6 rounded-[2.5rem] border border-border bg-card/50 backdrop-blur-sm space-y-4 opacity-60 group hover:opacity-100 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-muted text-muted-foreground">
-                    <Lock className="size-6" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">2FA Layer</p>
-                    <p className="font-bold">Not Enabled</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Advanced "Action" Card */}
-              <div className="sm:col-span-2 p-8 rounded-[2.5rem] border border-border bg-muted/20 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-6">
-                  <div className="h-16 w-16 rounded-3xl bg-card border border-border flex items-center justify-center shadow-sm">
-                    <Globe className="size-8 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-black text-xl tracking-tight">Security Audit</h4>
-                    <p className="text-sm text-muted-foreground font-medium">Review your last login IP and device fingerprints.</p>
-                  </div>
-                </div>
-                <Button className="rounded-2xl font-black bg-card text-foreground border border-border hover:bg-primary hover:text-primary-foreground h-12 px-6 transition-all group">
-                  Access Logs <ChevronRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </div>
-
             </div>
           </section>
         </div>
-
       </div>
     </div>
   );
 };
 
-// Reusable Small Component
-const InfoRow = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: string | null | undefined }) => (
-  <div className="flex items-center gap-4 p-4 rounded-2xl hover:bg-muted/50 transition-colors group">
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-      {cloneElement(icon as React.ReactElement)}
+const ProfileField = ({
+  label,
+  icon,
+  children,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <div className="space-y-2">
+    <div className="flex items-center gap-2 px-1">
+      <span className="rounded-xl bg-primary/10 p-2 text-primary">{icon}</span>
+      <span className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground">{label}</span>
     </div>
-    <div>
-      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 leading-none mb-1">{label}</p>
-      <p className={`text-sm font-bold tracking-tight ${!value ? "text-muted-foreground/40 italic" : "text-foreground"}`}>
-        {value || "Pending Update"}
-      </p>
+    {children}
+  </div>
+);
+
+const StatusCard = ({
+  icon,
+  title,
+  value,
+  tone,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  tone: "success" | "default";
+}) => (
+  <div className="rounded-[2.5rem] border border-border bg-card/50 p-6 backdrop-blur-sm">
+    <div className="flex items-center gap-4">
+      <div
+        className={
+          tone === "success"
+            ? "rounded-2xl bg-green-500/10 p-3 text-green-600"
+            : "rounded-2xl bg-primary/10 p-3 text-primary"
+        }
+      >
+        {icon}
+      </div>
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{title}</p>
+        <p className="font-bold">{value}</p>
+      </div>
     </div>
   </div>
 );
 
-import { cloneElement } from "react";
+const ProfilePageSkeleton = () => (
+  <div className="min-h-screen bg-background p-4 md:p-8 lg:p-12 animate-pulse">
+    <div className="mx-auto max-w-6xl space-y-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 rounded-[3rem] border border-border bg-card p-8 shadow-premium">
+          <div className="flex flex-col gap-8 md:flex-row md:items-center">
+            <div className="h-40 w-40 rounded-full bg-muted" />
+            <div className="flex-1 space-y-4">
+              <div className="h-12 w-64 rounded-2xl bg-muted" />
+              <div className="h-5 w-72 rounded-xl bg-muted" />
+              <div className="flex gap-3">
+                <div className="h-8 w-24 rounded-xl bg-muted" />
+                <div className="h-8 w-24 rounded-xl bg-muted" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-[3rem] bg-card p-8 shadow-premium">
+          <div className="flex items-start justify-between">
+            <div className="h-12 w-12 rounded-2xl bg-muted" />
+            <div className="h-10 w-24 rounded-2xl bg-muted" />
+          </div>
+          <div className="mt-20 space-y-3">
+            <div className="h-3 w-24 rounded bg-muted" />
+            <div className="h-10 w-56 rounded-2xl bg-muted" />
+            <div className="h-5 w-full rounded-xl bg-muted" />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <div className="h-3 w-32 rounded bg-muted" />
+          <div className="grid grid-cols-1 gap-4 rounded-[2.5rem] border border-border bg-card p-6 shadow-sm md:grid-cols-2">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className={index === 4 ? "md:col-span-2 space-y-2" : "space-y-2"}>
+                <div className="h-3 w-24 rounded bg-muted" />
+                <div className="h-11 w-full rounded-2xl bg-muted" />
+              </div>
+            ))}
+            <div className="md:col-span-2 flex justify-end">
+              <div className="h-12 w-40 rounded-2xl bg-muted" />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="h-3 w-36 rounded bg-muted" />
+          <div className="space-y-4">
+            <div className="h-28 rounded-[2.5rem] bg-card" />
+            <div className="h-28 rounded-[2.5rem] bg-card" />
+            <div className="h-40 rounded-[2.5rem] bg-card" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export default ProfilePage;

@@ -1,5 +1,6 @@
 "use server";
 
+import { httpClient } from "@/lib/axios/httpClient";
 import { setTokenInCookies } from "@/lib/tokenUtils";
 import { cookies } from "next/headers";
 
@@ -76,4 +77,8 @@ export async function getUserInfo() {
         console.error("Error fetching user info:", error);
         return null;
     }
+}
+
+export async function updateProfile(payload: FormData) {
+    return httpClient.patch("/auth/me", payload);
 }

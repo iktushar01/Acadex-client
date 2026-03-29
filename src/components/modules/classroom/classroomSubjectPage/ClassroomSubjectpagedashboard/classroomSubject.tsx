@@ -12,6 +12,7 @@ import Link from "next/link";
 import { fetchSubjectsAction } from "@/actions/classroomSubject/_fetchSubjectsAction";
 import { deleteSubjectAction } from "@/actions/classroomSubject/_DeleteSubjectAction";
 import { useClassroomRole } from "@/hooks/useClassroomRole";
+import type { Subject } from "@/types/classroomSubject.types";
 
 // Components
 import { SubjectHeader } from "./SubjectHeader";
@@ -23,7 +24,7 @@ export default function ClassroomSubjectPage() {
   const classroomId = id as string;
 
   const { isCR, roleLoading } = useClassroomRole(classroomId);
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,7 +36,7 @@ export default function ClassroomSubjectPage() {
       const result = await fetchSubjectsAction(classroomId);
       if (result.success) setSubjects(result.data || []);
       else setError(result.error as string);
-    } catch (err) {
+    } catch {
       setError("Failed to fetch subjects.");
     } finally {
       setLoading(false);
@@ -43,6 +44,21 @@ export default function ClassroomSubjectPage() {
   }, [classroomId]);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  const handleDeleteSubject = useCallback(
+    async (subjectId: string) => {
+      const result = await deleteSubjectAction(subjectId, classroomId);
+
+      if (!result.success) {
+        toast.error(result.error || "Failed to delete subject.");
+        return;
+      }
+
+      toast.success(result.message || "Subject deleted successfully.");
+      await loadData();
+    },
+    [classroomId, loadData]
+  );
 
   const filteredSubjects = subjects.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -96,7 +112,7 @@ export default function ClassroomSubjectPage() {
                 key={subject.id} 
                 subject={subject} 
                 isCR={isCR} 
-                onDelete={loadData} // Or your delete handler
+                onDelete={handleDeleteSubject}
               />
             ))}
           </div>

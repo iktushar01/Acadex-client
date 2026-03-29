@@ -2,7 +2,6 @@
 
 import { deleteSubject } from "@/services/classroomSubject/crudSubject.service";
 import { revalidatePath } from "next/cache";
-import { getCookie } from "@/lib/cookieUtils";
 
 export const deleteSubjectAction = async (subjectId: string, classroomId: string) => {
   if (!subjectId || !classroomId) {
@@ -10,17 +9,8 @@ export const deleteSubjectAction = async (subjectId: string, classroomId: string
   }
 
   try {
-    const user = await getCookie("user");
-    
-    // Ensure we have a valid user ID from your cookie helper
-    if (!user || !user) {
-      return { success: false, error: "You must be logged in to perform this action." };
-    }
-
-    // Call the service directly (Prisma logic)
     const response = await deleteSubject(subjectId);
 
-    // Revalidate the specific classroom paths
     revalidatePath(`/dashboard/classroom/${classroomId}/subjects`);
     revalidatePath(`/dashboard/classroom/${classroomId}`, "layout");
     
@@ -30,11 +20,22 @@ export const deleteSubjectAction = async (subjectId: string, classroomId: string
       data: response 
     };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[DELETE_SUBJECT_ACTION]:`, error);
+
+    const maybeAxiosError = error as {
+      response?: { data?: { message?: string; error?: string } };
+      message?: string;
+    };
+
+    const backendMessage =
+      maybeAxiosError.response?.data?.message ||
+      maybeAxiosError.response?.data?.error ||
+      maybeAxiosError.message;
+
     return { 
       success: false, 
-      error: error.message || "Failed to delete subject." 
+      error: backendMessage || "Failed to delete subject." 
     };
   }
 };

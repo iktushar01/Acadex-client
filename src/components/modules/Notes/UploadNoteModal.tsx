@@ -107,13 +107,15 @@ interface FileListItemProps {
 }
 
 const FileListItem = ({ file, onRemove }: FileListItemProps) => (
-  <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-muted/20 border border-border/30 group">
+  <div className="flex w-full min-w-0 items-center gap-3 overflow-hidden px-3 py-2 rounded-xl bg-muted/20 border border-border/30 group">
     {file.type.includes("pdf") ? (
       <FileText className="h-4 w-4 text-orange-500 shrink-0" />
     ) : (
       <ImageIcon className="h-4 w-4 text-orange-400 shrink-0" />
     )}
-    <span className="flex-1 text-xs font-medium truncate">{file.name}</span>
+    <div className="min-w-0 flex-1">
+      <span className="block truncate text-xs font-medium">{file.name}</span>
+    </div>
     <span className="text-[10px] text-muted-foreground/40 shrink-0 tabular-nums">
       {formatFileSize(file.size)}
     </span>
@@ -261,7 +263,7 @@ export const UploadNoteModal = ({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-md rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl">
+      <DialogContent className="overflow-hidden sm:max-w-md rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl">
         <DialogHeader className="pb-1">
           <DialogTitle className="text-xl font-black tracking-tight">
             Upload <span className="text-orange-500">Note</span>
@@ -271,7 +273,7 @@ export const UploadNoteModal = ({
           </p>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 mt-1">
+        <div className="mt-1 flex min-w-0 flex-col gap-4 overflow-hidden">
           {/* Title */}
           <FormField label="Title" required hint={`${title.length}/${MAX_TITLE_LENGTH}`}>
             <Input
@@ -322,7 +324,7 @@ export const UploadNoteModal = ({
 
           {/* File list */}
           {files.length > 0 && (
-            <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto pr-0.5">
+            <div className="flex min-w-0 flex-col gap-1.5 overflow-x-hidden overflow-y-auto pr-0.5 max-h-40">
               {files.map((file, i) => (
                 <FileListItem
                   key={`${file.name}-${i}`}

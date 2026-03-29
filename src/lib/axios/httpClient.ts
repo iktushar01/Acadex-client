@@ -80,10 +80,7 @@ const httpGet = async <TData>(endpoint: string, options?: ApiRequestOptions): Pr
     }
 }
 
-const stripContentTypeForMultipart = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    headers: any
-) => {
+const stripContentTypeForMultipart = (headers: any) => {
     if (!headers) return;
     if (typeof headers.delete === "function") {
         headers.delete("Content-Type");
@@ -142,7 +139,22 @@ const httpPut = async <TData>(endpoint: string, data: unknown, options?: ApiRequ
 const httpPatch = async <TData>(endpoint: string, data: unknown, options?: ApiRequestOptions): Promise<ApiResponse<TData>> => {
     try {
         const instance = await axiosInstance(options);
-        const response = await instance.patch<ApiResponse<TData>>(endpoint, data, options);
+        const patchConfig: AxiosRequestConfig = {
+            ...options,
+            ...(isFormDataBody(data)
+                ? {
+                      transformRequest: [
+                          (body, headers) => {
+                              if (isFormDataBody(body)) {
+                                  stripContentTypeForMultipart(headers);
+                              }
+                              return body;
+                          },
+                      ],
+                  }
+                : {}),
+        };
+        const response = await instance.patch<ApiResponse<TData>>(endpoint, data, patchConfig);
         return response.data;
     } catch (error: any) {
         console.error(`PATCH request to ${endpoint} failed:`, error.message);
