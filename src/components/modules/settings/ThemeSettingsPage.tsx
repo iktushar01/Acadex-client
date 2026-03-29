@@ -37,8 +37,10 @@ const THEME_OPTIONS: Array<{
 
 const ThemeSettingsPage = ({
   scope,
+  extraContent,
 }: {
   scope: "student" | "admin";
+  extraContent?: React.ReactNode;
 }) => {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const mounted = useSyncExternalStore(
@@ -132,6 +134,8 @@ const ThemeSettingsPage = ({
             })}
           </div>
         </section>
+
+        {extraContent}
       </div>
     </div>
   );

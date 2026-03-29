@@ -5,17 +5,21 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { Membership } from "@/types/classroom.types";
+import type { Notice } from "@/types/notice.types";
 
 // Components
 import { ClassroomCard } from "@/components/modules/classroom/classroomMainPage/ClassroomMaindashboard/ClassroomCard";
 import { ClassroomHeader } from "@/components/modules/classroom/classroomMainPage/ClassroomMaindashboard/ClassroomHeader";
 import { ClassroomSkeleton } from "@/components/modules/classroom/classroomMainPage/ClassroomMaindashboard/ClassroomSkeleton";
+import ClassroomNoticeCenter from "@/components/modules/classroom/classroomMainPage/ClassroomMaindashboard/ClassroomNoticeCenter";
 
 // Server Action
 import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
+import { getCurrentNoticeAction } from "@/actions/noticeActions";
 
 export default function ClassroomDashboard() {
   const [memberships, setMemberships] = useState<Membership[]>([]);
+  const [notice, setNotice] = useState<Notice | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,11 +28,19 @@ export default function ClassroomDashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const result = await fetchMyClassroomsAction();
-        if (result.success) {
-          setMemberships(result.data || []);
+        const [classroomResult, noticeResult] = await Promise.all([
+          fetchMyClassroomsAction(),
+          getCurrentNoticeAction(),
+        ]);
+
+        if (classroomResult.success) {
+          setMemberships(classroomResult.data || []);
         } else {
-          setError(result.error as string || "Failed to load classrooms.");
+          setError(classroomResult.error as string || "Failed to load classrooms.");
+        }
+
+        if (noticeResult.success) {
+          setNotice(noticeResult.data || null);
         }
       } catch {
         setError("A network error occurred. Please try again.");
@@ -47,6 +59,7 @@ export default function ClassroomDashboard() {
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10">
+      <ClassroomNoticeCenter notice={notice} />
       <div className="mx-auto max-w-6xl">
         <ClassroomHeader />
 
