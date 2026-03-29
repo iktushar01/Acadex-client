@@ -4,17 +4,17 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Crown, Flame, Loader2, Medal,
-  MessageSquareText, NotebookPen, Star, Trophy,
-  Users, Zap, ShieldCheck, TrendingUp, ChevronRight
+  ArrowLeft, Crown, Medal, MessageSquareText,
+  NotebookPen, ShieldCheck, TrendingUp, Trophy, Zap
 } from "lucide-react";
 
 import { getClassroomLeaderboardByIdAction } from "@/actions/classroomActions/_getClassroomLeaderboardByIdAction";
+import { ClassroomLeaderboardDetailsSkeleton } from "@/components/modules/classroom/leaderboard/ClassroomLeaderboardDetailsSkeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { ClassroomLeaderboard, ClassroomLeaderboardEntry } from "@/types/classroom.types";
+import type { ClassroomLeaderboard } from "@/types/classroom.types";
 
 const anim = {
   container: { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } },
@@ -36,13 +36,8 @@ const ClassroomLeaderboardDetailsPage = ({ classroomId }: { classroomId: string 
 
   const allMembers = useMemo(() => leaderboard?.allMembers ?? [], [leaderboard]);
   const podium = allMembers.slice(0, 3);
-  const topScore = allMembers[0]?.score ?? 1;
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <Loader2 className="size-10 text-primary animate-spin" />
-    </div>
-  );
+  if (loading) return <ClassroomLeaderboardDetailsSkeleton />;
 
   if (!leaderboard) return <div className="p-20 text-center font-black uppercase tracking-widest">No Data Found</div>;
 
