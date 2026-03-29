@@ -1,31 +1,31 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { Target, Heart, Lightbulb, TrendingUp } from 'lucide-react'
 
 const values = [
   {
     icon: Target,
     title: 'Our Mission',
-    description: 'To make collaborative learning accessible and effortless for students everywhere.',
+    description: 'Make classroom learning materials easier to collect, review, and share without losing context.',
     gradient: 'from-orange-500 to-amber-500',
   },
   {
     icon: Heart,
     title: 'Our Values',
-    description: 'We believe in the power of community and helping each other succeed together.',
+    description: 'Keep study resources useful for everyone through teamwork, clarity, and trusted classroom collaboration.',
     gradient: 'from-orange-400 to-red-500',
   },
   {
     icon: Lightbulb,
     title: 'Innovation',
-    description: 'Continuously improving our platform with features that students actually need.',
+    description: 'Build around practical needs like note moderation, favorites, comments, and subject-based organization.',
     gradient: 'from-amber-400 to-orange-600',
   },
   {
     icon: TrendingUp,
     title: 'Growth',
-    description: 'Supporting your academic journey with tools that scale with your needs.',
+    description: 'Support students, class reps, and admins with tools that grow from one classroom to the full campus.',
     gradient: 'from-orange-600 to-yellow-600',
   },
 ]
@@ -77,8 +77,8 @@ function About() {
             </h2>
             
             <p className="text-muted-foreground font-medium max-w-3xl mx-auto text-lg md:text-xl leading-relaxed">
-              AcaDex was born from a simple idea: studying together should be easy, organized, and accessible. 
-              We provide solutions that actually solve the late-night study grind.
+              Acadex is designed around the way real academic groups work: classrooms, subjects, folders, reviewed notes, and shared progress. 
+              Instead of showing random demo ideas, this homepage now speaks directly to the product users will actually use after login.
             </p>
           </div>
 

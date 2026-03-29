@@ -1,27 +1,26 @@
 "use client";
 
 import { useEffect, useState } from 'react'
-import { UserPlus, Upload, Users, CheckCircle2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { UserPlus, Upload, Users } from 'lucide-react'
 
 const steps = [
   {
-    title: 'Create Your Account',
-    description: 'Sign up in seconds with your email. Join your course and connect with classmates instantly.',
+    title: 'Join Acadex',
+    description: 'Create your account, enter the dashboard, and join an existing classroom or create a new one for your batch.',
     icon: UserPlus,
     step: '01',
     gradient: 'from-blue-500 to-cyan-500',
   },
   {
-    title: 'Upload Your Notes',
-    description: 'Drag and drop files or select multiple documents. Our platform supports all major file formats.',
+    title: 'Open Subject Folders',
+    description: 'Go inside a classroom, browse subjects and folders, then upload notes to the exact place your classmates expect.',
     icon: Upload,
     step: '02',
     gradient: 'from-purple-500 to-pink-500',
   },
   {
-    title: 'Share & Collaborate',
-    description: 'Organize notes by courses, share with classmates, and access everything from one central hub.',
+    title: 'Share, Save & Compete',
+    description: 'Get notes approved, save favorites, comment on resources, and check the leaderboard to follow contributions.',
     icon: Users,
     step: '03',
     gradient: 'from-green-500 to-emerald-500',
@@ -75,9 +74,9 @@ function HowItWorks() {
             </div>
             
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter">
-              Get Started in <br />
+              Get Started with <br />
               <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent italic">
-                Three Simple Steps
+                The Acadex Flow
               </span>
             </h2>
             <div className="w-24 h-1.5 bg-orange-500 rounded-full mx-auto mt-4" />

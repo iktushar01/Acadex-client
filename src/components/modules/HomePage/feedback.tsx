@@ -7,24 +7,24 @@ import { Button } from '@/components/ui/button'; // Assuming standard Shadcn or 
 const feedbackTypes = [
   {
     id: 'ui',
-    label: 'UI Design',
+    label: 'Student Experience',
     icon: Sparkles,
     gradient: 'from-blue-500 to-cyan-500',
-    description: 'Suggest design tweaks or UI enhancements',
+    description: 'Suggest ways to make classroom flows easier to understand',
   },
   {
     id: 'feature',
     label: 'Feature Request',
     icon: Lightbulb,
     gradient: 'from-orange-500 to-amber-500', // Synced with our brand colors
-    description: 'What tools should we build next?',
+    description: 'Request tools for classrooms, notes, or collaboration',
   },
   {
     id: 'bug',
     label: 'Bug Report',
     icon: Bug,
     gradient: 'from-rose-500 to-red-600',
-    description: 'Report technical glitches or errors',
+    description: 'Report issues in classroom, notes, or leaderboard pages',
   },
 ];
 
@@ -68,11 +68,11 @@ function FeedBack() {
           <div className="text-center mb-16 space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-600 text-sm font-bold">
               <MessageSquare className="size-4" />
-              Community Driven
+              Built With User Feedback
             </div>
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter">
-              Help Us Build <br/>
-              <span className="italic text-orange-500">The Future of Study</span>
+              Help Improve <br/>
+              <span className="italic text-orange-500">Acadex for Students</span>
             </h2>
           </div>
 
@@ -128,8 +128,8 @@ function FeedBack() {
                     <div className="size-20 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center mb-6 border border-green-500/20">
                       <CheckCircle2 className="size-10" />
                     </div>
-                    <h3 className="text-2xl font-black mb-2">Note Received!</h3>
-                    <p className="text-muted-foreground font-medium">We've added your feedback to our study list.</p>
+                    <h3 className="text-2xl font-black mb-2">Feedback Received!</h3>
+                    <p className="text-muted-foreground font-medium">We&apos;ve added your message to the Acadex improvement list.</p>
                     <Button variant="ghost" className="mt-8 font-bold" onClick={() => setStatus('idle')}>Send another?</Button>
                   </div>
                 ) : (
@@ -141,7 +141,7 @@ function FeedBack() {
                           name="name"
                           value={formData.name}
                           onChange={handleChange}
-                          placeholder="Study Buddy"
+                          placeholder="Your name"
                           className="w-full bg-muted/50 border-none rounded-2xl px-5 py-4 focus:ring-2 ring-orange-500 transition-all outline-none"
                           required
                         />
@@ -153,7 +153,7 @@ function FeedBack() {
                           type="email"
                           value={formData.email}
                           onChange={handleChange}
-                          placeholder="hello@college.edu"
+                          placeholder="student@campus.edu"
                           className="w-full bg-muted/50 border-none rounded-2xl px-5 py-4 focus:ring-2 ring-orange-500 transition-all outline-none"
                           required
                         />
@@ -169,8 +169,8 @@ function FeedBack() {
                         onChange={handleChange}
                         placeholder={
                           formData.feedbackType 
-                            ? `Tell us more about this ${formData.feedbackType}...` 
-                            : "Select a type on the left and tell us your thoughts..."
+                            ? `Tell us more about this ${formData.feedbackType} for Acadex...` 
+                            : "Choose a type on the left and share your Acadex feedback..."
                         }
                         className="w-full bg-muted/50 border-none rounded-3xl px-5 py-4 focus:ring-2 ring-orange-500 transition-all outline-none resize-none"
                         required

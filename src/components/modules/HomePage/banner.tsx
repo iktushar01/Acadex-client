@@ -7,7 +7,7 @@ import Link from "next/link";
 const Banner = () => {
   return (
     <section 
-      className="relative flex md:min-h-[100vh] min-h-[40vh] w-full flex-col items-center justify-center overflow-hidden bg-background pt-20 pb-10"
+      className="relative flex md:min-h-[100vh] min-h-[40vh] w-full flex-col items-center justify-center overflow-hidden bg-background pt-6 pb-10"
       style={{
         // Modernized Notepad Grid: Thinner lines, more subtle
         backgroundImage: `
@@ -32,14 +32,14 @@ const Banner = () => {
         {/* Modern Glass Badge */}
         <div className="group mb-8 flex items-center gap-2 rounded-2xl border border-orange-500/20 bg-orange-500/5 px-5 py-2 text-sm font-bold text-orange-600 backdrop-blur-md transition-all hover:bg-orange-500/10 md:text-base animate-in fade-in slide-in-from-top-4 duration-700">
           <Sparkles className="size-4 fill-orange-500 animate-pulse" />
-          <span className="tracking-tight">Next-Gen Learning Platform</span>
+          <span className="tracking-tight">Classroom-Based Note Sharing Platform</span>
         </div>
 
         {/* Main Headline with Custom SVG Underline */}
-        <h1 className="max-w-5xl text-5xl font-black tracking-tighter text-foreground md:text-8xl lg:text-9xl leading-[0.9]">
-          Study Smarter, <br />
+        <h1 className="max-w-5xl text-5xl font-black tracking-tighter text-foreground md:text-5xl lg:text-7xl leading-[0.9]">
+          Manage Classrooms, <br />
           <span className="relative inline-block text-orange-500 italic">
-            Together
+            Share Notes
             {/* Hand-drawn style SVG Underline */}
             <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M4 8C45.5 2.5 132.5 -1.5 296 8" stroke="currentColor" strokeWidth="4" strokeLinecap="round" className="animate-draw" />
@@ -51,7 +51,7 @@ const Banner = () => {
         <div className="mt-16 flex max-w-xl items-center gap-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
           <div className="hidden sm:block h-20 w-[2px] rounded-full bg-gradient-to-b from-orange-500 to-transparent" />
           <p className="text-lg font-medium leading-relaxed text-muted-foreground md:text-xl text-center sm:text-left">
-            Ditch the messy folders. AcaDex is the <span className="text-foreground font-bold">unified workspace</span> for note-sharing, real-time collaboration, and organized academic growth.
+            Skip the scattered files. Acadex gives students and class reps one <span className="text-foreground font-bold">organized workspace</span> to join classrooms, manage subjects and folders, and share verified study notes.
           </p>
         </div>
 
@@ -59,7 +59,7 @@ const Banner = () => {
         <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-500">
           <Link href="/login">
           <Button size="lg" className="h-16 rounded-2xl bg-orange-500 px-10 text-lg font-black shadow-xl shadow-orange-500/20 hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all cursor-pointer">
-            Enter Dashboard
+            Open Acadex
             <ArrowRight className="ml-2 size-5" />
           </Button>
         </Link>

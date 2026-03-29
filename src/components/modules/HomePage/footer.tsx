@@ -23,25 +23,21 @@ const socialLinks = [
 function Footer() {
   return (
     <footer className="relative bg-card border-t border-border mt-auto overflow-hidden">
-      {/* ── DESIGN ELEMENTS ── */}
+      {/* Design elements */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-[120px] -translate-y-1/2 pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-orange-500/5 rounded-full blur-[100px] translate-y-1/2 pointer-events-none" />
-      
+
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-7xl mx-auto py-12 md:py-20">
-          
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-12">
-            {/* ── BRAND PILLAR ── */}
             <div className="md:col-span-6 space-y-6">
               <div className="inline-block transition-transform hover:scale-105 duration-300">
                 <Logo />
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-sm font-medium">
-                The high-performance platform for academic synthesis. 
-                Organize, collaborate, and master your curriculum with the 
-                Acadex digital ecosystem.
+                Acadex helps students and classroom leaders organize subjects, folders, notes, comments, favorites, and leaderboard activity from one shared academic workspace.
               </p>
-              
+
               <div className="flex items-center gap-2 pt-2">
                 {socialLinks.map((social) => {
                   const Icon = social.icon
@@ -59,7 +55,6 @@ function Footer() {
               </div>
             </div>
 
-            {/* ── NAV PILLARS ── */}
             <div className="md:col-span-6 grid grid-cols-2 gap-8">
               {[
                 { title: 'Support', links: footerLinks.support },
@@ -88,15 +83,14 @@ function Footer() {
             </div>
           </div>
 
-          {/* ── BOTTOM TERMINAL ── */}
           <div className="pt-8 border-t border-border/60">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-center md:text-left">
                 <p className="text-[11px] font-black tracking-widest text-muted-foreground/60 uppercase">
-                  © {new Date().getFullYear()} Acadex International
+                  {"\u00A9"} {new Date().getFullYear()} Acadex
                 </p>
                 <p className="text-[10px] font-medium text-muted-foreground/40 mt-1">
-                  Precision engineered for the modern student.
+                  Built for clearer classroom collaboration.
                 </p>
               </div>
 

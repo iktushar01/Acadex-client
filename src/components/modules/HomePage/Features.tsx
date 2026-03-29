@@ -2,27 +2,27 @@
 
 import { useEffect, useState, useRef } from 'react'
 import {
-  BookOpen,
-  Cloud,
+  CheckCircle2,
+  Heart,
+  MessageSquare,
+  Trophy,
   Users,
   Search,
-  Tag,
   Shield,
   FileText,
-  Zap,
   FolderTree,
 } from 'lucide-react'
 
 const features = [
-  { title: 'Smart Note Sharing', description: 'Upload and share study materials instantly. Support for PDFs, images, and documents.', icon: BookOpen, gradient: 'from-blue-500 to-cyan-500' },
-  { title: 'Cloud Storage', description: 'Secure cloud storage for all your notes. Access them anywhere, anytime, on any device.', icon: Cloud, gradient: 'from-purple-500 to-pink-500' },
-  { title: 'Course Organization', description: 'Organize notes by courses with custom categories. Keep everything structured.', icon: FolderTree, gradient: 'from-green-500 to-emerald-500' },
-  { title: 'Powerful Search', description: 'Find any note instantly with intelligent search. Filter by course, title, or content.', icon: Search, gradient: 'from-orange-500 to-red-500' },
-  { title: 'Smart Tagging', description: 'Tag and categorize notes for better organization. Create custom tags for quick access.', icon: Tag, gradient: 'from-pink-500 to-rose-500' },
-  { title: 'Secure & Private', description: 'Your data is encrypted and secure. Control access and maintain your privacy.', icon: Shield, gradient: 'from-indigo-500 to-purple-500' },
-  { title: 'Multiple Files', description: 'Upload multiple files at once. Support for PDFs, Word docs, and presentations.', icon: FileText, gradient: 'from-violet-500 to-purple-500' },
-  { title: 'Lightning Fast', description: 'Optimized for speed. Upload, download, and browse notes with minimal loading times.', icon: Zap, gradient: 'from-yellow-500 to-orange-500' },
-  { title: 'Collaborative', description: 'Work together with classmates. Share notes and organize study groups.', icon: Users, gradient: 'from-teal-500 to-cyan-500' },
+  { title: 'Classroom Workspace', description: 'Students can create or join classrooms and keep every academic resource inside the right learning space.', icon: Users, gradient: 'from-blue-500 to-cyan-500' },
+  { title: 'Subjects & Folders', description: 'Structure every classroom with subjects and folders so notes stay easy to browse before exams.', icon: FolderTree, gradient: 'from-purple-500 to-pink-500' },
+  { title: 'Note Uploads', description: 'Upload PDFs and study files into the correct subject or folder without changing your workflow.', icon: FileText, gradient: 'from-green-500 to-emerald-500' },
+  { title: 'Moderated Sharing', description: 'Class reps can approve or reject submissions, helping each classroom keep high-quality study materials.', icon: CheckCircle2, gradient: 'from-orange-500 to-red-500' },
+  { title: 'Fast Note Search', description: 'Search notes quickly and filter by status so you can find the right material at the right time.', icon: Search, gradient: 'from-pink-500 to-rose-500' },
+  { title: 'Favorites Collection', description: 'Save important notes to favorites and revisit your most useful resources in seconds.', icon: Heart, gradient: 'from-indigo-500 to-purple-500' },
+  { title: 'Comments & Discussion', description: 'Open a note, read details, and discuss improvements or questions directly with classmates.', icon: MessageSquare, gradient: 'from-violet-500 to-purple-500' },
+  { title: 'Leaderboard Tracking', description: 'See classroom standings and contribution rankings to recognize active members and top sharers.', icon: Trophy, gradient: 'from-yellow-500 to-orange-500' },
+  { title: 'Role-Based Access', description: 'Separate student, class rep, and admin responsibilities to keep classroom management secure and clear.', icon: Shield, gradient: 'from-teal-500 to-cyan-500' },
 ]
 
 function Features() {
@@ -67,11 +67,11 @@ function Features() {
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter">
               Everything You Need to <br />
               <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent italic">
-                Excel Together
+                Use Inside Acadex
               </span>
             </h2>
             <p className="text-muted-foreground font-medium max-w-2xl mx-auto text-lg">
-              Powerful features designed to make collaborative studying effortless.
+              Every section reflects the real classroom, notes, leaderboard, favorites, and moderation flows already available in your project.
             </p>
           </div>
           
