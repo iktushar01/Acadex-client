@@ -13,7 +13,7 @@ export const adminSidebar: SidebarData = {
       items: [
         { label: "Dashboard",      icon: "LayoutDashboard", href: "/dashboard" },
         { label: "Classrooms Management",      icon: "BarChart3",       href: "/admin/classrooms-management" },
-        { label: "Notifications",  icon: "Bell",            href: "/dashboard/admin/notifications", badge: 3 },
+        { label: "Admin Management",  icon: "Bell",            href: "/admin/admin-management"},
       ],
     },
     {

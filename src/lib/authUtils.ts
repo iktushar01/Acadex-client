@@ -18,14 +18,9 @@ export const commonProtectedRoutes : RouteConfig = {
 
 
 export const adminProtectedRoutes : RouteConfig = {
-    pattern: [/^\/admin\/dashboard/ ], // Matches any path that starts with /admin/dashboard
+    pattern: [/^\/admin(\/|$)/ ], // Matches admin area routes by default
     exact : []
 }
-
-// export const superAdminProtectedRoutes : RouteConfig = {
-//     pattern: [/^\/admin\/dashboard/ ], // Matches any path that starts with /super-admin/dashboard
-//     exact : []
-// }
 
 export const studentProtectedRoutes : RouteConfig = {
     pattern: [/^\/dashboard/ ], // Matches any path that starts with /dashboard
@@ -43,10 +38,6 @@ export const getRouteOwner = (pathname : string) : "SUPER_ADMIN" | "ADMIN" | "ST
     if(isRouteMatches(pathname, studentProtectedRoutes)) {
         return "STUDENT";
     }
-
-    // if (isRouteMatches(pathname, superAdminProtectedRoutes)) {
-    //     return "SUPER_ADMIN";
-    // }
 
     if(isRouteMatches(pathname, adminProtectedRoutes)) {
         return "ADMIN";
@@ -76,10 +67,6 @@ export const getDefaultDashboardRoute = (role : UserRole) => {
 }
 
 export const isValidRedirectForRole = (redirectPath : string, role : UserRole) => {
-    const unifySuperAdminAndAdminRole = role === "SUPER_ADMIN" ? "ADMIN" : role;
-
-    role = unifySuperAdminAndAdminRole;
-
     const sanitizedRedirectPath = redirectPath.split("?")[0] || redirectPath;
     const routeOwner = getRouteOwner(sanitizedRedirectPath);
 
@@ -88,6 +75,10 @@ export const isValidRedirectForRole = (redirectPath : string, role : UserRole) =
     }
 
     if(routeOwner === role){
+        return true;
+    }
+
+    if(routeOwner === "ADMIN" && role === "SUPER_ADMIN") {
         return true;
     }
 

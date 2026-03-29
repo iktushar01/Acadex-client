@@ -5,7 +5,6 @@ import Banner from "./banner";
 import Features from "./Features";
 import HowItWork from "./howitwork";
 import FeedBack from "./feedback";
-import Footer from "./footer";
 
 const Home = () => {
     return (
@@ -15,7 +14,6 @@ const Home = () => {
             <HowItWork />
             <About/>
             <FeedBack />
-            <Footer/>
         </div>
     );
 };
