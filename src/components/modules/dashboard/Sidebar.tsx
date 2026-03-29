@@ -52,7 +52,7 @@ export const AppSidebar = ({ data, user }: AppSidebarProps) => {
         router.refresh();
         if (isMobile) setOpenMobile(false);
       }
-    } catch (error) {
+    } catch {
       toast.error("An error occurred during logout");
     }
   };
@@ -65,6 +65,11 @@ export const AppSidebar = ({ data, user }: AppSidebarProps) => {
         .toUpperCase()
         .slice(0, 2)
     : "?";
+
+  const settingsHref =
+    user?.role === "ADMIN" || user?.role === "SUPER_ADMIN"
+      ? "/admin/dashboard/settings"
+      : "/dashboard/settings";
 
   return (
     <Sidebar>
@@ -163,7 +168,7 @@ export const AppSidebar = ({ data, user }: AppSidebarProps) => {
 
               <DropdownMenuItem asChild>
                 <Link
-                  href="/dashboard/settings"
+                  href={settingsHref}
                   className="cursor-pointer"
                   onClick={() => isMobile && setOpenMobile(false)}
                 >

@@ -23,11 +23,11 @@ export const adminSidebar: SidebarData = {
     //     { label: "Roles & Permissions", icon: "ShieldCheck", href: "/dashboard/admin/roles" },
     //   ],
     // },
-    // {
-    //   title: "System",
-    //   items: [
-    //     { label: "Settings", icon: "Settings", href: "/dashboard/admin/settings" },
-    //   ],
-    // },
+    {
+      title: "System",
+      items: [
+        { label: "Settings", icon: "Settings", href: "/dashboard/admin/settings" },
+      ],
+    },
   ],
 };

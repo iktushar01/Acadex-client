@@ -39,11 +39,18 @@ export const getStudentSidebarData = async (): Promise<SidebarData> => {
           : ([{ label: "No classes joined", icon: "BookOpen", href: "/dashboard/classroom" }] as NavItem[]),
       },
       {
-        title: "",
+        title: "Messages",
         items: [
-          { label: "Messages", icon: "MessageSquare", href: "/dashboard/messages"},
+          { label: "Messages", icon: "MessageSquare", href: "/dashboard/classroom/Group-chat"},
         ],
+        
       },
+      {
+      title: "System",
+      items: [
+        { label: "Settings", icon: "Settings", href: "/dashboard/admin/settings" },
+      ],
+    },
     ],
   };
 };

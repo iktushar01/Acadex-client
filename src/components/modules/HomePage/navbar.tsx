@@ -114,10 +114,7 @@ const Navbar = () => {
               Profile
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer rounded-xl gap-2 p-2.5 focus:bg-orange-500/10 focus:text-orange-600">
-            <Settings className="h-4 w-4 text-orange-500" />
-            Settings
-          </DropdownMenuItem>
+          
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
