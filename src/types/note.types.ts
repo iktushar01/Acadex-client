@@ -93,3 +93,9 @@ export interface INotesStats {
   rejected: number;
   totalFiles: number;
 }
+
+export interface IFavoriteNoteItem {
+  favoriteId: string;
+  savedAt: string;
+  note: INote;
+}
