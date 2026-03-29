@@ -28,6 +28,7 @@ export const getStudentSidebarData = async (): Promise<SidebarData> => {
         title: "Overview",
         items: [
           { label: "Classroom", icon: "BarChart3", href: "/dashboard/classroom" },
+          { label: "Leaderboard", icon: "BookOpen", href: "/dashboard/classroom/leaderboard" },
         ],
       },
       {
@@ -37,12 +38,12 @@ export const getStudentSidebarData = async (): Promise<SidebarData> => {
           ? dynamicClassroomItems
           : ([{ label: "No classes joined", icon: "BookOpen", href: "/dashboard/classroom" }] as NavItem[]),
       },
-      // {
-      //   title: "Community",
-      //   items: [
-      //     { label: "Messages", icon: "MessageSquare", href: "/dashboard/messages"},
-      //   ],
-      // },
+      {
+        title: "",
+        items: [
+          { label: "Messages", icon: "MessageSquare", href: "/dashboard/messages"},
+        ],
+      },
     ],
   };
 };
