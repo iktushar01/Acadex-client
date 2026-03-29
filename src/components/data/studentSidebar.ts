@@ -27,7 +27,6 @@ export const getStudentSidebarData = async (): Promise<SidebarData> => {
       {
         title: "Overview",
         items: [
-          { label: "Dashboard", icon: "LayoutDashboard", href: "/dashboard" },
           { label: "Classroom", icon: "BarChart3", href: "/dashboard/classroom" },
         ],
       },

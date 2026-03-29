@@ -1,9 +1,7 @@
+import { redirect } from "next/navigation";
+
 const DashboardPage = () => {
-    return (
-        <div>
-            dashboard page
-        </div>
-    );
+    redirect("/dashboard/classroom");
 };
 
 export default DashboardPage;

@@ -176,7 +176,13 @@ const AdminManagementDashboard = () => {
       payload,
     }: {
       adminId: string;
-      payload: { admin: UpdateFormState };
+      payload: {
+        admin: {
+          name: string;
+          contactNumber?: string;
+          profilePhoto?: string;
+        };
+      };
     }) => {
       const result = await fetchAdminApi(`/admins/${adminId}`, {
         method: "PATCH",

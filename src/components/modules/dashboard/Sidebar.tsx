@@ -1,7 +1,9 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
+import { logoutAction } from "@/components/modules/HomePage/_logoutAction";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuBadge,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -37,6 +40,22 @@ type AppSidebarProps = {
 
 export const AppSidebar = ({ data, user }: AppSidebarProps) => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { setOpenMobile, isMobile } = useSidebar();
+
+  const handleLogout = async () => {
+    try {
+      const res = await logoutAction();
+      if (res.success) {
+        toast.success("Logged out successfully");
+        router.push("/");
+        router.refresh();
+        if (isMobile) setOpenMobile(false);
+      }
+    } catch (error) {
+      toast.error("An error occurred during logout");
+    }
+  };
 
   const initials = user?.name
     ? user.name
@@ -76,7 +95,10 @@ export const AppSidebar = ({ data, user }: AppSidebarProps) => {
                         isActive={isActive}
                         tooltip={item.label}
                       >
-                        <Link href={item.href}>
+                        <Link
+                          href={item.href}
+                          onClick={() => isMobile && setOpenMobile(false)}
+                        >
                           {Icon && <Icon className="h-4 w-4" />}
                           <span>{item.label}</span>
                         </Link>
@@ -140,7 +162,11 @@ export const AppSidebar = ({ data, user }: AppSidebarProps) => {
               <DropdownMenuSeparator />
 
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings" className="cursor-pointer">
+                <Link
+                  href="/dashboard/settings"
+                  className="cursor-pointer"
+                  onClick={() => isMobile && setOpenMobile(false)}
+                >
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </Link>
@@ -148,14 +174,12 @@ export const AppSidebar = ({ data, user }: AppSidebarProps) => {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem asChild>
-                <Link
-                  href="/api/auth/signout"
-                  className="cursor-pointer text-destructive focus:text-destructive"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign out
-                </Link>
+              <DropdownMenuItem
+                onSelect={handleLogout}
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
