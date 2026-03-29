@@ -45,7 +45,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
     })
 
     return (
-        <main className="relative flex min-h-screen w-full flex-col lg:flex-row overflow-hidden bg-background">
+        <main className="relative flex min-h-screen w-full flex-col lg:flex-row overflow-hidden bg-background ">
             {/* 1. NOTEPAD BACKGROUND EFFECT */}
             <div
                 className="absolute inset-0 z-0 opacity-30 dark:opacity-10 pointer-events-none"
@@ -109,9 +109,9 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                 </div>
             </div>
 
-            {/* 4. FORM CARD (RIGHT-CENTERED) */}
-            <div className="relative flex flex-1 items-center justify-center p-6 z-10 lg:justify-center lg:pr-32">
-                <div className="w-full rounded-[2.5rem] border border-border bg-card/80 p-8 md:p-10 shadow-2xl backdrop-blur-xl">
+            {/* 4. FORM CARD (CENTERED) */}
+            <div className="relative flex flex-1 items-center justify-center p-6 z-10">
+                <div className="w-full max-w-[550px] rounded-[2.5rem] border border-border bg-card/80 p-8 md:p-10 shadow-2xl backdrop-blur-xl">
 
                     <div className="mb-8 text-center lg:text-left">
                         <h2 className="text-3xl font-bold tracking-tight text-foreground">Sign In</h2>
@@ -194,15 +194,15 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                     </form>
 
                     {/* DIVIDER */}
-                    {/* <div className="relative my-8">
+                    <div className="relative my-8">
                         <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                         <div className="relative flex justify-center text-xs uppercase">
                             <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
                         </div>
-                    </div> */}
+                    </div>
 
                     {/* GOOGLE LOGIN */}
-                    {/* <Button
+                    <Button
                         variant="outline"
                         className="w-full h-11 rounded-xl font-semibold gap-3 border-border hover:bg-secondary transition-all"
                         onClick={() => {
@@ -217,7 +217,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                         </svg>
                         Google Account
-                    </Button> */}
+                    </Button>
 
                     <p className="mt-8 text-center text-sm text-muted-foreground">
                         Don&apos;t have an account?{" "}

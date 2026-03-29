@@ -126,8 +126,8 @@ const removeImage = (field: any) => {
                 </div>
             </div>
 
-            {/* 4. FORM CARD (RIGHT-CENTERED) */}
-            <div className="relative flex flex-1 items-center justify-center p-6 z-10 lg:justify-center lg:pr-32">
+            {/* 4. FORM CARD (CENTERED) */}
+            <div className="relative flex flex-1 items-center justify-center p-6 z-10">
                 <div className="w-full max-w-[550px] rounded-[2.5rem] border border-border bg-card/80 p-8 md:p-10 shadow-2xl backdrop-blur-xl">
 
                     <div className="mb-8 text-center lg:text-left">

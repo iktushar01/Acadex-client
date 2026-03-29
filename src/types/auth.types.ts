@@ -54,5 +54,6 @@ export interface UserFromCookie {
     name: string;
     email: string;
     role: string;
-    avatar: string;
+    avatar?: string | null;
+    image?: string | null;
 }

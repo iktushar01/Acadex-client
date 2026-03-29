@@ -15,6 +15,7 @@ import {
 import { AppSidebar } from "@/components/modules/dashboard/Sidebar";
 import { getSidebarData } from "@/lib/getSidebarData";
 import { getCookie } from "@/lib/cookieUtils";
+import { getUserInfo } from "@/services/auth/auth.services";
 import { UserFromCookie } from "@/types/auth.types";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,26 @@ const Sidebar1 = async ({ className, children }: Sidebar1Props) => {
       user = JSON.parse(userCookie) as UserFromCookie;
     } catch (error) {
       console.error("Failed to parse user cookie:", error);
+    }
+  }
+
+  if (!user) {
+    const backendUser = await getUserInfo();
+
+    if (backendUser) {
+      const avatar =
+        backendUser.image ??
+        backendUser.student?.profilePhoto ??
+        backendUser.admin?.profilePhoto ??
+        null;
+
+      user = {
+        name: backendUser.name,
+        email: backendUser.email,
+        role: backendUser.role,
+        avatar,
+        image: backendUser.image ?? avatar,
+      };
     }
   }
 
