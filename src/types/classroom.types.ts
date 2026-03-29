@@ -21,6 +21,21 @@ export interface Membership {
   classroom: Classroom;
 }
 
+export interface ClassroomMember {
+  role: "STUDENT" | "CR";
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    image?: string | null;
+  };
+}
+
+export interface ClassroomMembersResponse extends Classroom {
+  memberships: ClassroomMember[];
+}
+
 export interface ClassroomLeaderboardEntry {
   rank: number;
   userId: string;

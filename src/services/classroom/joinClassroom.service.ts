@@ -17,12 +17,13 @@ export const joinClassroomService = {
   async join(joinCode: string): Promise<ApiResponse<Classroom>> {
     // 1. Validate the input using the Zod schema
     // This ensures the joinCode meets length/format requirements before the API call.
-    const validated = joinClassValidation.parse({ joinCode });
+    const normalizedJoinCode = joinCode.trim().toUpperCase();
+    const validated = joinClassValidation.parse({ joinCode: normalizedJoinCode });
 
     // 2. Execute Request
     // The httpClient handles: Base URL, Cookies, and Bearer Tokens automatically.
-    return await httpClient.post<Classroom>("/classrooms/join", { 
-      joinCode: validated.classCode.trim() 
+    return await httpClient.post<Classroom>("/classrooms/join", {
+      joinCode: validated.joinCode,
     });
   },
 };

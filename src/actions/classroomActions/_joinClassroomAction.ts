@@ -3,6 +3,14 @@
 import { joinClassroomService } from "@/services/classroom/joinClassroom.service";
 import axios from "axios";
 
+type JoinClassroomError = {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
 export async function joinClassroomAction(joinCode: string) {
   try {
     if (!joinCode || joinCode.trim().length === 0) {
@@ -17,13 +25,17 @@ export async function joinClassroomAction(joinCode: string) {
       message: response.message || "Classroom joined successfully.",
     };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("error in join classroom action", error);
 
     if (axios.isAxiosError(error)) {
+      const axiosError = error as JoinClassroomError;
+
       return {
         success: false,
-        message: error.response?.data?.message || "Invalid access code or classroom full.",
+        message:
+          axiosError.response?.data?.message ||
+          "Invalid access code or classroom full.",
       };
     }
 

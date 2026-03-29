@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { DoorOpen, ArrowRight, ShieldCheck, Info, Loader2, Keyboard, Sparkles } from "lucide-react";
+import { DoorOpen, ArrowRight, ShieldCheck, Info, Loader2, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -125,7 +125,7 @@ const JoinClassroom = () => {
 
         <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-                Don't have a code? <span className="text-primary font-semibold cursor-pointer hover:underline">Contact Support</span>
+                Don&apos;t have a code? <span className="text-primary font-semibold cursor-pointer hover:underline">Contact Support</span>
             </p>
         </div>
       </div>
