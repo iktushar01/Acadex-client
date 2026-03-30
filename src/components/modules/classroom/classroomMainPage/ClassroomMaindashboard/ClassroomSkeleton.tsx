@@ -12,10 +12,10 @@ export const ClassroomSkeleton = () => {
           className="rounded-[2.5rem] border-border bg-card/50 p-4 sm:p-6"
         >
           <div className="flex h-full animate-pulse flex-col">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <Skeleton className="h-14 w-14 rounded-2xl bg-muted/50" />
-              <div className="flex flex-col gap-3 sm:items-end">
-                <div className="flex flex-wrap gap-1.5">
+            <div className="flex items-start justify-between gap-3">
+              <Skeleton className="h-12 w-12 rounded-2xl bg-muted/50 sm:h-14 sm:w-14" />
+              <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-wrap justify-end gap-1.5">
                   <Skeleton className="h-5 w-20 rounded-full bg-muted/50" />
                   <Skeleton className="h-5 w-14 rounded-full bg-muted/50" />
                 </div>
@@ -23,26 +23,26 @@ export const ClassroomSkeleton = () => {
               </div>
             </div>
 
-            <div className="mt-6 flex-1 space-y-5 sm:mt-8">
+            <div className="mt-4 flex-1 space-y-4 sm:mt-8 sm:space-y-5">
               <div className="space-y-3">
-                <Skeleton className="h-8 w-3/4 rounded-xl bg-muted/50" />
+                <Skeleton className="h-7 w-3/4 rounded-xl bg-muted/50 sm:h-8" />
                 <div className="flex flex-wrap items-center gap-2">
                   <Skeleton className="h-5 w-12 rounded-md bg-muted/50" />
-                  <Skeleton className="h-4 w-20 rounded-md bg-muted/50" />
+                  <Skeleton className="h-4 w-24 rounded-md bg-muted/50" />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="hidden grid-cols-1 gap-3 sm:grid sm:grid-cols-2">
                 <Skeleton className="h-12 rounded-xl bg-muted/50" />
                 <Skeleton className="h-12 rounded-xl bg-muted/50" />
               </div>
 
-              <div className="flex items-center justify-between rounded-xl border border-border/30 bg-secondary/20 px-3 py-2.5">
+              <div className="hidden items-center justify-between rounded-xl border border-border/30 bg-secondary/20 px-3 py-2.5 sm:flex">
                 <Skeleton className="h-3 w-28 rounded-full bg-muted/50" />
                 <Skeleton className="h-5 w-8 rounded-md bg-muted/50" />
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="hidden items-center gap-3 sm:flex">
                 <Skeleton className="h-10 w-10 rounded-full bg-muted/50" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-32 rounded-md bg-muted/50" />
@@ -51,7 +51,7 @@ export const ClassroomSkeleton = () => {
               </div>
             </div>
 
-            <div className="mt-8 border-t border-border/50 pt-5">
+            <div className="mt-5 border-t border-border/50 pt-4 sm:mt-8 sm:pt-5">
               <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
                 <Skeleton className="h-11 w-full rounded-2xl bg-muted/50" />
                 <Skeleton
