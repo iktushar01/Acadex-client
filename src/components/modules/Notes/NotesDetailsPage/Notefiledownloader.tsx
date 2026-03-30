@@ -15,29 +15,32 @@ import { Card } from "@/components/ui/card";
 import type { INoteFile } from "@/types/note.types";
 import { formatFileSize } from "@/lib/Noteconstants";
 
+const getFileRoute = (file: INoteFile, download = false) => {
+  const params = new URLSearchParams({
+    url: file.url,
+    fileName: file.fileName,
+  });
+
+  if (download) {
+    params.set("download", "1");
+  }
+
+  return `/api/notes/files?${params.toString()}`;
+};
+
+const triggerBrowserDownload = (href: string, fileName: string) => {
+  const anchor = document.createElement("a");
+  anchor.href = href;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/**
- * Triggers a browser download for a single file via fetch → blob → anchor click.
- * Falls back to window.open for cross-origin URLs that reject fetch.
- */
 async function downloadFile(file: INoteFile): Promise<void> {
-  try {
-    const res = await fetch(file.url, { mode: "cors" });
-    if (!res.ok) throw new Error("Fetch failed");
-    const blob = await res.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = file.fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(blobUrl);
-  } catch {
-    // Cross-origin fallback — opens in new tab, browser handles download
-    window.open(file.url, "_blank", "noopener,noreferrer");
-  }
+  triggerBrowserDownload(getFileRoute(file, true), file.fileName);
 }
 
 /**
@@ -55,7 +58,7 @@ async function downloadAllAsZip(
 
     const fetches = files.map(async (file) => {
       try {
-        const res = await fetch(file.url, { mode: "cors" });
+        const res = await fetch(getFileRoute(file), { cache: "no-store" });
         if (!res.ok) throw new Error();
         const blob = await res.blob();
         zip.file(file.fileName, blob);
@@ -102,6 +105,7 @@ const FileRow = ({ file, index }: FileRowProps) => {
   };
 
   const isPdf = file.type === "pdf";
+  const previewHref = getFileRoute(file);
 
   return (
     <div
@@ -143,7 +147,7 @@ const FileRow = ({ file, index }: FileRowProps) => {
 
       {/* Preview link */}
       <a
-        href={file.url}
+        href={previewHref}
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
@@ -253,7 +257,7 @@ export const NoteFileDownloader = ({
       {files.length > 1 && (
         <div className="px-5 py-3 border-t border-border/20 bg-muted/10">
           <p className="text-[11px] text-muted-foreground/40 font-medium">
-            "Download All" packages every file into a single .zip folder.
+            &quot;Download All&quot; packages every file into a single .zip folder.
           </p>
         </div>
       )}

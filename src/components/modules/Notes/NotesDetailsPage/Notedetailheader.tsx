@@ -1,12 +1,13 @@
 "use client";
 
-import { ArrowLeft, BookOpen, FolderOpen, Heart, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Copy, FolderOpen, Heart, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/modules/Notes/StatusBadge";
 import { UploaderAvatar } from "@/components/modules/Notes/UploaderAvatar";
 import { useNoteFavorite } from "@/hooks/Usenotefavorite";
 import type { INote } from "@/types/note.types";
+import { toast } from "sonner";
 import { formatDate } from "../NotesMainPage";
 
 interface NoteDetailHeaderProps {
@@ -16,6 +17,20 @@ interface NoteDetailHeaderProps {
 
 export const NoteDetailHeader = ({ note, backHref }: NoteDetailHeaderProps) => {
   const { isFavorited, loading: favLoading, toggling, toggle } = useNoteFavorite(note.id);
+
+  const handleShareNote = async () => {
+    const shareUrl = `${window.location.origin}/dashboard/classroom/notes/${note.id}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Note link copied", {
+        description: "This note link is ready to share.",
+        icon: <Copy className="h-4 w-4" />,
+      });
+    } catch {
+      toast.error("Could not copy note link");
+    }
+  };
 
   return (
     <header className="mb-10">
@@ -74,8 +89,18 @@ export const NoteDetailHeader = ({ note, backHref }: NoteDetailHeaderProps) => {
           </div>
         </div>
 
-        {/* Favorite button */}
-        <div className="shrink-0">
+        {/* Action buttons */}
+        <div className="shrink-0 flex flex-wrap items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={handleShareNote}
+            className="h-10 rounded-2xl border-border/50 px-5 text-sm font-bold transition-all hover:border-orange-500/30 hover:bg-orange-500/5 hover:text-orange-500"
+            aria-label="Copy note link"
+          >
+            <Copy className="h-4 w-4" />
+            Share Note
+          </Button>
+
           <Button
             variant="outline"
             onClick={toggle}
