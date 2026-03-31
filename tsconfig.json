@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "src/services/classroom/getMyClassroomMemberships.service.ts"  ],
+, "src/services/classroom/getMyClassroomMemberships.service.ts", "next.config.mjs"  ],
   "exclude": ["node_modules"]
 }

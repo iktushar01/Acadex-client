@@ -116,7 +116,7 @@ const ClassroomManageMembersPage = () => {
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-4 min-w-0">
                     <Avatar className="h-14 w-14 border border-border">
-                      <AvatarImage src={member.user.image} />
+                      <AvatarImage src={member.user.image ?? undefined} />
                       <AvatarFallback className="text-sm font-black">
                         {member.user.name?.[0]?.toUpperCase()}
                       </AvatarFallback>

@@ -162,7 +162,7 @@ export const AppSidebar = ({ data, user }: AppSidebarProps) => {
                 className="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
                   <AvatarFallback className="rounded-lg text-xs">
                     {initials}
                   </AvatarFallback>

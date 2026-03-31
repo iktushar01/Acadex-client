@@ -3,22 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bun --bun next dev",
-    "build": "bun --bun next build",
-    "start": "bun --bun next start",
-    "lint": "eslint"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
     "@hookform/resolvers": "^5.2.2",
-    "@tanstack/react-devtools": "^0.10.0",
     "@tanstack/react-form": "^1.28.5",
-    "@tanstack/react-form-devtools": "^0.2.19",
     "@tanstack/react-form-nextjs": "^1.28.5",
     "@tanstack/react-query": "^5.95.2",
     "@tanstack/react-query-next-experimental": "^5.95.2",
     "@tanstack/react-table": "^8.21.3",
-    "@tanstack/zod-form-adapter": "^0.42.1",
     "@types/jsonwebtoken": "^9.0.10",
     "axios": "^1.13.6",
     "class-variance-authority": "^0.7.1",

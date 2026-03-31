@@ -31,16 +31,17 @@ import { logoutAction } from "./_logoutAction";
 import { getCookie, deleteCookie } from "cookies-next";
 import { useState } from "react";
 import Logo from "@/components/shared/logo/logo";
+import type { UserFromCookie } from "@/types/auth.types";
 
 const Navbar = () => {
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
-  const [user, setUser] = useState<Record<string, string> | null>(() => {
+  const [user, setUser] = useState<UserFromCookie | null>(() => {
     const userCookie = getCookie("user");
     if (!userCookie) return null;
 
     try {
-      return JSON.parse(userCookie as string);
+      return JSON.parse(userCookie as string) as UserFromCookie;
     } catch {
       return null;
     }
@@ -56,7 +57,7 @@ const Navbar = () => {
   const resolvedUser =
     user ??
     (syncedUser?.success && syncedUser.data
-      ? (syncedUser.data as Record<string, string>)
+      ? syncedUser.data
       : null);
 
   const { mutate: handleLogout, isPending: isLoggingOut } = useMutation({
@@ -102,7 +103,7 @@ const Navbar = () => {
                 >
                   <Avatar className="h-9 w-9">
                     <AvatarImage
-                      src={resolvedUser.avatar || resolvedUser.image}
+                      src={resolvedUser.avatar ?? resolvedUser.image ?? undefined}
                       alt={resolvedUser.name}
                     />
                     <AvatarFallback className="bg-orange-500 font-bold text-white">

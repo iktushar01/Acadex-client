@@ -82,6 +82,8 @@ type ClassroomCardProps = {
 export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProps) => {
   const cls = membership.classroom;
   const theme = getTheme(cls.id);
+  const activeStudentsCount = cls._count?.memberships ?? 0;
+  const creatorImage = cls.creator.image ?? undefined;
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -116,7 +118,7 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
   const mobileDetails = [
     { icon: Layers, label: "Class", value: cls.className || "Class not set" },
     { icon: FlaskConical, label: "Department", value: cls.department || "Department not set" },
-    { icon: Users, label: "Active Students", value: String(cls._count.memberships) },
+    { icon: Users, label: "Active Students", value: String(activeStudentsCount) },
     { icon: BookOpenText, label: "Institution", value: cls.institutionName },
   ];
 
@@ -244,13 +246,13 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
                   Active Students
                 </span>
                 <span className={cn("text-sm font-black tracking-tight", theme.text)}>
-                  {cls._count.memberships}
+                  {activeStudentsCount}
                 </span>
               </div>
 
               <div className="hidden min-w-0 items-center gap-3 sm:flex">
                 <Avatar className="h-10 w-10 border-2 border-background ring-1 ring-border/20 shadow-sm">
-                  <AvatarImage src={cls.creator.image} />
+                  <AvatarImage src={creatorImage} />
                   <AvatarFallback className={cn("font-bold text-white", theme.bg)}>
                     {cls.creator.name[0]}
                   </AvatarFallback>
@@ -328,7 +330,7 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
 
             <div className="flex items-center gap-3 rounded-2xl border border-border/40 bg-card/40 p-3">
               <Avatar className="h-10 w-10 border-2 border-background ring-1 ring-border/20 shadow-sm">
-                <AvatarImage src={cls.creator.image} />
+                <AvatarImage src={creatorImage} />
                 <AvatarFallback className={cn("font-bold text-white", theme.bg)}>
                   {cls.creator.name[0]}
                 </AvatarFallback>
