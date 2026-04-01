@@ -64,7 +64,7 @@ const JoinClassroom = () => {
               Join a <span className="text-primary">Classroom</span>
             </h1>
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
-              Enter your invitation details
+              Enter your classroom code
             </p>
           </div>
 
@@ -84,7 +84,7 @@ const JoinClassroom = () => {
                 />
               </div>
               <p className="text-[10px] text-center text-muted-foreground">
-                Ask your teacher for the join code.
+                Ask your CR for the join code.
               </p>
             </div>
 

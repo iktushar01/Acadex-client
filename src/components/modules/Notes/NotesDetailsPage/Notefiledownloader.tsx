@@ -111,75 +111,88 @@ const FileRow = ({ file, index }: FileRowProps) => {
   return (
     <div
       className="
-        group flex items-center gap-4 rounded-2xl border border-border/40 bg-card/40 px-4 py-3.5
+        group flex flex-col gap-3 rounded-2xl border border-border/40 bg-card/40 px-4 py-3.5
         transition-all duration-200 hover:border-orange-500/30 hover:bg-card/70
+        sm:flex-row sm:items-center sm:gap-4
       "
       style={{ animationDelay: `${index * 50}ms` }}
     >
-      <div
-        className={`
-          flex h-10 w-10 shrink-0 items-center justify-center rounded-xl
-          ${isPdf ? "border border-orange-500/20 bg-orange-500/10" : "border border-sky-500/20 bg-sky-500/10"}
-        `}
-      >
-        {isPdf ? (
-          <FileText className="h-5 w-5 text-orange-500" />
-        ) : (
-          <ImageIcon className="h-5 w-5 text-sky-500" />
-        )}
-      </div>
+      <div className="flex min-w-0 w-full items-start gap-3 sm:flex-1 sm:items-center">
+        <div
+          className={`
+            flex h-10 w-10 shrink-0 items-center justify-center rounded-xl
+            ${isPdf ? "border border-orange-500/20 bg-orange-500/10" : "border border-sky-500/20 bg-sky-500/10"}
+          `}
+        >
+          {isPdf ? (
+            <FileText className="h-5 w-5 text-orange-500" />
+          ) : (
+            <ImageIcon className="h-5 w-5 text-sky-500" />
+          )}
+        </div>
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold">{file.fileName}</p>
-        <div className="mt-0.5 flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
-            {isPdf ? "PDF" : "Image"}
-          </span>
-          <span className="text-[10px] text-muted-foreground/20">·</span>
-          <span className="text-[10px] tabular-nums text-muted-foreground/50">
-            {formatFileSize(file.fileSize)}
-          </span>
+        <div className="min-w-0 flex-1">
+          <p className="break-words text-sm font-semibold sm:truncate">
+            {file.fileName}
+          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
+              {isPdf ? "PDF" : "Image"}
+            </span>
+            <span className="text-[10px] text-muted-foreground/20">·</span>
+            <span className="text-[10px] tabular-nums text-muted-foreground/50">
+              {formatFileSize(file.fileSize)}
+            </span>
+          </div>
         </div>
       </div>
 
-      <a
-        href={previewHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(event) => event.stopPropagation()}
+      <div
         className="
-          hidden px-2 text-[11px] font-bold text-muted-foreground/40 transition-colors
-          hover:text-orange-500 sm:flex
+          flex w-full flex-wrap items-center gap-2
+          sm:w-auto sm:flex-nowrap sm:justify-end
         "
       >
-        Preview
-      </a>
+        <a
+          href={previewHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(event) => event.stopPropagation()}
+          className="
+            inline-flex h-8 flex-1 items-center justify-center rounded-xl border border-border/50
+            px-3 text-xs font-bold text-muted-foreground/70 transition-colors
+            hover:border-orange-500/40 hover:bg-orange-500/5 hover:text-orange-500
+            sm:flex-none sm:border-none sm:px-2 sm:text-[11px]
+          "
+        >
+          Preview
+        </a>
 
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={handleDownload}
-        disabled={state === "loading"}
-        className={`
-          h-8 shrink-0 gap-1.5 rounded-xl px-3 text-xs font-bold transition-all
-          ${state === "done"
-            ? "border-emerald-500/40 bg-emerald-500/8 text-emerald-500"
-            : "border-border/50 hover:border-orange-500/40 hover:bg-orange-500/5 hover:text-orange-500"
-          }
-        `}
-      >
-        {state === "loading" ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        ) : state === "done" ? (
-          <>
-            <CheckCircle2 className="h-3.5 w-3.5" /> Saved
-          </>
-        ) : (
-          <>
-            <Download className="h-3.5 w-3.5" /> Download
-          </>
-        )}
-      </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleDownload}
+          disabled={state === "loading"}
+          className={`
+            h-8 flex-1 shrink-0 gap-1.5 rounded-xl px-3 text-xs font-bold transition-all sm:flex-none
+            ${state === "done"
+              ? "border-emerald-500/40 bg-emerald-500/8 text-emerald-500"
+              : "border-border/50 hover:border-orange-500/40 hover:bg-orange-500/5 hover:text-orange-500"}
+          `}
+        >
+          {state === "loading" ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : state === "done" ? (
+            <>
+              <CheckCircle2 className="h-3.5 w-3.5" /> Saved
+            </>
+          ) : (
+            <>
+              <Download className="h-3.5 w-3.5" /> Download
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 };
@@ -230,8 +243,8 @@ export const NoteFileDownloader = ({
                   Unzip?
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-3xl rounded-3xl border-border/50 bg-background/95 p-0 backdrop-blur-xl">
-                <DialogHeader className="border-b border-border/30 px-6 py-5">
+              <DialogContent className="flex max-h-[85vh] max-w-3xl flex-col overflow-hidden rounded-3xl border-border/50 bg-background/95 p-0 backdrop-blur-xl">
+                <DialogHeader className="border-b border-border/30 px-6 py-5 pr-14">
                   <DialogTitle className="text-xl font-black tracking-tight">
                     Guide for Unzip
                   </DialogTitle>
@@ -240,7 +253,7 @@ export const NoteFileDownloader = ({
                   </DialogDescription>
                 </DialogHeader>
 
-                <div className="grid gap-4 px-6 py-5 sm:grid-cols-3">
+                <div className="grid flex-1 gap-4 overflow-y-auto px-6 py-5 sm:grid-cols-3">
                   <div className="rounded-2xl border border-border/40 bg-card/40 p-4">
                     <div className="mb-3 flex items-center gap-2 text-sm font-black">
                       <Smartphone className="h-4 w-4 text-orange-500" />
@@ -297,8 +310,7 @@ export const NoteFileDownloader = ({
                 h-8 gap-1.5 rounded-xl px-4 text-xs font-bold transition-all
                 ${zipState === "done"
                   ? "bg-emerald-500 text-white hover:bg-emerald-500"
-                  : "bg-orange-500 text-white shadow-sm shadow-orange-500/20 hover:bg-orange-600"
-                }
+                  : "bg-orange-500 text-white shadow-sm shadow-orange-500/20 hover:bg-orange-600"}
               `}
             >
               {zipState === "loading" ? (
@@ -311,7 +323,8 @@ export const NoteFileDownloader = ({
                 </>
               ) : (
                 <>
-                  <FolderDown className="h-3.5 w-3.5" /> <span className="sm:block hidden">Download</span> All
+                  <FolderDown className="h-3.5 w-3.5" />{" "}
+                  <span className="hidden sm:block">Download</span> All
                 </>
               )}
             </Button>

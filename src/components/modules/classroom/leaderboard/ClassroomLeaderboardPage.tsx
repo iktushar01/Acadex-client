@@ -65,14 +65,14 @@ const ClassroomLeaderboardPage = () => {
   }, [leaderboards, query]);
 
   return (
-    <div className="min-h-screen bg-background/50 p-4 sm:p-8 lg:p-12">
-      <div className="mx-auto max-w-7xl space-y-12">
-        <header className="relative space-y-6">
+    <div className="min-h-screen bg-background/50 px-4 py-5 sm:px-6 sm:py-8 lg:px-12 lg:py-12">
+      <div className="mx-auto max-w-7xl space-y-8 sm:space-y-12">
+        <header className="relative space-y-5 sm:space-y-6">
           <div className="space-y-4">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-2"
+              className="flex flex-wrap items-center gap-2"
             >
               <div className="h-1 w-12 rounded-full bg-primary" />
               <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">
@@ -83,7 +83,7 @@ const ClassroomLeaderboardPage = () => {
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="max-w-4xl text-4xl font-black leading-none tracking-tighter md:text-6xl"
+              className="max-w-4xl text-3xl font-black leading-none tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl"
             >
               Track your <span className="text-muted-foreground">Classroom</span> Standing.
             </motion.h1>
@@ -92,20 +92,20 @@ const ClassroomLeaderboardPage = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="max-w-xl font-medium leading-relaxed text-muted-foreground"
+              className="max-w-xl text-sm font-medium leading-relaxed text-muted-foreground sm:text-base"
             >
               Access detailed podium rankings and contribution stats for every classroom you are
               part of.
             </motion.p>
           </div>
 
-          <div className="group relative max-w-md">
+          <div className="group relative w-full max-w-md">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Filter by classroom or school..."
-              className="h-14 rounded-2xl border-border/50 bg-card/50 pl-12 shadow-sm transition-all backdrop-blur-md focus:ring-primary/20"
+              className="h-12 rounded-2xl border-border/50 bg-card/50 pl-12 text-sm shadow-sm transition-all backdrop-blur-md focus:ring-primary/20 sm:h-14"
             />
           </div>
         </header>
@@ -130,7 +130,7 @@ const ClassroomLeaderboardPage = () => {
           ) : error ? (
             <motion.div
               key="error"
-              className="rounded-[2rem] border-2 border-dashed border-destructive/20 bg-destructive/5 p-12 text-center"
+              className="rounded-[2rem] border-2 border-dashed border-destructive/20 bg-destructive/5 px-6 py-10 text-center sm:p-12"
             >
               <p className="text-lg font-bold text-destructive">{error}</p>
               <Button
@@ -147,7 +147,7 @@ const ClassroomLeaderboardPage = () => {
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+              className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3"
             >
               {filtered.map((leaderboard) => (
                 <LeaderboardClassroomCard
@@ -170,17 +170,17 @@ const LeaderboardClassroomCard = ({ leaderboard }: { leaderboard: ClassroomLeade
     <motion.div
       variants={cardVariants}
       whileHover="hover"
-      className="group relative flex min-h-[300px] flex-col"
+      className="group relative flex min-h-[280px] flex-col sm:min-h-[300px]"
     >
       <div
         className={cn(
-          "relative flex h-full flex-col overflow-hidden rounded-[2.5rem] border p-7 transition-all duration-500",
+          "relative flex h-full flex-col overflow-hidden rounded-[2rem] border p-5 transition-all duration-500 sm:rounded-[2.5rem] sm:p-7",
           "border-border/50 bg-card/40 shadow-sm backdrop-blur-xl hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5"
         )}
       >
         <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/10 blur-[60px] transition-colors duration-700 group-hover:bg-primary/20 -z-10" />
 
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 sm:mb-8">
           <Badge
             variant="secondary"
             className="rounded-lg border-border/50 bg-background/50 px-3 py-1 text-[10px] font-black uppercase tracking-widest"
@@ -194,18 +194,18 @@ const LeaderboardClassroomCard = ({ leaderboard }: { leaderboard: ClassroomLeade
         </div>
 
         <div className="flex-1 space-y-2">
-          <h2 className="text-2xl font-black leading-[1.1] tracking-tighter transition-colors group-hover:text-primary">
+          <h2 className="text-xl font-black leading-[1.1] tracking-tighter transition-colors group-hover:text-primary sm:text-2xl">
             {leaderboard.classroom.name}
           </h2>
-          <div className="flex items-center gap-2 text-muted-foreground/60">
+          <div className="flex items-start gap-2 text-muted-foreground/60">
             <Building2 className="size-3.5" />
-            <span className="truncate text-[13px] font-medium">
+            <span className="line-clamp-2 text-[13px] font-medium">
               {leaderboard.classroom.institutionName}
             </span>
           </div>
         </div>
 
-        <div className="my-8 grid grid-cols-2 gap-3">
+        <div className="my-6 grid grid-cols-1 gap-3 sm:my-8 sm:grid-cols-2">
           <div className="space-y-1 rounded-3xl border border-border/40 bg-background/60 p-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               <Star className="size-3" /> Rank
@@ -218,7 +218,7 @@ const LeaderboardClassroomCard = ({ leaderboard }: { leaderboard: ClassroomLeade
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               <Crown className="size-3 text-amber-500" /> Leader
             </div>
-            <p className="truncate text-[13px] font-black">{firstPlace ? firstPlace.name : "N/A"}</p>
+            <p className="break-words text-[13px] font-black sm:truncate">{firstPlace ? firstPlace.name : "N/A"}</p>
           </div>
         </div>
 
@@ -226,7 +226,7 @@ const LeaderboardClassroomCard = ({ leaderboard }: { leaderboard: ClassroomLeade
           <motion.div
             whileTap={{ scale: 0.98 }}
             className={cn(
-              "group/btn flex items-center justify-between rounded-2xl p-4 transition-all",
+              "group/btn flex items-center justify-between gap-3 rounded-2xl p-4 transition-all",
               "bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/40"
             )}
           >
