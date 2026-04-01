@@ -36,13 +36,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -85,7 +78,6 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
   const activeStudentsCount = cls._count?.memberships ?? 0;
   const creatorImage = cls.creator.image ?? undefined;
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const copyJoinCode = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -115,13 +107,6 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
     },
   });
 
-  const mobileDetails = [
-    { icon: Layers, label: "Class", value: cls.className || "Class not set" },
-    { icon: FlaskConical, label: "Department", value: cls.department || "Department not set" },
-    { icon: Users, label: "Active Students", value: String(activeStudentsCount) },
-    { icon: BookOpenText, label: "Institution", value: cls.institutionName },
-  ];
-
   return (
     <>
       <motion.div
@@ -145,7 +130,7 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
           />
 
           <div className="relative z-10 flex h-full flex-col p-4 sm:p-6">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <motion.div
                 whileHover={{ rotate: -5, scale: 1.05 }}
                 className={cn(
@@ -157,8 +142,8 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
                 <GraduationCap className="h-6 w-6 sm:h-7 sm:w-7" />
               </motion.div>
 
-              <div className="flex flex-col items-end gap-2">
-                <div className="flex flex-wrap justify-end gap-1.5">
+              <div className="flex w-full flex-row items-start justify-between gap-3 sm:w-auto sm:flex-col sm:items-end">
+                <div className="flex min-w-0 flex-wrap gap-1.5 sm:justify-end">
                   <Badge
                     variant="outline"
                     className="bg-background/50 text-[10px] font-bold uppercase tracking-widest backdrop-blur-md"
@@ -186,16 +171,6 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
                       <Copy className="h-4 w-4" /> Copy Join Code
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={(event) => {
-                        event.preventDefault();
-                        setDetailsOpen(true);
-                      }}
-                      className="cursor-pointer gap-2 rounded-lg py-2.5 focus:bg-primary/5 sm:hidden"
-                    >
-                      <BookOpenText className="h-4 w-4" /> Details
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="opacity-50" />
-                    <DropdownMenuItem
                       disabled={membership.memberRole === "CR"}
                       onClick={(event) => {
                         event.preventDefault();
@@ -211,7 +186,7 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
               </div>
             </div>
 
-            <div className="mt-4 flex-1 space-y-4 sm:mt-8 sm:space-y-5">
+            <div className="mt-4 flex-1 space-y-4 sm:mt-6">
               <div className="min-w-0">
                 <h3 className="break-words text-lg font-black leading-tight tracking-tight decoration-border/50 underline-offset-4 group-hover:underline sm:text-2xl">
                   {cls.name}
@@ -226,31 +201,33 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
                 </div>
               </div>
 
-              <div className="hidden grid-cols-1 gap-3 sm:grid sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {[
-                  { icon: Layers, label: cls.className || "Class not set" },
-                  { icon: FlaskConical, label: cls.department || "Department not set" },
+                  { icon: Layers, eyebrow: "Class", label: cls.className || "Class not set" },
+                  { icon: FlaskConical, eyebrow: "Department", label: cls.department || "Department not set" },
+                  { icon: Users, eyebrow: "Students", label: `${activeStudentsCount} active` },
+                  { icon: Building2, eyebrow: "Institution", label: cls.institutionName },
                 ].map((item, i) => (
                   <div
                     key={i}
-                    className="min-w-0 flex items-center gap-2 rounded-xl border border-border/30 bg-secondary/20 p-2.5 transition-colors group-hover:bg-secondary/40"
+                    className="min-w-0 rounded-2xl border border-border/30 bg-secondary/20 p-3 transition-colors group-hover:bg-secondary/40"
                   >
-                    <item.icon className={cn("h-4 w-4 shrink-0", theme.text)} />
-                    <span className="truncate text-xs font-bold leading-none tracking-tight">{item.label}</span>
+                    <div className="flex items-start gap-3">
+                      <div className={cn("mt-0.5 rounded-xl p-2", theme.light)}>
+                        <item.icon className={cn("h-4 w-4 shrink-0", theme.text)} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
+                          {item.eyebrow}
+                        </p>
+                        <p className="mt-1 break-words text-sm font-bold leading-5 text-foreground">{item.label}</p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
 
-              <div className="hidden items-center justify-between rounded-xl border border-border/30 bg-secondary/20 px-3 py-2.5 sm:flex">
-                <span className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground">
-                  Active Students
-                </span>
-                <span className={cn("text-sm font-black tracking-tight", theme.text)}>
-                  {activeStudentsCount}
-                </span>
-              </div>
-
-              <div className="hidden min-w-0 items-center gap-3 sm:flex">
+              <div className="min-w-0 items-center gap-3 rounded-2xl border border-border/30 bg-secondary/20 p-3 sm:flex">
                 <Avatar className="h-10 w-10 border-2 border-background ring-1 ring-border/20 shadow-sm">
                   <AvatarImage src={creatorImage} />
                   <AvatarFallback className={cn("font-bold text-white", theme.bg)}>
@@ -260,14 +237,14 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
                 <div className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-bold text-foreground/90">{cls.creator.name}</span>
                   <span className="flex items-center gap-1 truncate text-[10px] font-medium text-muted-foreground">
-                    <Building2 className="h-3 w-3" /> {cls.institutionName}
+                    <ShieldCheck className="h-3 w-3" /> Created by class owner
                   </span>
                 </div>
               </div>
             </div>
 
             <div className="mt-5 border-t border-border/40 pt-4 sm:mt-8 sm:pt-5">
-              <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:w-auto lg:min-w-[260px]">
+              <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
                 {membership.memberRole === "CR" && (
                   <Link href={`/dashboard/classroom/${cls.id}/manage`} className="w-full">
                     <Button variant="outline" className="w-full rounded-2xl px-4 font-bold">
@@ -284,7 +261,7 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
                     className={cn(
                       "w-full rounded-2xl px-4 font-bold text-white transition-all duration-300",
                       theme.bg,
-                      "shadow-lg hover:brightness-110 hover:shadow-xl lg:group-hover:px-6"
+                      "shadow-lg hover:brightness-110 hover:shadow-xl"
                     )}
                   >
                     Enter
@@ -303,48 +280,6 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
           />
         </Card>
       </motion.div>
-
-      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="max-w-[calc(100%-1.5rem)] rounded-[2rem] border-border/50 bg-background/95 p-0 backdrop-blur-xl sm:hidden">
-          <DialogHeader className="border-b border-border/30 px-5 py-5">
-            <DialogTitle className="text-lg font-black">{cls.name}</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              More classroom details for mobile view.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3 px-5 py-5">
-            {mobileDetails.map((item) => (
-              <div key={item.label} className="flex items-start gap-3 rounded-2xl border border-border/40 bg-card/40 p-3">
-                <div className={cn("mt-0.5 rounded-xl p-2", theme.light)}>
-                  <item.icon className={cn("h-4 w-4", theme.text)} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground">
-                    {item.label}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-foreground">{item.value}</p>
-                </div>
-              </div>
-            ))}
-
-            <div className="flex items-center gap-3 rounded-2xl border border-border/40 bg-card/40 p-3">
-              <Avatar className="h-10 w-10 border-2 border-background ring-1 ring-border/20 shadow-sm">
-                <AvatarImage src={creatorImage} />
-                <AvatarFallback className={cn("font-bold text-white", theme.bg)}>
-                  {cls.creator.name[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground">
-                  Created by
-                </p>
-                <p className="truncate text-sm font-semibold text-foreground">{cls.creator.name}</p>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <AlertDialog open={leaveModalOpen} onOpenChange={setLeaveModalOpen}>
         <AlertDialogContent className="rounded-[2rem]">

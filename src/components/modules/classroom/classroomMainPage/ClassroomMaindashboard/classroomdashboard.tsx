@@ -58,19 +58,19 @@ export default function ClassroomDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10">
+    <div className="min-h-screen bg-background px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-10">
       <ClassroomNoticeCenter notice={notice} />
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <ClassroomHeader />
 
         {/* SEARCH BAR */}
-        <div className="relative mb-10 group">
+        <div className="group relative mb-8 sm:mb-10">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground transition-colors group-focus-within:text-orange-500" />
           <Input
             placeholder="Search by name, teacher or institution..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-14 pl-12 rounded-[1.5rem] border-border bg-card/50 backdrop-blur-sm focus-visible:ring-orange-500/20 focus-visible:border-orange-500 transition-all"
+            className="h-12 rounded-[1.25rem] border-border bg-card/50 pl-12 text-sm backdrop-blur-sm transition-all focus-visible:border-orange-500 focus-visible:ring-orange-500/20 sm:h-14 sm:rounded-[1.5rem] sm:text-base"
           />
         </div>
 
@@ -91,7 +91,7 @@ export default function ClassroomDashboard() {
           </div>
         ) : filteredMemberships.length > 0 ? (
           /* DATA GRID */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3 xl:gap-6">
             {filteredMemberships.map((item) => (
               <ClassroomCard
                 key={item.classroom.id}
