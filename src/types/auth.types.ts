@@ -51,9 +51,14 @@ export interface IVerifyEmailResponse {
 }
 
 export interface UserFromCookie {
+    id?: string;
     name: string;
     email: string;
     role: string;
+    status?: string;
+    emailVerified?: boolean;
+    needPasswordChange?: boolean;
+    createdAt?: string;
     avatar?: string | null;
     image?: string | null;
 }

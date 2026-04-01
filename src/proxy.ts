@@ -2,7 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDefaultDashboardRoute, getRouteOwner, isAuthRoute, UserRole } from "./lib/authUtils";
 import { jwtUtils } from "./lib/jwtUtils";
 import { isTokenExpiringSoon } from "./lib/tokenUtils";
-import { getNewTokensWithRefreshToken, getUserInfo } from "./services/auth/auth.services";
+import { getNewTokensWithRefreshToken } from "./services/auth/auth.services";
+import { UserFromCookie } from "./types/auth.types";
+
+const readUserFromCookie = (request: NextRequest): UserFromCookie | null => {
+    const rawUserCookie = request.cookies.get("user")?.value;
+
+    if (!rawUserCookie) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(rawUserCookie) as UserFromCookie;
+    } catch (error) {
+        console.error("Failed to parse user cookie in proxy:", error);
+        return null;
+    }
+};
 
 async function refreshTokenMiddleware(refreshToken: string): Promise<boolean> {
     try {
@@ -24,6 +40,7 @@ export async function proxy(request: NextRequest) {
         const pathWithQuery = `${pathname}${request.nextUrl.search}`;
         const accessToken = request.cookies.get("accessToken")?.value;
         const refreshToken = request.cookies.get("refreshToken")?.value;
+        const cookieUser = readUserFromCookie(request);
 
         const accessTokenSecret =
             process.env.ACCESS_TOKEN_SECRET ?? process.env.JWT_ACCESS_SECRET;
@@ -108,9 +125,7 @@ export async function proxy(request: NextRequest) {
             // case - 1 user has needPasswordChange true
             //no need for case 1 if need password change is handled from change-password page
             if (accessToken && email) {
-                const userInfo = await getUserInfo();
-
-                if (userInfo.needPasswordChange) {
+                if (cookieUser?.needPasswordChange) {
                     return NextResponse.next();
                 } else {
                     return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
@@ -142,39 +157,34 @@ export async function proxy(request: NextRequest) {
 
         //Rule - Enforcing user to stay in reset password or verify email page if their needPasswordChange or isEmailVerified flags are not satisfied respectively
 
-        if (accessToken) {
-            const userInfo = await getUserInfo();
-
-            if (userInfo) {
-                // need email verification scenario
-                if (userInfo.emailVerified === false) {
-                    if (pathname !== "/verify-email") {
-                        const verifyEmailUrl = new URL("/verify-email", request.url);
-                        verifyEmailUrl.searchParams.set("email", userInfo.email);
-                        return NextResponse.redirect(verifyEmailUrl);
-                    }
-
-                    return NextResponse.next();
+        if (accessToken && cookieUser) {
+            // Use the locally stored auth snapshot so navigation does not wait on an extra backend call.
+            if (cookieUser.emailVerified === false) {
+                if (pathname !== "/verify-email") {
+                    const verifyEmailUrl = new URL("/verify-email", request.url);
+                    verifyEmailUrl.searchParams.set("email", cookieUser.email);
+                    return NextResponse.redirect(verifyEmailUrl);
                 }
 
-                if (userInfo.emailVerified && pathname === "/verify-email") {
-                    return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
+                return NextResponse.next();
+            }
+
+            if (cookieUser.emailVerified && pathname === "/verify-email") {
+                return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
+            }
+
+            if (cookieUser.needPasswordChange) {
+                if (pathname !== "/reset-password") {
+                    const resetPasswordUrl = new URL("/reset-password", request.url);
+                    resetPasswordUrl.searchParams.set("email", cookieUser.email);
+                    return NextResponse.redirect(resetPasswordUrl);
                 }
 
-                // need password change scenario
-                if (userInfo.needPasswordChange) {
-                    if (pathname !== "/reset-password") {
-                        const resetPasswordUrl = new URL("/reset-password", request.url);
-                        resetPasswordUrl.searchParams.set("email", userInfo.email);
-                        return NextResponse.redirect(resetPasswordUrl);
-                    }
+                return NextResponse.next();
+            }
 
-                    return NextResponse.next();
-                }
-
-                if (!userInfo.needPasswordChange && pathname === "/reset-password") {
-                    return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
-                }
+            if (cookieUser.needPasswordChange === false && pathname === "/reset-password") {
+                return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
             }
         }
 

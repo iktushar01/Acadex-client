@@ -5,9 +5,14 @@ import { getUserInfo } from "@/services/auth/auth.services";
 import { UserFromCookie } from "@/types/auth.types";
 
 const mapUserToCookieShape = (user: {
+  id?: string;
   name: string;
   email: string;
   role: string;
+  status?: string;
+  emailVerified?: boolean;
+  needPasswordChange?: boolean;
+  createdAt?: string;
   image?: string | null;
   student?: { profilePhoto?: string | null } | null;
   admin?: { profilePhoto?: string | null } | null;
@@ -19,9 +24,14 @@ const mapUserToCookieShape = (user: {
     null;
 
   return {
+    id: user.id,
     name: user.name,
     email: user.email,
     role: user.role,
+    status: user.status,
+    emailVerified: user.emailVerified,
+    needPasswordChange: user.needPasswordChange,
+    createdAt: user.createdAt,
     avatar,
     image: user.image ?? avatar,
   };

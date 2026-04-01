@@ -7,9 +7,14 @@ interface OAuthCompleteBody {
   refreshToken?: string;
   redirectPath?: string;
   user?: {
+    id?: string;
     name: string;
     email: string;
     role: string;
+    status?: string;
+    emailVerified?: boolean;
+    needPasswordChange?: boolean;
+    createdAt?: string;
     image?: string | null;
   };
 }
@@ -41,9 +46,14 @@ export async function POST(request: NextRequest) {
   await setCookie(
     "user",
     JSON.stringify({
+      id: body.user.id,
       name: body.user.name,
       email: body.user.email,
       role: normalizedRole,
+      status: body.user.status,
+      emailVerified: body.user.emailVerified,
+      needPasswordChange: body.user.needPasswordChange,
+      createdAt: body.user.createdAt,
       avatar: body.user.image ?? null,
       image: body.user.image ?? null,
     }),
