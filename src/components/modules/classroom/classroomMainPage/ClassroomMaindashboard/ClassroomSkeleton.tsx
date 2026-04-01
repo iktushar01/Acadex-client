@@ -23,7 +23,7 @@ export const ClassroomSkeleton = () => {
               </div>
             </div>
 
-            <div className="mt-4 flex-1 space-y-4 sm:mt-6">
+            <div className="mt-4 flex-1 space-y-4">
               <div className="space-y-3">
                 <Skeleton className="h-7 w-3/4 rounded-xl bg-muted/50 sm:h-8" />
                 <div className="flex flex-wrap items-center gap-2">
@@ -32,11 +32,9 @@ export const ClassroomSkeleton = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Skeleton className="h-20 rounded-2xl bg-muted/50" />
-                <Skeleton className="h-20 rounded-2xl bg-muted/50" />
-                <Skeleton className="h-20 rounded-2xl bg-muted/50" />
-                <Skeleton className="h-20 rounded-2xl bg-muted/50" />
+              <div className="flex flex-wrap items-center gap-2">
+                <Skeleton className="h-7 w-24 rounded-full bg-muted/50" />
+                <Skeleton className="h-7 w-28 rounded-full bg-muted/50" />
               </div>
 
               <div className="flex items-center gap-3 rounded-2xl border border-border/30 bg-secondary/20 p-3">
@@ -48,7 +46,7 @@ export const ClassroomSkeleton = () => {
               </div>
             </div>
 
-            <div className="mt-5 border-t border-border/50 pt-4 sm:mt-8 sm:pt-5">
+            <div className="mt-5 border-t border-border/50 pt-4">
               <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
                 {i % 2 !== 0 && <Skeleton className="h-11 w-full rounded-2xl bg-muted/50" />}
                 <Skeleton

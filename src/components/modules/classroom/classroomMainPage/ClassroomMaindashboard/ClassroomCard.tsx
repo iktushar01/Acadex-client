@@ -36,6 +36,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -78,6 +85,14 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
   const activeStudentsCount = cls._count?.memberships ?? 0;
   const creatorImage = cls.creator.image ?? undefined;
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  const details = [
+    { icon: Layers, label: "Class", value: cls.className || "Class not set" },
+    { icon: FlaskConical, label: "Department", value: cls.department || "Department not set" },
+    { icon: Users, label: "Students", value: `${activeStudentsCount} active students` },
+    { icon: Building2, label: "Institution", value: cls.institutionName || "Institution not set" },
+  ];
 
   const copyJoinCode = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -171,6 +186,16 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
                       <Copy className="h-4 w-4" /> Copy Join Code
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setDetailsOpen(true);
+                      }}
+                      className="cursor-pointer gap-2 rounded-lg py-2.5 focus:bg-primary/5"
+                    >
+                      <BookOpenText className="h-4 w-4" /> Details
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="opacity-50" />
+                    <DropdownMenuItem
                       disabled={membership.memberRole === "CR"}
                       onClick={(event) => {
                         event.preventDefault();
@@ -186,7 +211,7 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
               </div>
             </div>
 
-            <div className="mt-4 flex-1 space-y-4 sm:mt-6">
+            <div className="mt-4 flex-1 space-y-4">
               <div className="min-w-0">
                 <h3 className="break-words text-lg font-black leading-tight tracking-tight decoration-border/50 underline-offset-4 group-hover:underline sm:text-2xl">
                   {cls.name}
@@ -201,33 +226,16 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {[
-                  { icon: Layers, eyebrow: "Class", label: cls.className || "Class not set" },
-                  { icon: FlaskConical, eyebrow: "Department", label: cls.department || "Department not set" },
-                  { icon: Users, eyebrow: "Students", label: `${activeStudentsCount} active` },
-                  { icon: Building2, eyebrow: "Institution", label: cls.institutionName },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="min-w-0 rounded-2xl border border-border/30 bg-secondary/20 p-3 transition-colors group-hover:bg-secondary/40"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={cn("mt-0.5 rounded-xl p-2", theme.light)}>
-                        <item.icon className={cn("h-4 w-4 shrink-0", theme.text)} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
-                          {item.eyebrow}
-                        </p>
-                        <p className="mt-1 break-words text-sm font-bold leading-5 text-foreground">{item.label}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="rounded-full bg-secondary/30 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                  {cls.className || "Class not set"}
+                </Badge>
+                <Badge variant="outline" className="rounded-full bg-secondary/30 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                  {activeStudentsCount} Students
+                </Badge>
               </div>
 
-              <div className="min-w-0 items-center gap-3 rounded-2xl border border-border/30 bg-secondary/20 p-3 sm:flex">
+              <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-border/30 bg-secondary/20 p-3">
                 <Avatar className="h-10 w-10 border-2 border-background ring-1 ring-border/20 shadow-sm">
                   <AvatarImage src={creatorImage} />
                   <AvatarFallback className={cn("font-bold text-white", theme.bg)}>
@@ -243,7 +251,7 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
               </div>
             </div>
 
-            <div className="mt-5 border-t border-border/40 pt-4 sm:mt-8 sm:pt-5">
+            <div className="mt-5 border-t border-border/40 pt-4">
               <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
                 {membership.memberRole === "CR" && (
                   <Link href={`/dashboard/classroom/${cls.id}/manage`} className="w-full">
@@ -280,6 +288,76 @@ export const ClassroomCard = ({ membership, onLeftClassroom }: ClassroomCardProp
           />
         </Card>
       </motion.div>
+
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-h-[85vh] max-w-[calc(100%-1rem)] overflow-hidden rounded-[2rem] border-border/50 bg-background/95 p-0 backdrop-blur-xl sm:max-w-xl">
+          <DialogHeader className="border-b border-border/30 px-6 py-6">
+            <div className="flex items-start gap-4">
+              <div className={cn("flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-xl", theme.bg, theme.shadow)}>
+                <GraduationCap className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <DialogTitle className="break-words text-xl font-black tracking-tight">{cls.name}</DialogTitle>
+                <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                  Full classroom details and quick context.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="max-h-[calc(85vh-112px)] space-y-4 overflow-y-auto px-6 py-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="bg-background/60 text-[10px] font-bold uppercase tracking-widest">
+                {cls.level}
+              </Badge>
+              <Badge className={cn("border-none text-[10px] font-bold uppercase tracking-wider text-white", theme.bg)}>
+                {membership.memberRole}
+              </Badge>
+            </div>
+
+            <div className="rounded-2xl border border-border/40 bg-card/50 p-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground">Join Code</p>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <code className={cn("break-all text-sm font-bold", theme.text)}>{cls.joinCode}</code>
+                <Button variant="outline" size="sm" className="rounded-xl font-bold" onClick={copyJoinCode}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {details.map((item) => (
+                <div key={item.label} className="rounded-2xl border border-border/40 bg-card/40 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className={cn("rounded-xl p-2", theme.light)}>
+                      <item.icon className={cn("h-4 w-4", theme.text)} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">{item.label}</p>
+                      <p className="mt-1 break-words text-sm font-semibold text-foreground">{item.value}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3 rounded-2xl border border-border/40 bg-card/40 p-4">
+              <Avatar className="h-11 w-11 border-2 border-background ring-1 ring-border/20 shadow-sm">
+                <AvatarImage src={creatorImage} />
+                <AvatarFallback className={cn("font-bold text-white", theme.bg)}>
+                  {cls.creator.name[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">Created By</p>
+                <p className="truncate text-sm font-semibold text-foreground">{cls.creator.name}</p>
+                <p className="truncate text-xs text-muted-foreground">{cls.creator.email}</p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={leaveModalOpen} onOpenChange={setLeaveModalOpen}>
         <AlertDialogContent className="rounded-[2rem]">
