@@ -25,9 +25,18 @@ export async function proxy(request: NextRequest) {
         const accessToken = request.cookies.get("accessToken")?.value;
         const refreshToken = request.cookies.get("refreshToken")?.value;
 
-        const decodedAccessToken = accessToken && jwtUtils.verifyToken(accessToken, process.env.JWT_ACCESS_SECRET as string).data;
+        const accessTokenSecret =
+            process.env.ACCESS_TOKEN_SECRET ?? process.env.JWT_ACCESS_SECRET;
 
-        const isValidAccessToken = accessToken && jwtUtils.verifyToken(accessToken, process.env.JWT_ACCESS_SECRET as string).success;
+        const decodedAccessToken =
+            accessToken && accessTokenSecret
+                ? jwtUtils.verifyToken(accessToken, accessTokenSecret).data
+                : null;
+
+        const isValidAccessToken =
+            accessToken && accessTokenSecret
+                ? jwtUtils.verifyToken(accessToken, accessTokenSecret).success
+                : false;
 
         let userRole: UserRole | null = null;
 
@@ -45,7 +54,7 @@ export async function proxy(request: NextRequest) {
 
 
         //proactively refresh token if refresh token exists and access token is expired or about to expire
-        if (isValidAccessToken && refreshToken && (await isTokenExpiringSoon(accessToken))) {
+        if (isValidAccessToken && refreshToken && accessToken && (await isTokenExpiringSoon(accessToken))) {
             const requestHeaders = new Headers(request.headers);
 
             const response = NextResponse.next({
