@@ -30,6 +30,7 @@ export const getStudentSidebarData = async (): Promise<SidebarData> => {
           { label: "Classroom", icon: "LayoutDashboard", href: "/dashboard/classroom" },
           { label: "Leaderboard", icon: "BarChart3", href: "/dashboard/classroom/leaderboard" },
           { label: "Favorites", icon: "Heart", href: "/dashboard/favorites" },
+          { label: "Services", icon: "ClipboardList", href: "/dashboard/services" },
         ],
       },
       {

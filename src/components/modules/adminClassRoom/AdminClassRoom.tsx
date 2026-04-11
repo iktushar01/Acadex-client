@@ -46,7 +46,7 @@ const AdminClassRoom = () => {
         page,
         limit: 10,
         searchTerm: searchTerm || undefined,
-        status: (statusFilter as any) || undefined,
+        status: (statusFilter as "PENDING" | "APPROVED" | "REJECTED" | "") || undefined,
       }),
     placeholderData: (prev) => prev,
   });
