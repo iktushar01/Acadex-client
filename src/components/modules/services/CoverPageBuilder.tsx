@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import { uploadCoverLogoAction } from "@/actions/coverPageActions/_uploadCoverLogoAction";
 import { Button } from "@/components/ui/button";
@@ -142,6 +143,12 @@ const CoverPageBuilder = () => {
   return (
     <div className="mx-auto max-w-7xl space-y-8 animate-in fade-in duration-500">
       <div>
+        <Link
+          href="/dashboard/services"
+          className="mb-3 inline-block text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+        >
+          ← All services
+        </Link>
         <h1 className="text-2xl font-black tracking-tight md:text-3xl">Lab report cover page</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Fill in the details, add an optional logo (stored on Cloudinary), then download as PNG or PDF.
