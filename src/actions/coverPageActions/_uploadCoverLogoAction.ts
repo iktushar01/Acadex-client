@@ -4,13 +4,21 @@ import { uploadCoverLogoService } from "@/services/coverPage/coverPage.service";
 
 export const uploadCoverLogoAction = async (formData: FormData) => {
   try {
-    const file = formData.get("logo");
-    if (!file || !(file instanceof File)) {
-      return { success: false as const, error: "A logo image file is required" };
-    }
-
     const outbound = new FormData();
-    outbound.append("logo", file);
+    const file = formData.get("logo");
+    const logoUrl = formData.get("logoUrl");
+    const fileName = formData.get("fileName");
+
+    if (file instanceof File) {
+      outbound.append("logo", file);
+    } else if (typeof logoUrl === "string" && logoUrl.trim()) {
+      outbound.append("logoUrl", logoUrl);
+      if (typeof fileName === "string" && fileName.trim()) {
+        outbound.append("fileName", fileName);
+      }
+    } else {
+      return { success: false as const, error: "A logo image file or logo URL is required" };
+    }
 
     const response = await uploadCoverLogoService(outbound);
 

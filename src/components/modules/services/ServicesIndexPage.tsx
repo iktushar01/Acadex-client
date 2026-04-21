@@ -6,7 +6,7 @@ import { ArrowRight, FileStack, Sparkles } from "lucide-react";
 const services = [
   {
     id: "cover-page",
-    title: "Lab report cover page",
+    title: "Lab report & Assignment cover page",
     description:
       "Generate a printable A4 cover page for lab reports and assignments. Add your institution logo, course details, and download as PNG or PDF.",
     href: "/dashboard/services/cover-page",
