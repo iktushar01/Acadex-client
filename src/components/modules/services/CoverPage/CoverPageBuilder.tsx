@@ -69,7 +69,7 @@ const CoverPageBuilder = () => {
 
   const selectedUni = UNIVERSITIES.find((u) => u.id === form.selectedUniId) ?? UNIVERSITIES[0];
   const previewLogoUrl = getLogoProxyUrl(selectedUni.logo);
-  const activeCaptureLogoUrl = captureLogoUrl || previewLogoUrl;
+  const activeLogoUrl = captureLogoUrl || previewLogoUrl;
   const missingFields = useMemo(() => getMissingFields(form), [form]);
   const itemNumberLabel = getItemNumberLabel(form.documentType);
   const itemTitleLabel = getItemTitleLabel(form.documentType);
@@ -280,20 +280,12 @@ const CoverPageBuilder = () => {
                   className="absolute left-0 top-0 origin-top-left"
                   style={{ transform: "scale(0.42)", width: A4_W, height: A4_H }}
                 >
-                  <CoverPageContent form={form} logoUrl={previewLogoUrl} />
+                  <CoverPageContent form={form} logoUrl={activeLogoUrl} previewRef={previewRef} />
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      <div
-        aria-hidden
-        className="pointer-events-none fixed left-[-10000px] top-0"
-        style={{ width: A4_W, height: A4_H }}
-      >
-        <CoverPageContent form={form} logoUrl={activeCaptureLogoUrl} previewRef={previewRef} />
       </div>
 
       <MissingFieldsDialog
