@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { uploadCoverLogoAction } from "@/actions/coverPageActions/_uploadCoverLogoAction";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { A4_H, A4_W, UNIVERSITIES, defaultForm } from "./CoverPageBuilder.constants";
 import { CoverPageContent, StepBar } from "./CoverPagePreview";
@@ -14,25 +13,38 @@ import {
   getFirstMissingStep,
   getItemNumberLabel,
   getItemTitleLabel,
-  getLogoFileName,
   getLogoProxyUrl,
   getMissingFields,
 } from "./CoverPageBuilder.utils";
 
-const logoUrlCache = new Map<string, string>();
+const logoDataUrlCache = new Map<string, string>();
+
+const blobToDataUrl = (blob: Blob) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+      reject(new Error("Failed to read logo"));
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("Failed to read logo"));
+    reader.readAsDataURL(blob);
+  });
 
 const CoverPageBuilder = () => {
   const [form, setForm] = useState<FormState>(defaultForm);
   const [step, setStep] = useState(1);
-  const [resolvedLogoUrl, setResolvedLogoUrl] = useState<string | null>(null);
+  const [captureLogoUrl, setCaptureLogoUrl] = useState<string | null>(null);
   const [isLogoResolving, setIsLogoResolving] = useState(false);
   const [missingDialogOpen, setMissingDialogOpen] = useState(false);
   const [pendingFormat, setPendingFormat] = useState<DownloadFormat | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const selectedUni = UNIVERSITIES.find((u) => u.id === form.selectedUniId) ?? UNIVERSITIES[0];
-  const logoFallbackUrl = getLogoProxyUrl(selectedUni.logo);
-  const activeLogoUrl = resolvedLogoUrl || logoFallbackUrl;
+  const previewLogoUrl = getLogoProxyUrl(selectedUni.logo);
+  const activeCaptureLogoUrl = captureLogoUrl || previewLogoUrl;
   const missingFields = useMemo(() => getMissingFields(form), [form]);
   const itemNumberLabel = getItemNumberLabel(form.documentType);
   const itemTitleLabel = getItemTitleLabel(form.documentType);
@@ -41,51 +53,43 @@ const CoverPageBuilder = () => {
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  useEffect(() => {
-    let cancelled = false;
+  const prepareCaptureLogo = useCallback(async () => {
     const cacheKey = `${selectedUni.id}:${selectedUni.logo}`;
 
-    const resolveLogo = async () => {
-      if (logoUrlCache.has(cacheKey)) {
-        setResolvedLogoUrl(logoUrlCache.get(cacheKey) ?? logoFallbackUrl);
-        return;
+    if (logoDataUrlCache.has(cacheKey)) {
+      const cachedUrl = logoDataUrlCache.get(cacheKey) ?? null;
+      setCaptureLogoUrl(cachedUrl);
+      return cachedUrl;
+    }
+
+    setIsLogoResolving(true);
+
+    try {
+      const response = await fetch(previewLogoUrl, {
+        cache: "force-cache",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch logo");
       }
 
-      setResolvedLogoUrl(null);
-      setIsLogoResolving(true);
+      const blob = await response.blob();
+      const dataUrl = await blobToDataUrl(blob);
+      logoDataUrlCache.set(cacheKey, dataUrl);
+      setCaptureLogoUrl(dataUrl);
+      return dataUrl;
+    } catch {
+      setCaptureLogoUrl(null);
+      return null;
+    } finally {
+      setIsLogoResolving(false);
+    }
+  }, [previewLogoUrl, selectedUni.id, selectedUni.logo]);
 
-      try {
-        const formData = new FormData();
-        formData.append("logoUrl", selectedUni.logo);
-        formData.append("fileName", getLogoFileName(selectedUni.name, selectedUni.logo));
-        const result = await uploadCoverLogoAction(formData);
-
-        if (cancelled) return;
-
-        if (result.success && result.data?.url) {
-          logoUrlCache.set(cacheKey, result.data.url);
-          setResolvedLogoUrl(result.data.url);
-          return;
-        }
-
-        setResolvedLogoUrl(logoFallbackUrl);
-      } catch {
-        if (!cancelled) {
-          setResolvedLogoUrl(logoFallbackUrl);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLogoResolving(false);
-        }
-      }
-    };
-
-    void resolveLogo();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [logoFallbackUrl, selectedUni.id, selectedUni.logo, selectedUni.name]);
+  useEffect(() => {
+    setCaptureLogoUrl(null);
+    void prepareCaptureLogo();
+  }, [prepareCaptureLogo]);
 
   const capturePreview = useCallback(async () => {
     const element = previewRef.current;
@@ -108,6 +112,7 @@ const CoverPageBuilder = () => {
   const runDownload = useCallback(
     async (format: DownloadFormat) => {
       try {
+        await prepareCaptureLogo();
         const canvas = await capturePreview();
 
         if (!canvas) {
@@ -135,7 +140,7 @@ const CoverPageBuilder = () => {
         toast.error(`Could not create ${format.toUpperCase()}`);
       }
     },
-    [capturePreview, downloadBaseName],
+    [capturePreview, downloadBaseName, prepareCaptureLogo],
   );
 
   const requestDownload = useCallback(
@@ -248,7 +253,7 @@ const CoverPageBuilder = () => {
                   className="absolute left-0 top-0 origin-top-left"
                   style={{ transform: "scale(0.42)", width: A4_W, height: A4_H }}
                 >
-                  <CoverPageContent form={form} logoUrl={activeLogoUrl} />
+                  <CoverPageContent form={form} logoUrl={previewLogoUrl} />
                 </div>
               </div>
             </div>
@@ -256,8 +261,12 @@ const CoverPageBuilder = () => {
         </Card>
       </div>
 
-      <div className="sr-only" aria-hidden>
-        <CoverPageContent form={form} logoUrl={activeLogoUrl} previewRef={previewRef} />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed left-[-10000px] top-0 opacity-0"
+        style={{ width: A4_W, height: A4_H }}
+      >
+        <CoverPageContent form={form} logoUrl={activeCaptureLogoUrl} previewRef={previewRef} />
       </div>
 
       <MissingFieldsDialog
