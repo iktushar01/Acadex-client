@@ -33,6 +33,31 @@ const blobToDataUrl = (blob: Blob) =>
     reader.readAsDataURL(blob);
   });
 
+const waitForImages = async (element: HTMLElement) => {
+  const images = Array.from(element.querySelectorAll("img"));
+
+  await Promise.all(
+    images.map(
+      (image) =>
+        new Promise<void>((resolve) => {
+          if (image.complete && image.naturalWidth > 0) {
+            resolve();
+            return;
+          }
+
+          const done = () => {
+            image.removeEventListener("load", done);
+            image.removeEventListener("error", done);
+            resolve();
+          };
+
+          image.addEventListener("load", done, { once: true });
+          image.addEventListener("error", done, { once: true });
+        }),
+    ),
+  );
+};
+
 const CoverPageBuilder = () => {
   const [form, setForm] = useState<FormState>(defaultForm);
   const [step, setStep] = useState(1);
@@ -97,6 +122,8 @@ const CoverPageBuilder = () => {
     if (!element) {
       return null;
     }
+
+    await waitForImages(element);
 
     const html2canvas = (await import("html2canvas")).default;
 
@@ -263,7 +290,7 @@ const CoverPageBuilder = () => {
 
       <div
         aria-hidden
-        className="pointer-events-none fixed left-[-10000px] top-0 opacity-0"
+        className="pointer-events-none fixed left-[-10000px] top-0"
         style={{ width: A4_W, height: A4_H }}
       >
         <CoverPageContent form={form} logoUrl={activeCaptureLogoUrl} previewRef={previewRef} />
