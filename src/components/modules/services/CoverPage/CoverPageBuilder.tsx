@@ -116,11 +116,18 @@ const CoverPageBuilder = () => {
     void prepareCaptureLogo();
   }, [prepareCaptureLogo]);
 
-  const capturePreview = useCallback(async () => {
+  const capturePreview = useCallback(async (logoDataUrl?: string) => {
     const element = previewRef.current;
 
     if (!element) {
       return null;
+    }
+
+    if (logoDataUrl) {
+      const logoImage = element.querySelector<HTMLImageElement>('img[alt="Institution logo"]');
+      if (logoImage && logoImage.src !== logoDataUrl) {
+        logoImage.src = logoDataUrl;
+      }
     }
 
     await waitForImages(element);
@@ -139,8 +146,8 @@ const CoverPageBuilder = () => {
   const runDownload = useCallback(
     async (format: DownloadFormat) => {
       try {
-        await prepareCaptureLogo();
-        const canvas = await capturePreview();
+        const logoDataUrl = await prepareCaptureLogo();
+        const canvas = await capturePreview(logoDataUrl ?? captureLogoUrl ?? previewLogoUrl);
 
         if (!canvas) {
           toast.error("Preview is not ready yet");
@@ -167,13 +174,13 @@ const CoverPageBuilder = () => {
         toast.error(`Could not create ${format.toUpperCase()}`);
       }
     },
-    [capturePreview, downloadBaseName, prepareCaptureLogo],
+    [capturePreview, captureLogoUrl, downloadBaseName, prepareCaptureLogo, previewLogoUrl],
   );
 
   const requestDownload = useCallback(
     async (format: DownloadFormat) => {
       if (isLogoResolving) {
-        toast.message("Please wait while the logo finishes loading");
+        toast("Please wait while the logo finishes loading");
         return;
       }
 
