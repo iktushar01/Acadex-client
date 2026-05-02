@@ -35,24 +35,53 @@ const blobToDataUrl = (blob: Blob) =>
 
 const waitForImages = async (element: HTMLElement) => {
   const images = Array.from(element.querySelectorAll("img"));
+  const IMAGE_TIMEOUT_MS = 5000; // 5 second timeout per image
 
   await Promise.all(
     images.map(
       (image) =>
-        new Promise<void>((resolve) => {
-          if (image.complete && image.naturalWidth > 0) {
-            resolve();
+        new Promise<boolean>((resolve) => {
+          // Check if image is already loaded successfully
+          if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
+            resolve(true);
             return;
           }
 
-          const done = () => {
-            image.removeEventListener("load", done);
-            image.removeEventListener("error", done);
-            resolve();
+          // If image is complete but has no dimensions, it failed to load
+          if (image.complete && image.naturalWidth === 0) {
+            console.warn("Image failed to load:", image.src);
+            resolve(false);
+            return;
+          }
+
+          // Set up load/error handlers with timeout
+          let timeoutId: NodeJS.Timeout | null = null;
+          const cleanup = () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            image.removeEventListener("load", onLoad);
+            image.removeEventListener("error", onError);
           };
 
-          image.addEventListener("load", done, { once: true });
-          image.addEventListener("error", done, { once: true });
+          const onLoad = () => {
+            cleanup();
+            resolve(true);
+          };
+
+          const onError = () => {
+            cleanup();
+            console.warn("Image load error:", image.src);
+            resolve(false);
+          };
+
+          const onTimeout = () => {
+            cleanup();
+            console.warn("Image load timeout:", image.src);
+            resolve(false);
+          };
+
+          image.addEventListener("load", onLoad, { once: true });
+          image.addEventListener("error", onError, { once: true });
+          timeoutId = setTimeout(onTimeout, IMAGE_TIMEOUT_MS);
         }),
     ),
   );
@@ -120,13 +149,17 @@ const CoverPageBuilder = () => {
     const element = previewRef.current;
 
     if (!element) {
-      return null;
+      throw new Error("Preview element not found");
     }
 
     if (logoDataUrl) {
       const logoImage = element.querySelector<HTMLImageElement>('img[alt="Institution logo"]');
-      if (logoImage && logoImage.src !== logoDataUrl) {
+      if (logoImage) {
+        // Ensure CORS is set for the data URL assignment
+        logoImage.crossOrigin = "anonymous";
         logoImage.src = logoDataUrl;
+        // Give the image a moment to start loading
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
 
@@ -134,47 +167,78 @@ const CoverPageBuilder = () => {
 
     const html2canvas = (await import("html2canvas")).default;
 
-    return html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: "#ffffff",
-      logging: false,
-    });
+    try {
+      // First attempt: strict CORS requirements
+      return await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+    } catch (error) {
+      console.warn("html2canvas failed with strict CORS, retrying with allowTaint...", error);
+      // Fallback: allow tainted canvas if strict mode fails
+      return html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+    }
   }, []);
 
   const runDownload = useCallback(
     async (format: DownloadFormat) => {
       try {
-        const logoDataUrl = await prepareCaptureLogo();
-        const canvas = await capturePreview(logoDataUrl ?? captureLogoUrl ?? previewLogoUrl);
+        let logoDataUrl: string | null = null;
+        try {
+          logoDataUrl = await prepareCaptureLogo();
+        } catch (logoError) {
+          console.warn("Failed to prepare logo, will use default:", logoError);
+        }
+
+        const canvas = await capturePreview(logoDataUrl ?? captureLogoUrl ?? undefined);
 
         if (!canvas) {
-          toast.error("Preview is not ready yet");
+          toast.error("Could not capture preview. Please try again.");
           return;
         }
 
         if (format === "png") {
-          const anchor = document.createElement("a");
-          anchor.href = canvas.toDataURL("image/png");
-          anchor.download = `${downloadBaseName}.png`;
-          anchor.click();
-          toast.success("PNG downloaded");
+          try {
+            const anchor = document.createElement("a");
+            anchor.href = canvas.toDataURL("image/png");
+            anchor.download = `${downloadBaseName}.png`;
+            anchor.click();
+            toast.success("PNG downloaded");
+          } catch (downloadError) {
+            console.error("PNG download failed:", downloadError);
+            toast.error("Failed to download PNG. Please try again.");
+          }
           return;
         }
 
-        const { jsPDF } = await import("jspdf");
-        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-        const width = pdf.internal.pageSize.getWidth();
-        const height = pdf.internal.pageSize.getHeight();
-        pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, width, height, undefined, "FAST");
-        pdf.save(`${downloadBaseName}.pdf`);
-        toast.success("PDF downloaded");
-      } catch {
-        toast.error(`Could not create ${format.toUpperCase()}`);
+        try {
+          const { jsPDF } = await import("jspdf");
+          const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+          const width = pdf.internal.pageSize.getWidth();
+          const height = pdf.internal.pageSize.getHeight();
+          const imageData = canvas.toDataURL("image/png");
+          pdf.addImage(imageData, "PNG", 0, 0, width, height, undefined, "FAST");
+          pdf.save(`${downloadBaseName}.pdf`);
+          toast.success("PDF downloaded");
+        } catch (pdfError) {
+          console.error("PDF generation failed:", pdfError);
+          toast.error("Failed to create PDF. The preview may be too large. Try simplifying the form.");
+        }
+      } catch (error) {
+        console.error("Download failed:", error);
+        toast.error(`Could not create ${format.toUpperCase()}. Please try again or refresh the page.`);
       }
     },
-    [capturePreview, captureLogoUrl, downloadBaseName, prepareCaptureLogo, previewLogoUrl],
+    [capturePreview, captureLogoUrl, downloadBaseName, prepareCaptureLogo],
   );
 
   const requestDownload = useCallback(
