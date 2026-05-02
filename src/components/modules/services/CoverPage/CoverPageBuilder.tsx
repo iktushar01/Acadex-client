@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { A4_H, A4_W, UNIVERSITIES, defaultForm } from "./CoverPageBuilder.constants";
@@ -9,15 +9,21 @@ import { CoverPageContent, StepBar } from "./CoverPagePreview";
 import { MissingFieldsDialog, Step1Institution, Step2Document, Step3People, Step4Download } from "./CoverPageSteps";
 import { DownloadFormat, FormState } from "./CoverPageBuilder.types";
 import {
+  formatDate,
+  getDocumentLabel,
   getDownloadBaseName,
   getFirstMissingStep,
   getItemNumberLabel,
+  getItemNumberValue,
   getItemTitleLabel,
   getLogoProxyUrl,
   getMissingFields,
 } from "./CoverPageBuilder.utils";
 
 const logoDataUrlCache = new Map<string, string>();
+const EXPORT_SCALE = 2;
+const EXPORT_WIDTH = A4_W * EXPORT_SCALE;
+const EXPORT_HEIGHT = A4_H * EXPORT_SCALE;
 
 const blobToDataUrl = (blob: Blob) =>
   new Promise<string>((resolve, reject) => {
@@ -33,58 +39,242 @@ const blobToDataUrl = (blob: Blob) =>
     reader.readAsDataURL(blob);
   });
 
-const waitForImages = async (element: HTMLElement) => {
-  const images = Array.from(element.querySelectorAll("img"));
-  const IMAGE_TIMEOUT_MS = 5000; // 5 second timeout per image
+const loadImage = (src: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+    image.src = src;
+  });
 
-  await Promise.all(
-    images.map(
-      (image) =>
-        new Promise<boolean>((resolve) => {
-          // Check if image is already loaded successfully
-          if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
-            resolve(true);
-            return;
-          }
+const drawWrappedText = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+) => {
+  const words = text.split(/\s+/).filter(Boolean);
+  let line = "";
+  let cursorY = y;
 
-          // If image is complete but has no dimensions, it failed to load
-          if (image.complete && image.naturalWidth === 0) {
-            console.warn("Image failed to load:", image.src);
-            resolve(false);
-            return;
-          }
+  for (const word of words) {
+    const nextLine = line ? `${line} ${word}` : word;
+    if (ctx.measureText(nextLine).width <= maxWidth) {
+      line = nextLine;
+      continue;
+    }
 
-          // Set up load/error handlers with timeout
-          let timeoutId: NodeJS.Timeout | null = null;
-          const cleanup = () => {
-            if (timeoutId) clearTimeout(timeoutId);
-            image.removeEventListener("load", onLoad);
-            image.removeEventListener("error", onError);
-          };
+    if (line) {
+      ctx.fillText(line, x, cursorY);
+      cursorY += lineHeight;
+    }
 
-          const onLoad = () => {
-            cleanup();
-            resolve(true);
-          };
+    line = word;
+  }
 
-          const onError = () => {
-            cleanup();
-            console.warn("Image load error:", image.src);
-            resolve(false);
-          };
+  if (line) {
+    ctx.fillText(line, x, cursorY);
+    cursorY += lineHeight;
+  }
 
-          const onTimeout = () => {
-            cleanup();
-            console.warn("Image load timeout:", image.src);
-            resolve(false);
-          };
+  return cursorY;
+};
 
-          image.addEventListener("load", onLoad, { once: true });
-          image.addEventListener("error", onError, { once: true });
-          timeoutId = setTimeout(onTimeout, IMAGE_TIMEOUT_MS);
-        }),
-    ),
-  );
+const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = EXPORT_WIDTH;
+  canvas.height = EXPORT_HEIGHT;
+
+  const ctx = canvas.getContext("2d");
+
+  if (!ctx) {
+    throw new Error("Canvas context is not available");
+  }
+
+  ctx.scale(EXPORT_SCALE, EXPORT_SCALE);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, A4_W, A4_H);
+
+  const marginX = 60;
+  const contentWidth = A4_W - marginX * 2;
+  const documentLabel = getDocumentLabel(form.documentType);
+  const itemNumberLabel = getItemNumberLabel(form.documentType);
+  const itemTitleLabel = getItemTitleLabel(form.documentType);
+  const itemNumber = getItemNumberValue(form);
+  const dash = "................................";
+
+  let cursorY = 52;
+
+  if (logoUrl) {
+    try {
+      const logo = await loadImage(logoUrl);
+      const maxWidth = 220;
+      const maxHeight = 112;
+      const ratio = Math.min(maxWidth / logo.width, maxHeight / logo.height, 1);
+      const drawWidth = Math.max(1, logo.width * ratio);
+      const drawHeight = Math.max(1, logo.height * ratio);
+      const drawX = (A4_W - drawWidth) / 2;
+
+      ctx.drawImage(logo, drawX, cursorY, drawWidth, drawHeight);
+      cursorY += drawHeight + 24;
+    } catch (error) {
+      console.warn("Logo drawing failed:", error);
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      ctx.arc(A4_W / 2, cursorY + 48, 48, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "12px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Logo", A4_W / 2, cursorY + 52);
+      cursorY += 120;
+    }
+  } else {
+    cursorY += 120;
+  }
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#1a3a6b";
+  ctx.font = "700 30px Arial";
+  ctx.fillText(form.institutionName, A4_W / 2, cursorY);
+  cursorY += 22;
+
+  if (form.tagline) {
+    ctx.fillStyle = "#555555";
+    ctx.font = "13px Arial";
+    ctx.fillText(form.tagline, A4_W / 2, cursorY + 12);
+    cursorY += 20;
+  }
+
+  if (form.department) {
+    ctx.font = "italic 12px Arial";
+    ctx.fillText(form.department, A4_W / 2, cursorY + 10);
+    cursorY += 18;
+  }
+
+  cursorY += 18;
+
+  const gradient = ctx.createLinearGradient(marginX, 0, A4_W - marginX, 0);
+  gradient.addColorStop(0, "#1a3a6b");
+  gradient.addColorStop(0.5, "#2a5aa0");
+  gradient.addColorStop(1, "#1a3a6b");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(marginX, cursorY, contentWidth, 2);
+  ctx.fillStyle = "#2a5aa0";
+  ctx.fillRect((A4_W - contentWidth * 0.6) / 2, cursorY + 4, contentWidth * 0.6, 1);
+  cursorY += 42;
+
+  ctx.fillStyle = "#1a1a1a";
+  ctx.font = "300 38px Arial";
+  ctx.fillText(documentLabel, A4_W / 2, cursorY);
+  ctx.fillStyle = "#c4933a";
+  ctx.fillRect(A4_W / 2 - 36, cursorY + 8, 72, 2);
+  cursorY += 54;
+
+  const rows: [string, string][] = [
+    [itemNumberLabel, itemNumber],
+    [itemTitleLabel, form.itemTitle],
+    ["Subject Name & Code", [form.subjectName, form.subjectCode].filter(Boolean).join(" - ")],
+  ];
+
+  const labelX = marginX;
+  const valueX = marginX + 212;
+
+  for (const [label, value] of rows) {
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#111827";
+    ctx.font = "600 17px Arial";
+    ctx.fillText(label, labelX, cursorY);
+
+    ctx.fillStyle = value ? "#1a1a1a" : "#b8b8b8";
+    ctx.font = "17px Arial";
+    drawWrappedText(ctx, value || dash, valueX, cursorY, A4_W - marginX - valueX, 22);
+
+    ctx.strokeStyle = "#e8e4dd";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(valueX, cursorY + 10);
+    ctx.lineTo(A4_W - marginX, cursorY + 10);
+    ctx.stroke();
+
+    cursorY += 40;
+  }
+
+  const boxTop = A4_H - 300;
+  const boxGap = 20;
+  const boxWidth = (contentWidth - boxGap) / 2;
+  const boxHeight = 220;
+
+  const drawInfoBox = (
+    x: number,
+    title: string,
+    rowsToRender: [string, string][],
+    footer?: () => void,
+  ) => {
+    ctx.strokeStyle = "#1a3a6b";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x, boxTop, boxWidth, boxHeight);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#1a3a6b";
+    ctx.font = "700 18px Arial";
+    ctx.fillText(title, x + boxWidth / 2, boxTop + 28);
+
+    let rowY = boxTop + 64;
+    for (const [label, value] of rowsToRender) {
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#111827";
+      ctx.font = "600 15px Arial";
+      ctx.fillText(label, x + 16, rowY);
+
+      ctx.fillStyle = value ? "#1a1a1a" : "#b8b8b8";
+      ctx.font = "15px Arial";
+      ctx.fillText(value || dash, x + 118, rowY, boxWidth - 136);
+
+      ctx.strokeStyle = "#cfcfcf";
+      ctx.setLineDash([2, 4]);
+      ctx.beginPath();
+      ctx.moveTo(x + 118, rowY + 5);
+      ctx.lineTo(x + boxWidth - 16, rowY + 5);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      rowY += 30;
+    }
+
+    footer?.();
+  };
+
+  drawInfoBox(marginX, "Submitted To:", [
+    ["Name:", form.teacherName],
+    ["Designation:", form.teacherDesignation],
+  ], () => {
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#333333";
+    ctx.font = "15px Arial";
+    ctx.fillText(form.institutionName || "Institution Name", marginX + 16, boxTop + 154, boxWidth - 32);
+
+    ctx.fillStyle = "#111827";
+    ctx.font = "700 15px Arial";
+    ctx.fillText("Date:", marginX + 16, boxTop + 184);
+    ctx.font = "15px Arial";
+    ctx.fillText(formatDate(form.submissionDate), marginX + 68, boxTop + 184);
+  });
+
+  drawInfoBox(marginX + boxWidth + boxGap, "Submitted By", [
+    ["Name:", form.studentName],
+    ["Student ID:", form.studentId],
+    ["Batch & Group:", form.batchGroup],
+    ["Section:", form.section],
+  ]);
+
+  return canvas;
 };
 
 const CoverPageBuilder = () => {
@@ -94,7 +284,6 @@ const CoverPageBuilder = () => {
   const [isLogoResolving, setIsLogoResolving] = useState(false);
   const [missingDialogOpen, setMissingDialogOpen] = useState(false);
   const [pendingFormat, setPendingFormat] = useState<DownloadFormat | null>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   const selectedUni = UNIVERSITIES.find((u) => u.id === form.selectedUniId) ?? UNIVERSITIES[0];
   const previewLogoUrl = getLogoProxyUrl(selectedUni.logo);
@@ -119,10 +308,7 @@ const CoverPageBuilder = () => {
     setIsLogoResolving(true);
 
     try {
-      const response = await fetch(previewLogoUrl, {
-        cache: "force-cache",
-      });
-
+      const response = await fetch(previewLogoUrl, { cache: "force-cache" });
       if (!response.ok) {
         throw new Error("Failed to fetch logo");
       }
@@ -132,7 +318,8 @@ const CoverPageBuilder = () => {
       logoDataUrlCache.set(cacheKey, dataUrl);
       setCaptureLogoUrl(dataUrl);
       return dataUrl;
-    } catch {
+    } catch (error) {
+      console.warn("Logo preparation failed:", error);
       setCaptureLogoUrl(null);
       return null;
     } finally {
@@ -141,104 +328,38 @@ const CoverPageBuilder = () => {
   }, [previewLogoUrl, selectedUni.id, selectedUni.logo]);
 
   useEffect(() => {
-    setCaptureLogoUrl(null);
     void prepareCaptureLogo();
   }, [prepareCaptureLogo]);
-
-  const capturePreview = useCallback(async (logoDataUrl?: string) => {
-    const element = previewRef.current;
-
-    if (!element) {
-      throw new Error("Preview element not found");
-    }
-
-    if (logoDataUrl) {
-      const logoImage = element.querySelector<HTMLImageElement>('img[alt="Institution logo"]');
-      if (logoImage) {
-        // Ensure CORS is set for the data URL assignment
-        logoImage.crossOrigin = "anonymous";
-        logoImage.src = logoDataUrl;
-        // Give the image a moment to start loading
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-    }
-
-    await waitForImages(element);
-
-    const html2canvas = (await import("html2canvas")).default;
-
-    try {
-      // First attempt: strict CORS requirements
-      return await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: "#ffffff",
-        logging: false,
-      });
-    } catch (error) {
-      console.warn("html2canvas failed with strict CORS, retrying with allowTaint...", error);
-      // Fallback: allow tainted canvas if strict mode fails
-      return html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-      });
-    }
-  }, []);
 
   const runDownload = useCallback(
     async (format: DownloadFormat) => {
       try {
-        let logoDataUrl: string | null = null;
-        try {
-          logoDataUrl = await prepareCaptureLogo();
-        } catch (logoError) {
-          console.warn("Failed to prepare logo, will use default:", logoError);
-        }
-
-        const canvas = await capturePreview(logoDataUrl ?? captureLogoUrl ?? undefined);
-
-        if (!canvas) {
-          toast.error("Could not capture preview. Please try again.");
-          return;
-        }
+        const logoDataUrl = (await prepareCaptureLogo()) ?? captureLogoUrl ?? previewLogoUrl;
+        const canvas = await renderCoverPageCanvas(form, logoDataUrl);
 
         if (format === "png") {
-          try {
-            const anchor = document.createElement("a");
-            anchor.href = canvas.toDataURL("image/png");
-            anchor.download = `${downloadBaseName}.png`;
-            anchor.click();
-            toast.success("PNG downloaded");
-          } catch (downloadError) {
-            console.error("PNG download failed:", downloadError);
-            toast.error("Failed to download PNG. Please try again.");
-          }
+          const anchor = document.createElement("a");
+          anchor.href = canvas.toDataURL("image/png");
+          anchor.download = `${downloadBaseName}.png`;
+          anchor.click();
+          toast.success("PNG downloaded");
           return;
         }
 
-        try {
-          const { jsPDF } = await import("jspdf");
-          const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-          const width = pdf.internal.pageSize.getWidth();
-          const height = pdf.internal.pageSize.getHeight();
-          const imageData = canvas.toDataURL("image/png");
-          pdf.addImage(imageData, "PNG", 0, 0, width, height, undefined, "FAST");
-          pdf.save(`${downloadBaseName}.pdf`);
-          toast.success("PDF downloaded");
-        } catch (pdfError) {
-          console.error("PDF generation failed:", pdfError);
-          toast.error("Failed to create PDF. The preview may be too large. Try simplifying the form.");
-        }
+        const { jsPDF } = await import("jspdf");
+        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const width = pdf.internal.pageSize.getWidth();
+        const height = pdf.internal.pageSize.getHeight();
+
+        pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, width, height, undefined, "FAST");
+        pdf.save(`${downloadBaseName}.pdf`);
+        toast.success("PDF downloaded");
       } catch (error) {
-        console.error("Download failed:", error);
+        console.error("Cover page export failed:", error);
         toast.error(`Could not create ${format.toUpperCase()}. Please try again or refresh the page.`);
       }
     },
-    [capturePreview, captureLogoUrl, downloadBaseName, prepareCaptureLogo],
+    [captureLogoUrl, downloadBaseName, form, prepareCaptureLogo, previewLogoUrl],
   );
 
   const requestDownload = useCallback(
@@ -346,12 +467,15 @@ const CoverPageBuilder = () => {
           </CardHeader>
           <CardContent className="overflow-x-auto pb-6">
             <div className="flex min-h-[280px] justify-center py-2">
-              <div className="relative overflow-hidden rounded-lg shadow-md" style={{ width: A4_W * 0.42, height: A4_H * 0.42 }}>
+              <div
+                className="relative overflow-hidden rounded-lg shadow-md"
+                style={{ width: A4_W * 0.42, height: A4_H * 0.42 }}
+              >
                 <div
                   className="absolute left-0 top-0 origin-top-left"
                   style={{ transform: "scale(0.42)", width: A4_W, height: A4_H }}
                 >
-                  <CoverPageContent form={form} logoUrl={activeLogoUrl} previewRef={previewRef} />
+                  <CoverPageContent form={form} logoUrl={activeLogoUrl} />
                 </div>
               </div>
             </div>
