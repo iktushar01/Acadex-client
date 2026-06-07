@@ -34,4 +34,4 @@ export type MissingField = {
   step: number;
 };
 
-export type DownloadFormat = "png" | "pdf";
+export type DownloadFormat = "png" | "pdf" | "merged-pdf";

@@ -269,7 +269,7 @@ export function CoverPageContent({
               ["Name:", form.studentName],
               ["Student ID:", form.studentId],
               ["Semester:", form.batchGroup],
-              ["Batch & Section:", form.section],
+              ["Batch", form.section],
             ] as [string, string][]
           ).map(([k, v]) => (
             <div

@@ -25,6 +25,28 @@ const EXPORT_SCALE = 2;
 const EXPORT_WIDTH = A4_W * EXPORT_SCALE;
 const EXPORT_HEIGHT = A4_H * EXPORT_SCALE;
 
+const dataUrlToBytes = (dataUrl: string) => {
+  const base64 = dataUrl.split(",")[1];
+  const binary = window.atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return bytes;
+};
+
+const downloadBytes = (bytes: Uint8Array, fileName: string, type: string) => {
+  const arrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+  const url = URL.createObjectURL(new Blob([arrayBuffer], { type }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+};
+
 const blobToDataUrl = (blob: Blob) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -282,8 +304,10 @@ const CoverPageBuilder = () => {
   const [step, setStep] = useState(1);
   const [captureLogoUrl, setCaptureLogoUrl] = useState<string | null>(null);
   const [isLogoResolving, setIsLogoResolving] = useState(false);
+  const [isMergingPdf, setIsMergingPdf] = useState(false);
   const [missingDialogOpen, setMissingDialogOpen] = useState(false);
   const [pendingFormat, setPendingFormat] = useState<DownloadFormat | null>(null);
+  const [pendingMergeFile, setPendingMergeFile] = useState<File | null>(null);
 
   const selectedUni = UNIVERSITIES.find((u) => u.id === form.selectedUniId) ?? UNIVERSITIES[0];
   const previewLogoUrl = getLogoProxyUrl(selectedUni.logo);
@@ -332,7 +356,7 @@ const CoverPageBuilder = () => {
   }, [prepareCaptureLogo]);
 
   const runDownload = useCallback(
-    async (format: DownloadFormat) => {
+    async (format: DownloadFormat, mergeFile?: File) => {
       try {
         const logoDataUrl = (await prepareCaptureLogo()) ?? captureLogoUrl ?? previewLogoUrl;
         const canvas = await renderCoverPageCanvas(form, logoDataUrl);
@@ -346,6 +370,42 @@ const CoverPageBuilder = () => {
           return;
         }
 
+        if (format === "merged-pdf") {
+          if (!mergeFile) {
+            toast.error("Please choose a PDF to merge with your cover page.");
+            return;
+          }
+
+          if (mergeFile.type && mergeFile.type !== "application/pdf") {
+            toast.error("Only PDF files can be merged.");
+            return;
+          }
+
+          setIsMergingPdf(true);
+
+          const { PDFDocument } = await import("pdf-lib");
+          const mergedPdf = await PDFDocument.create();
+          const coverImage = await mergedPdf.embedPng(dataUrlToBytes(canvas.toDataURL("image/png")));
+          const coverPage = mergedPdf.addPage([595.28, 841.89]);
+
+          coverPage.drawImage(coverImage, {
+            x: 0,
+            y: 0,
+            width: coverPage.getWidth(),
+            height: coverPage.getHeight(),
+          });
+
+          const sourcePdf = await PDFDocument.load(await mergeFile.arrayBuffer());
+          const sourcePages = await mergedPdf.copyPages(sourcePdf, sourcePdf.getPageIndices());
+
+          sourcePages.forEach((page) => mergedPdf.addPage(page));
+
+          const mergedBytes = await mergedPdf.save();
+          downloadBytes(mergedBytes, `${downloadBaseName}-merged.pdf`, "application/pdf");
+          toast.success("Merged PDF downloaded");
+          return;
+        }
+
         const { jsPDF } = await import("jspdf");
         const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
         const width = pdf.internal.pageSize.getWidth();
@@ -356,17 +416,38 @@ const CoverPageBuilder = () => {
         toast.success("PDF downloaded");
       } catch (error) {
         console.error("Cover page export failed:", error);
-        toast.error(`Could not create ${format.toUpperCase()}. Please try again or refresh the page.`);
+        const formatLabel = format === "merged-pdf" ? "merged PDF" : format.toUpperCase();
+        toast.error(`Could not create ${formatLabel}. Please try again or refresh the page.`);
+      } finally {
+        if (format === "merged-pdf") {
+          setIsMergingPdf(false);
+        }
       }
     },
     [captureLogoUrl, downloadBaseName, form, prepareCaptureLogo, previewLogoUrl],
   );
 
   const requestDownload = useCallback(
-    async (format: DownloadFormat) => {
+    async (format: DownloadFormat, mergeFile?: File) => {
       if (isLogoResolving) {
         toast("Please wait while the logo finishes loading");
         return;
+      }
+
+      if (format === "merged-pdf") {
+        if (!mergeFile) {
+          toast.error("Please choose a PDF to merge with your cover page.");
+          return;
+        }
+
+        if (mergeFile.type && mergeFile.type !== "application/pdf") {
+          toast.error("Only PDF files can be merged.");
+          return;
+        }
+
+        setPendingMergeFile(mergeFile);
+      } else {
+        setPendingMergeFile(null);
       }
 
       setPendingFormat(format);
@@ -376,8 +457,9 @@ const CoverPageBuilder = () => {
         return;
       }
 
-      await runDownload(format);
+      await runDownload(format, mergeFile);
       setPendingFormat(null);
+      setPendingMergeFile(null);
     },
     [isLogoResolving, missingFields.length, runDownload],
   );
@@ -385,13 +467,15 @@ const CoverPageBuilder = () => {
   const handleDownloadAnyway = useCallback(async () => {
     if (!pendingFormat) return;
     setMissingDialogOpen(false);
-    await runDownload(pendingFormat);
+    await runDownload(pendingFormat, pendingMergeFile ?? undefined);
     setPendingFormat(null);
-  }, [pendingFormat, runDownload]);
+    setPendingMergeFile(null);
+  }, [pendingFormat, pendingMergeFile, runDownload]);
 
   const handleContinueEditing = useCallback(() => {
     setMissingDialogOpen(false);
     setPendingFormat(null);
+    setPendingMergeFile(null);
     setStep(getFirstMissingStep(missingFields));
   }, [missingFields]);
 
@@ -399,6 +483,7 @@ const CoverPageBuilder = () => {
     setMissingDialogOpen(open);
     if (!open) {
       setPendingFormat(null);
+      setPendingMergeFile(null);
     }
   }, []);
 
@@ -451,8 +536,10 @@ const CoverPageBuilder = () => {
                 downloadBaseName={downloadBaseName}
                 onDownloadPng={() => void requestDownload("png")}
                 onDownloadPdf={() => void requestDownload("pdf")}
+                onMergePdf={(file) => void requestDownload("merged-pdf", file)}
                 onBack={() => setStep(3)}
                 isLogoResolving={isLogoResolving}
+                isMergingPdf={isMergingPdf}
               />
             )}
           </CardContent>

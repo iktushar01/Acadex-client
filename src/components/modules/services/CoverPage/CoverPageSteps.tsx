@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2, FileImage, FileText, TriangleAlert } from "lucide-react";
+import { useRef } from "react";
+import { CheckCircle2, FileImage, FilePlus2, FileText, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -277,15 +278,22 @@ export function Step4Download({
   downloadBaseName,
   onDownloadPng,
   onDownloadPdf,
+  onMergePdf,
   onBack,
   isLogoResolving,
+  isMergingPdf,
 }: {
   downloadBaseName: string;
   onDownloadPng: () => void;
   onDownloadPdf: () => void;
+  onMergePdf: (file: File) => void;
   onBack: () => void;
   isLogoResolving: boolean;
+  isMergingPdf: boolean;
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const downloadsDisabled = isLogoResolving || isMergingPdf;
+
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
@@ -302,8 +310,8 @@ export function Step4Download({
           Preparing the institution logo for download...
         </div>
       )}
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button type="button" className="rounded-xl font-bold" onClick={onDownloadPng} disabled={isLogoResolving}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <Button type="button" className="rounded-xl font-bold" onClick={onDownloadPng} disabled={downloadsDisabled}>
           <FileImage className="mr-2 h-4 w-4" />
           Download PNG
         </Button>
@@ -312,10 +320,34 @@ export function Step4Download({
           variant="secondary"
           className="rounded-xl font-bold"
           onClick={onDownloadPdf}
-          disabled={isLogoResolving}
+          disabled={downloadsDisabled}
         >
           <FileText className="mr-2 h-4 w-4" />
           Download PDF
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/pdf,.pdf"
+          className="hidden"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+
+            if (file) {
+              onMergePdf(file);
+            }
+          }}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          className="rounded-xl font-bold"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={downloadsDisabled}
+        >
+          <FilePlus2 className="mr-2 h-4 w-4" />
+          {isMergingPdf ? "Merging..." : "Merge with PDF"}
         </Button>
       </div>
       <div className="pt-2">
@@ -342,6 +374,9 @@ export function MissingFieldsDialog({
   onDownloadAnyway: () => void;
   onOpenChange: (open: boolean) => void;
 }) {
+  const pendingFormatLabel =
+    pendingFormat === "merged-pdf" ? "merged PDF" : pendingFormat?.toUpperCase() ?? "file";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-[2rem] sm:max-w-lg">
@@ -351,7 +386,7 @@ export function MissingFieldsDialog({
             Some details are still missing
           </DialogTitle>
           <DialogDescription>
-            Your cover page can still be downloaded, but these fields will appear blank in the {pendingFormat?.toUpperCase() ?? "file"}.
+            Your cover page can still be downloaded, but these fields will appear blank in the {pendingFormatLabel}.
           </DialogDescription>
         </DialogHeader>
         <div className="rounded-2xl border border-border/60 bg-muted/30 p-4">

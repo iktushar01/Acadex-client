@@ -49,8 +49,8 @@ export const getMissingFields = (form: FormState): MissingField[] => {
     { key: "teacherDesignation", label: "Teacher designation", step: 3 },
     { key: "studentName", label: "Student name", step: 3 },
     { key: "studentId", label: "Student ID", step: 3 },
-    { key: "batchGroup", label: "Batch & group", step: 3 },
     { key: "section", label: "Section", step: 3 },
+    { key: "batchGroup", label: "Batch & Group", step: 3 },
   ];
 
   return values.filter(({ key }) => {
