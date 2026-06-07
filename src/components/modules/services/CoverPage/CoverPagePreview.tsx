@@ -106,88 +106,108 @@ export function CoverPageContent({
   const itemTitleLabel = getItemTitleLabel(form.documentType);
   const itemNumber = getItemNumberValue(form);
   const dash = "................................";
+  const margin = 94;
+  const navy = "#1A3A6B";
+  const gold = "#C8952A";
+  const charcoal = "#2C2C2C";
+  const boxFill = "#EEF4FF";
+  const fieldRows: [string, string][] = [
+    [itemNumberLabel, itemNumber],
+    [itemTitleLabel, form.itemTitle],
+    ["Course Title & Code", [form.subjectName, form.subjectCode].filter(Boolean).join(" - ")],
+  ];
+  const submittedToRows: [string, string][] = [
+    ["Name:", form.teacherName],
+    ["Designation:", form.teacherDesignation],
+  ];
+  const submittedByRows: [string, string][] = [
+    ["Name:", form.studentName],
+    ["Student ID:", form.studentId],
+    ["Semester:", form.batchGroup],
+    ["Batch & Section:", form.section],
+  ];
 
   return (
     <div
       ref={previewRef}
-      className="box-border flex flex-col bg-white text-slate-900"
+      className="box-border flex flex-col bg-white"
       style={{
         width: A4_W,
         height: A4_H,
-        padding: "52px 60px 56px",
+        padding: `${margin}px ${margin}px 58px`,
         fontFamily: "Arial, Helvetica, sans-serif",
+        color: charcoal,
+        position: "relative",
       }}
     >
-      <div className="flex flex-col items-center text-center">
+      <div
+        className="flex flex-col items-center text-center"
+        style={{
+          margin: "-48px -12px 0",
+          padding: "22px 24px 26px",
+          borderRadius: 12,
+          background: "#f4f8fc",
+        }}
+      >
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={logoUrl}
             alt="Institution logo"
             crossOrigin="anonymous"
-            className="mb-4 max-h-28 max-w-[220px] object-contain"
+            className="mb-7 max-h-[78px] max-w-[190px] object-contain"
           />
         ) : (
-          <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full border border-dashed border-slate-300 text-[11px] text-slate-400">
+          <div className="mb-7 flex h-[78px] w-[78px] items-center justify-center rounded-full border border-dashed border-slate-300 text-[11px] text-slate-400">
             Logo
           </div>
         )}
 
-        <h2 style={{ fontSize: 30, fontWeight: 700, color: "#1a3a6b", margin: 0 }}>{form.institutionName}</h2>
-        {form.tagline && <p style={{ fontSize: 13, color: "#555", marginTop: 8 }}>{form.tagline}</p>}
+        <h2 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 31, fontWeight: 700, color: navy, margin: 0 }}>
+          {form.institutionName}
+        </h2>
+        {form.tagline && <p style={{ fontSize: 13, color: "#5f6b7a", fontStyle: "italic", marginTop: 8 }}>{form.tagline}</p>}
         {form.department && (
-          <p style={{ fontSize: 12, color: "#555", fontStyle: "italic", marginTop: 4 }}>{form.department}</p>
+          <p style={{ fontSize: 12, color: "#5f6b7a", marginTop: 4 }}>{form.department}</p>
         )}
       </div>
 
-      <div
-        style={{
-          width: "100%",
-          height: 2,
-          background: "linear-gradient(to right,#1a3a6b,#2a5aa0,#1a3a6b)",
-          marginTop: 18,
-        }}
-      />
-      <div style={{ width: "60%", height: 1, background: "#2a5aa0", margin: "4px auto 0" }} />
+      <div style={{ width: "100%", height: 2, background: navy, marginTop: 24 }} />
+      <div style={{ width: "100%", height: 2, background: gold, marginTop: 7 }} />
 
-      <div style={{ textAlign: "center", marginTop: 20 }}>
+      <div style={{ textAlign: "center", marginTop: 58 }}>
         <h1
           style={{
-            fontSize: 38,
-            fontWeight: 300,
-            letterSpacing: 1,
-            color: "#1a1a1a",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            fontSize: 40,
+            fontWeight: 700,
+            letterSpacing: 0,
+            color: charcoal,
             margin: 0,
           }}
         >
           {documentLabel}
         </h1>
-        <div style={{ width: 72, height: 2, background: "#c4933a", margin: "8px auto 0" }} />
+        <div style={{ width: 116, height: 4, background: gold, margin: "13px auto 0" }} />
       </div>
 
       <div
         style={{
-          marginTop: 32,
+          marginTop: 68,
           display: "flex",
           flexDirection: "column",
-          gap: 12,
-          fontSize: 17,
+          gap: 34,
+          fontSize: 16,
           lineHeight: 1.55,
         }}
       >
-        {(
-          [
-            [itemNumberLabel, itemNumber],
-            [itemTitleLabel, form.itemTitle],
-            ["Course Title & Code", [form.subjectName, form.subjectCode].filter(Boolean).join(" - ")],
-          ] as [string, string][]
-        ).map(([label, value]) => (
-          <div key={label} style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 12 }}>
-            <span style={{ fontWeight: 600 }}>{label}</span>
+        {fieldRows.map(([label, value]) => (
+          <div key={label} style={{ display: "grid", gridTemplateColumns: "172px 1fr", gap: 18, alignItems: "baseline" }}>
+            <span style={{ fontWeight: 700, color: navy }}>{label}</span>
             <span
               style={{
-                color: value ? "#1a1a1a" : "#bbb",
-                borderBottom: "1px solid #e8e4dd",
+                color: value ? charcoal : "#9ca3af",
+                borderBottom: "1.2px dotted #9ca3af",
                 paddingBottom: 3,
               }}
             >
@@ -200,96 +220,126 @@ export function CoverPageContent({
       <div
         style={{
           marginTop: "auto",
-          paddingTop: 32,
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
-          gap: 20,
+          gap: 28,
         }}
       >
-        <div style={{ border: "1.5px solid #1a3a6b", padding: "18px 20px" }}>
-          <h3
+        <div
+          style={{
+            overflow: "hidden",
+            minHeight: 252,
+            border: "1px solid rgba(26, 58, 107, 0.22)",
+            borderRadius: 8,
+            background: boxFill,
+            boxShadow: "0 8px 18px rgba(26, 58, 107, 0.16)",
+          }}
+        >
+          <div
             style={{
-              fontSize: 18,
+              height: 38,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: navy,
+              color: "#fff",
+              fontSize: 16,
               fontWeight: 700,
-              textAlign: "center",
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
-              color: "#1a3a6b",
-              marginBottom: 16,
             }}
           >
             Submitted To:
-          </h3>
-          {(
-            [
-              ["Name:", form.teacherName],
-              ["Designation:", form.teacherDesignation],
-            ] as [string, string][]
-          ).map(([k, v]) => (
+          </div>
+          <div style={{ padding: "26px 18px 18px" }}>
+          {submittedToRows.map(([k, v]) => (
             <div
               key={k}
               style={{
                 display: "grid",
-                gridTemplateColumns: "100px 1fr",
+                gridTemplateColumns: "90px 1fr",
                 gap: 8,
-                fontSize: 15,
-                marginBottom: 10,
+                fontSize: 14,
+                marginBottom: 18,
                 lineHeight: 1.5,
               }}
             >
-              <span style={{ fontWeight: 600 }}>{k}</span>
-              <span style={{ color: v ? "#1a1a1a" : "#bbb", borderBottom: "1px dotted #ccc", paddingBottom: 2 }}>
+              <span style={{ fontWeight: 700, color: navy }}>{k}</span>
+              <span style={{ color: v ? charcoal : "#9ca3af", borderBottom: "1px dotted #9ca3af", paddingBottom: 2 }}>
                 {v || dash}
               </span>
             </div>
           ))}
-          <p style={{ fontSize: 15, marginTop: 10, color: "#333" }}>{form.institutionName || "Institution Name"}</p>
-          <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 8, fontSize: 15, marginTop: 14 }}>
-            <span style={{ fontWeight: 700 }}>Date:</span>
+          <p style={{ fontSize: 14, marginTop: 16, color: charcoal }}>{form.institutionName || "Institution Name"}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "44px 1fr", gap: 8, fontSize: 14, marginTop: 24 }}>
+            <span style={{ fontWeight: 700, color: navy }}>Date:</span>
             <span>{formatDate(form.submissionDate)}</span>
+          </div>
           </div>
         </div>
 
-        <div style={{ border: "1.5px solid #1a3a6b", padding: "18px 20px" }}>
-          <h3
+        <div
+          style={{
+            overflow: "hidden",
+            minHeight: 252,
+            border: "1px solid rgba(26, 58, 107, 0.22)",
+            borderRadius: 8,
+            background: boxFill,
+            boxShadow: "0 8px 18px rgba(26, 58, 107, 0.16)",
+          }}
+        >
+          <div
             style={{
-              fontSize: 18,
+              height: 38,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: navy,
+              color: "#fff",
+              fontSize: 16,
               fontWeight: 700,
-              textAlign: "center",
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
-              color: "#1a3a6b",
-              marginBottom: 16,
             }}
           >
             Submitted By
-          </h3>
-          {(
-            [
-              ["Name:", form.studentName],
-              ["Student ID:", form.studentId],
-              ["Semester:", form.batchGroup],
-              ["Batch", form.section],
-            ] as [string, string][]
-          ).map(([k, v]) => (
+          </div>
+          <div style={{ padding: "26px 18px 18px" }}>
+          {submittedByRows.map(([k, v]) => (
             <div
               key={k}
               style={{
                 display: "grid",
-                gridTemplateColumns: "100px 1fr",
+                gridTemplateColumns: "108px 1fr",
                 gap: 8,
-                fontSize: 15,
-                marginBottom: 10,
+                fontSize: 14,
+                marginBottom: 18,
                 lineHeight: 1.5,
               }}
             >
-              <span style={{ fontWeight: 600 }}>{k}</span>
-              <span style={{ color: v ? "#1a1a1a" : "#bbb", borderBottom: "1px dotted #ccc", paddingBottom: 2 }}>
+              <span style={{ fontWeight: 700, color: navy }}>{k}</span>
+              <span style={{ color: v ? charcoal : "#9ca3af", borderBottom: "1px dotted #9ca3af", paddingBottom: 2 }}>
                 {v || dash}
               </span>
             </div>
           ))}
+          </div>
         </div>
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 30,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: navy,
+          color: "#fff",
+          fontSize: 11,
+          fontStyle: "italic",
+        }}
+      >
+        Uttara University — Excellence in Higher Education and Research
       </div>
     </div>
   );

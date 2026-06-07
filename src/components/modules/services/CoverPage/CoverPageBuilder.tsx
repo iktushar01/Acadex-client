@@ -24,6 +24,11 @@ const logoDataUrlCache = new Map<string, string>();
 const EXPORT_SCALE = 2;
 const EXPORT_WIDTH = A4_W * EXPORT_SCALE;
 const EXPORT_HEIGHT = A4_H * EXPORT_SCALE;
+const PAGE_MARGIN = 94;
+const PRIMARY_NAVY = "#1A3A6B";
+const ACCENT_GOLD = "#C8952A";
+const BOX_FILL = "#EEF4FF";
+const CHARCOAL = "#2C2C2C";
 
 const dataUrlToBytes = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1];
@@ -105,6 +110,27 @@ const drawWrappedText = (
   return cursorY;
 };
 
+const drawRoundedRect = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) => {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+};
+
 const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) => {
   const canvas = document.createElement("canvas");
   canvas.width = EXPORT_WIDTH;
@@ -120,28 +146,36 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, A4_W, A4_H);
 
-  const marginX = 60;
+  const marginX = PAGE_MARGIN;
   const contentWidth = A4_W - marginX * 2;
   const documentLabel = getDocumentLabel(form.documentType);
   const itemNumberLabel = getItemNumberLabel(form.documentType);
   const itemTitleLabel = getItemTitleLabel(form.documentType);
   const itemNumber = getItemNumberValue(form);
   const dash = "................................";
+  const footerHeight = 30;
 
-  let cursorY = 52;
+  const headerBandY = 46;
+  const headerBandHeight = 188;
+
+  ctx.fillStyle = "#f4f8fc";
+  drawRoundedRect(ctx, marginX - 12, headerBandY, contentWidth + 24, headerBandHeight, 12);
+  ctx.fill();
+
+  let cursorY = headerBandY + 22;
 
   if (logoUrl) {
     try {
       const logo = await loadImage(logoUrl);
-      const maxWidth = 220;
-      const maxHeight = 112;
+      const maxWidth = 190;
+      const maxHeight = 78;
       const ratio = Math.min(maxWidth / logo.width, maxHeight / logo.height, 1);
       const drawWidth = Math.max(1, logo.width * ratio);
       const drawHeight = Math.max(1, logo.height * ratio);
       const drawX = (A4_W - drawWidth) / 2;
 
       ctx.drawImage(logo, drawX, cursorY, drawWidth, drawHeight);
-      cursorY += drawHeight + 24;
+      cursorY += drawHeight + 30;
     } catch (error) {
       console.warn("Logo drawing failed:", error);
       ctx.strokeStyle = "#cbd5e1";
@@ -155,49 +189,44 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
       ctx.font = "12px Arial";
       ctx.textAlign = "center";
       ctx.fillText("Logo", A4_W / 2, cursorY + 52);
-      cursorY += 120;
+      cursorY += 110;
     }
   } else {
-    cursorY += 120;
+    cursorY += 110;
   }
 
   ctx.textAlign = "center";
-  ctx.fillStyle = "#1a3a6b";
-  ctx.font = "700 30px Arial";
+  ctx.fillStyle = PRIMARY_NAVY;
+  ctx.font = "700 31px Georgia";
   ctx.fillText(form.institutionName, A4_W / 2, cursorY);
-  cursorY += 22;
+  cursorY += 24;
 
   if (form.tagline) {
-    ctx.fillStyle = "#555555";
-    ctx.font = "13px Arial";
-    ctx.fillText(form.tagline, A4_W / 2, cursorY + 12);
-    cursorY += 20;
-  }
-
-  if (form.department) {
-    ctx.font = "italic 12px Arial";
-    ctx.fillText(form.department, A4_W / 2, cursorY + 10);
+    ctx.fillStyle = "#5f6b7a";
+    ctx.font = "italic 13px Arial";
+    ctx.fillText(form.tagline, A4_W / 2, cursorY);
     cursorY += 18;
   }
 
-  cursorY += 18;
+  if (form.department) {
+    ctx.fillStyle = "#5f6b7a";
+    ctx.font = "12px Arial";
+    ctx.fillText(form.department, A4_W / 2, cursorY);
+  }
 
-  const gradient = ctx.createLinearGradient(marginX, 0, A4_W - marginX, 0);
-  gradient.addColorStop(0, "#1a3a6b");
-  gradient.addColorStop(0.5, "#2a5aa0");
-  gradient.addColorStop(1, "#1a3a6b");
-  ctx.fillStyle = gradient;
+  cursorY = headerBandY + headerBandHeight + 24;
+  ctx.fillStyle = PRIMARY_NAVY;
   ctx.fillRect(marginX, cursorY, contentWidth, 2);
-  ctx.fillStyle = "#2a5aa0";
-  ctx.fillRect((A4_W - contentWidth * 0.6) / 2, cursorY + 4, contentWidth * 0.6, 1);
-  cursorY += 42;
+  ctx.fillStyle = ACCENT_GOLD;
+  ctx.fillRect(marginX, cursorY + 7, contentWidth, 2);
+  cursorY += 72;
 
-  ctx.fillStyle = "#1a1a1a";
-  ctx.font = "300 38px Arial";
+  ctx.fillStyle = CHARCOAL;
+  ctx.font = "700 40px Georgia";
   ctx.fillText(documentLabel, A4_W / 2, cursorY);
-  ctx.fillStyle = "#c4933a";
-  ctx.fillRect(A4_W / 2 - 36, cursorY + 8, 72, 2);
-  cursorY += 54;
+  ctx.fillStyle = ACCENT_GOLD;
+  ctx.fillRect(A4_W / 2 - 58, cursorY + 13, 116, 4);
+  cursorY += 82;
 
   const rows: [string, string][] = [
     [itemNumberLabel, itemNumber],
@@ -206,32 +235,35 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
   ];
 
   const labelX = marginX;
-  const valueX = marginX + 212;
+  const valueX = marginX + 190;
 
   for (const [label, value] of rows) {
     ctx.textAlign = "left";
-    ctx.fillStyle = "#111827";
-    ctx.font = "600 17px Arial";
+    ctx.fillStyle = PRIMARY_NAVY;
+    ctx.font = "700 16px Arial";
     ctx.fillText(label, labelX, cursorY);
 
-    ctx.fillStyle = value ? "#1a1a1a" : "#b8b8b8";
-    ctx.font = "17px Arial";
+    ctx.fillStyle = value ? CHARCOAL : "#9ca3af";
+    ctx.font = "16px Arial";
     drawWrappedText(ctx, value || dash, valueX, cursorY, A4_W - marginX - valueX, 22);
 
-    ctx.strokeStyle = "#e8e4dd";
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#9ca3af";
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([2, 5]);
     ctx.beginPath();
-    ctx.moveTo(valueX, cursorY + 10);
-    ctx.lineTo(A4_W - marginX, cursorY + 10);
+    ctx.moveTo(valueX, cursorY + 8);
+    ctx.lineTo(A4_W - marginX, cursorY + 8);
     ctx.stroke();
+    ctx.setLineDash([]);
 
-    cursorY += 40;
+    cursorY += 58;
   }
 
-  const boxTop = A4_H - 300;
-  const boxGap = 20;
+  const boxTop = A4_H - footerHeight - PAGE_MARGIN - 252;
+  const boxGap = 28;
   const boxWidth = (contentWidth - boxGap) / 2;
-  const boxHeight = 220;
+  const boxHeight = 252;
+  const boxHeaderHeight = 38;
 
   const drawInfoBox = (
     x: number,
@@ -239,35 +271,52 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
     rowsToRender: [string, string][],
     footer?: () => void,
   ) => {
-    ctx.strokeStyle = "#1a3a6b";
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(x, boxTop, boxWidth, boxHeight);
+    ctx.save();
+    ctx.shadowColor = "rgba(26, 58, 107, 0.16)";
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetY = 6;
+    ctx.fillStyle = BOX_FILL;
+    drawRoundedRect(ctx, x, boxTop, boxWidth, boxHeight, 8);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.strokeStyle = "rgba(26, 58, 107, 0.22)";
+    ctx.lineWidth = 1;
+    drawRoundedRect(ctx, x, boxTop, boxWidth, boxHeight, 8);
+    ctx.stroke();
+
+    ctx.save();
+    drawRoundedRect(ctx, x, boxTop, boxWidth, boxHeaderHeight, 8);
+    ctx.clip();
+    ctx.fillStyle = PRIMARY_NAVY;
+    ctx.fillRect(x, boxTop, boxWidth, boxHeaderHeight + 8);
+    ctx.restore();
 
     ctx.textAlign = "center";
-    ctx.fillStyle = "#1a3a6b";
-    ctx.font = "700 18px Arial";
-    ctx.fillText(title, x + boxWidth / 2, boxTop + 28);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 16px Arial";
+    ctx.fillText(title, x + boxWidth / 2, boxTop + 24);
 
-    let rowY = boxTop + 64;
+    let rowY = boxTop + 70;
     for (const [label, value] of rowsToRender) {
       ctx.textAlign = "left";
-      ctx.fillStyle = "#111827";
-      ctx.font = "600 15px Arial";
-      ctx.fillText(label, x + 16, rowY);
+      ctx.fillStyle = PRIMARY_NAVY;
+      ctx.font = "700 14px Arial";
+      ctx.fillText(label, x + 18, rowY);
 
-      ctx.fillStyle = value ? "#1a1a1a" : "#b8b8b8";
-      ctx.font = "15px Arial";
-      ctx.fillText(value || dash, x + 118, rowY, boxWidth - 136);
+      ctx.fillStyle = value ? CHARCOAL : "#9ca3af";
+      ctx.font = "14px Arial";
+      ctx.fillText(value || dash, x + 116, rowY, boxWidth - 136);
 
-      ctx.strokeStyle = "#cfcfcf";
-      ctx.setLineDash([2, 4]);
+      ctx.strokeStyle = "#9ca3af";
+      ctx.setLineDash([2, 5]);
       ctx.beginPath();
-      ctx.moveTo(x + 118, rowY + 5);
-      ctx.lineTo(x + boxWidth - 16, rowY + 5);
+      ctx.moveTo(x + 116, rowY + 5);
+      ctx.lineTo(x + boxWidth - 18, rowY + 5);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      rowY += 30;
+      rowY += 34;
     }
 
     footer?.();
@@ -278,15 +327,16 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
     ["Designation:", form.teacherDesignation],
   ], () => {
     ctx.textAlign = "left";
-    ctx.fillStyle = "#333333";
-    ctx.font = "15px Arial";
-    ctx.fillText(form.institutionName || "Institution Name", marginX + 16, boxTop + 154, boxWidth - 32);
+    ctx.fillStyle = CHARCOAL;
+    ctx.font = "14px Arial";
+    ctx.fillText(form.institutionName || "Institution Name", marginX + 18, boxTop + 160, boxWidth - 36);
 
-    ctx.fillStyle = "#111827";
-    ctx.font = "700 15px Arial";
-    ctx.fillText("Date:", marginX + 16, boxTop + 184);
-    ctx.font = "15px Arial";
-    ctx.fillText(formatDate(form.submissionDate), marginX + 68, boxTop + 184);
+    ctx.fillStyle = PRIMARY_NAVY;
+    ctx.font = "700 14px Arial";
+    ctx.fillText("Date:", marginX + 18, boxTop + 198);
+    ctx.fillStyle = CHARCOAL;
+    ctx.font = "14px Arial";
+    ctx.fillText(formatDate(form.submissionDate), marginX + 70, boxTop + 198);
   });
 
   drawInfoBox(marginX + boxWidth + boxGap, "Submitted By", [
@@ -295,6 +345,13 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
     ["Semester", form.batchGroup],
     ["Batch & Section:", form.section],
   ]);
+
+  ctx.fillStyle = PRIMARY_NAVY;
+  ctx.fillRect(0, A4_H - footerHeight, A4_W, footerHeight);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "italic 11px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("Uttara University - Excellence in Higher Education and Research", A4_W / 2, A4_H - 11);
 
   return canvas;
 };
