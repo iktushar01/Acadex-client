@@ -20,10 +20,10 @@ export const getDocumentLabel = (documentType: FormState["documentType"]) =>
   documentType === "lab-report" ? "Lab Report" : "Assignment";
 
 export const getItemNumberLabel = (documentType: FormState["documentType"]) =>
-  documentType === "lab-report" ? "Experiment No." : "Assignment No.";
+  documentType === "lab-report" ? "Lab No." : "Assignment No.";
 
 export const getItemTitleLabel = (documentType: FormState["documentType"]) =>
-  documentType === "lab-report" ? "Experiment Name" : "Assignment Title";
+  documentType === "lab-report" ? "Lab Name" : "Assignment Title";
 
 export const getItemNumberValue = (form: FormState) =>
   form.documentType === "lab-report" ? form.experimentNo : form.assignmentNo;

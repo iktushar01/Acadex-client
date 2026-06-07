@@ -180,7 +180,7 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
   const rows: [string, string][] = [
     [itemNumberLabel, itemNumber],
     [itemTitleLabel, form.itemTitle],
-    ["Subject Name & Code", [form.subjectName, form.subjectCode].filter(Boolean).join(" - ")],
+    ["Course Title & Code", [form.subjectName, form.subjectCode].filter(Boolean).join(" - ")],
   ];
 
   const labelX = marginX;
@@ -270,8 +270,8 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
   drawInfoBox(marginX + boxWidth + boxGap, "Submitted By", [
     ["Name:", form.studentName],
     ["Student ID:", form.studentId],
-    ["Batch & Group:", form.batchGroup],
-    ["Section:", form.section],
+    ["Semester", form.batchGroup],
+    ["Batch & Section:", form.section],
   ]);
 
   return canvas;

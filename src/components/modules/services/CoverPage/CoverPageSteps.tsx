@@ -246,7 +246,7 @@ export function Step3People({
             id="batchGroup"
             value={form.batchGroup}
             onChange={(e) => setField("batchGroup", e.target.value)}
-            placeholder="e.g. 64 E"
+            placeholder="fall 22 "
             className="rounded-xl"
           />
         </div>
@@ -256,7 +256,7 @@ export function Step3People({
             id="section"
             value={form.section}
             onChange={(e) => setField("section", e.target.value)}
-            placeholder="e.g. E"
+            placeholder="e.g. 64E"
             className="rounded-xl"
           />
         </div>

@@ -9,7 +9,7 @@ export const UNIVERSITIES: University[] = [
     name: "Uttara University",
     short: "UU",
     tagline: "Excellence in Higher Education and Research",
-    logo: "https://i.ibb.co/xqwm5FDC/Screenshot-2026-04-21-150046.png",
+    logo: "https://res.cloudinary.com/dfoqasqnw/image/upload/header_logo_ldhtg9.png",
   },
   {
     id: "buet",

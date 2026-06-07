@@ -179,7 +179,7 @@ export function CoverPageContent({
           [
             [itemNumberLabel, itemNumber],
             [itemTitleLabel, form.itemTitle],
-            ["Subject Name & Code", [form.subjectName, form.subjectCode].filter(Boolean).join(" - ")],
+            ["Course Title & Code", [form.subjectName, form.subjectCode].filter(Boolean).join(" - ")],
           ] as [string, string][]
         ).map(([label, value]) => (
           <div key={label} style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 12 }}>
@@ -268,8 +268,8 @@ export function CoverPageContent({
             [
               ["Name:", form.studentName],
               ["Student ID:", form.studentId],
-              ["Batch & Group:", form.batchGroup],
-              ["Section:", form.section],
+              ["Semester:", form.batchGroup],
+              ["Batch & Section:", form.section],
             ] as [string, string][]
           ).map(([k, v]) => (
             <div
