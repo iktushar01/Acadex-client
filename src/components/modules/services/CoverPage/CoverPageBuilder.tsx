@@ -343,7 +343,7 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
     ["Name:", form.studentName],
     ["Student ID:", form.studentId],
     ["Semester", form.batchGroup],
-    ["Batch & Section:", form.section],
+    ["Batch:", form.section],
   ]);
 
   ctx.fillStyle = PRIMARY_NAVY;
