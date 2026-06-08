@@ -14,31 +14,31 @@ export const UNIVERSITIES: University[] = [
     id: "buet",
     name: "BUET",
     short: "BUET",
-    logo: "https://i.ibb.co/xqwm5FDC/Screenshot-2026-04-21-150046.png",
+    logo: "",
   },
   {
     id: "du",
     name: "Dhaka University",
     short: "DU",
-    logo: "https://i.ibb.co/xqwm5FDC/Screenshot-2026-04-21-150046.png",
+    logo: "",
   },
   {
     id: "diu",
     name: "Daffodil International",
     short: "DIU",
-    logo: "https://i.ibb.co/xqwm5FDC/Screenshot-2026-04-21-150046.png",
+    logo: "",
   },
   {
     id: "nsu",
     name: "North South University",
     short: "NSU",
-    logo: "https://i.ibb.co/xqwm5FDC/Screenshot-2026-04-21-150046.png",
+    logo: "",
   },
   {
     id: "brac",
     name: "BRAC University",
     short: "BRACU",
-    logo: "https://i.ibb.co/xqwm5FDC/Screenshot-2026-04-21-150046.png",
+    logo: "",
   },
   
 ];
