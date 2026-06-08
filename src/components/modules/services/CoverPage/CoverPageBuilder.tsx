@@ -325,7 +325,7 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
   drawInfoBox(marginX + boxWidth + boxGap, "Submitted By", [
     ["Name:", form.studentName],
     ["Student ID:", form.studentId],
-    ["Semester", form.batchGroup],
+    ["Semester:", form.batchGroup],
     ["Batch:", form.section],
   ]);
 
