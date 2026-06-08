@@ -268,7 +268,7 @@ export function CoverPageContent({
             </div>
           ))}
           <div style={{ display: "grid", gridTemplateColumns: "108px 1fr", gap: 8, fontSize: 14, marginBottom: 18, lineHeight: 1.5 }}>
-            <span style={{ fontWeight: 700, color: navy }}>Institution Name:</span>
+            <span style={{ fontWeight: 700, color: navy }}>Institution:</span>
             <span style={{ color: form.institutionName ? charcoal : "#9ca3af", borderBottom: "1px dotted #9ca3af", paddingBottom: 2 }}>
               {form.institutionName || dash}
             </span>
