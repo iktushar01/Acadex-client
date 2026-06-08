@@ -83,7 +83,7 @@ export function UniSelector({
       {/* Universities Container with Fixed Height and Scrollbar */}
       <div className="overflow-y-auto rounded-xl border border-border bg-background p-2" style={{ maxHeight: "320px" }}>
         {filteredUniversities.length > 0 ? (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="flex flex-col gap-2">
             {filteredUniversities.map((uni) => (
               <button
                 key={uni.id}
