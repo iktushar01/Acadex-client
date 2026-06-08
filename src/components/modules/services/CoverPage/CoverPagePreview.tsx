@@ -338,7 +338,7 @@ export function CoverPageContent({
               fontWeight: 700,
             }}
           >
-            Submitted By
+            Submitted By:
           </div>
           <div style={{ padding: "26px 18px 18px" }}>
           {submittedByRows.map(([k, v]) => (

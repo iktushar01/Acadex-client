@@ -322,7 +322,7 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
     ["Date:", formatDate(form.submissionDate)],
   ]);
 
-  drawInfoBox(marginX + boxWidth + boxGap, "Submitted By", [
+  drawInfoBox(marginX + boxWidth + boxGap, "Submitted By:", [
     ["Name:", form.studentName],
     ["Student ID:", form.studentId],
     ["Semester:", form.batchGroup],
