@@ -318,46 +318,9 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
   drawInfoBox(marginX, "Submitted To:", [
     ["Name:", form.teacherName],
     ["Designation:", form.teacherDesignation],
-  ], () => {
-    // Institution row
-    let footerRowY = boxTop + 160;
-    
-    ctx.textAlign = "left";
-    ctx.fillStyle = PRIMARY_NAVY;
-    ctx.font = "700 14px Arial";
-    ctx.fillText("Institution:", marginX + 18, footerRowY);
-
-    ctx.fillStyle = form.institutionName ? CHARCOAL : "#9ca3af";
-    ctx.font = "14px Arial";
-    ctx.fillText(form.institutionName || dash, marginX + 116, footerRowY, boxWidth - 136);
-
-    ctx.strokeStyle = "#9ca3af";
-    ctx.setLineDash([2, 5]);
-    ctx.beginPath();
-    ctx.moveTo(marginX + 116, footerRowY + 5);
-    ctx.lineTo(marginX + boxWidth - 18, footerRowY + 5);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Date row
-    footerRowY += 34;
-    ctx.textAlign = "left";
-    ctx.fillStyle = PRIMARY_NAVY;
-    ctx.font = "700 14px Arial";
-    ctx.fillText("Date:", marginX + 18, footerRowY);
-
-    ctx.fillStyle = CHARCOAL;
-    ctx.font = "14px Arial";
-    ctx.fillText(formatDate(form.submissionDate), marginX + 116, footerRowY);
-
-    ctx.strokeStyle = "#9ca3af";
-    ctx.setLineDash([2, 5]);
-    ctx.beginPath();
-    ctx.moveTo(marginX + 116, footerRowY + 5);
-    ctx.lineTo(marginX + boxWidth - 18, footerRowY + 5);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  });
+    ["Institution:", form.institutionName],
+    ["Date:", formatDate(form.submissionDate)],
+  ]);
 
   drawInfoBox(marginX + boxWidth + boxGap, "Submitted By", [
     ["Name:", form.studentName],
@@ -365,13 +328,6 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
     ["Semester", form.batchGroup],
     ["Batch:", form.section],
   ]);
-
-  ctx.fillStyle = PRIMARY_NAVY;
-  ctx.fillRect(0, A4_H - footerHeight, A4_W, footerHeight);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "italic 11px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("Uttara University - Excellence in Higher Education and Research", A4_W / 2, A4_H - 11);
 
   return canvas;
 };
