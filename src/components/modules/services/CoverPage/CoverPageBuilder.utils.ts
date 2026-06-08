@@ -39,7 +39,7 @@ export const getLogoProxyUrl = (url: string) =>
 
 export const getMissingFields = (form: FormState): MissingField[] => {
   const values: MissingField[] = [
-    { key: "institutionName", label: "Institution name", step: 1 },
+    { key: "institutionName", label: "Institution", step: 1 },
     { key: "subjectName", label: "Subject name", step: 2 },
     { key: "subjectCode", label: "Subject code", step: 2 },
     { key: "itemNumber", label: getItemNumberLabel(form.documentType), step: 2 },

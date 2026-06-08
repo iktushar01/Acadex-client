@@ -166,7 +166,6 @@ export function CoverPageContent({
         <h2 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 31, fontWeight: 700, color: navy, margin: 0 }}>
           {form.institutionName}
         </h2>
-        {form.tagline && <p style={{ fontSize: 13, color: "#5f6b7a", fontStyle: "italic", marginTop: 8 }}>{form.tagline}</p>}
         {form.department && (
           <p style={{ fontSize: 12, color: "#5f6b7a", marginTop: 4 }}>{form.department}</p>
         )}
@@ -255,7 +254,7 @@ export function CoverPageContent({
               key={k}
               style={{
                 display: "grid",
-                gridTemplateColumns: "90px 1fr",
+                gridTemplateColumns: "108px 1fr",
                 gap: 8,
                 fontSize: 14,
                 marginBottom: 18,
@@ -268,10 +267,17 @@ export function CoverPageContent({
               </span>
             </div>
           ))}
-          <p style={{ fontSize: 14, marginTop: 16, color: charcoal }}>{form.institutionName || "Institution Name"}</p>
-          <div style={{ display: "grid", gridTemplateColumns: "44px 1fr", gap: 8, fontSize: 14, marginTop: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "108px 1fr", gap: 8, fontSize: 14, marginBottom: 18, lineHeight: 1.5 }}>
+            <span style={{ fontWeight: 700, color: navy }}>Institution Name:</span>
+            <span style={{ color: form.institutionName ? charcoal : "#9ca3af", borderBottom: "1px dotted #9ca3af", paddingBottom: 2 }}>
+              {form.institutionName || dash}
+            </span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "108px 1fr", gap: 8, fontSize: 14, lineHeight: 1.5 }}>
             <span style={{ fontWeight: 700, color: navy }}>Date:</span>
-            <span>{formatDate(form.submissionDate)}</span>
+            <span style={{ color: charcoal, borderBottom: "1px dotted #9ca3af", paddingBottom: 2 }}>
+              {formatDate(form.submissionDate)}
+            </span>
           </div>
           </div>
         </div>
@@ -323,24 +329,6 @@ export function CoverPageContent({
         </div>
       </div>
 
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 30,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: navy,
-          color: "#fff",
-          fontSize: 11,
-          fontStyle: "italic",
-        }}
-      >
-        Uttara University — Excellence in Higher Education and Research
-      </div>
     </div>
   );
 }

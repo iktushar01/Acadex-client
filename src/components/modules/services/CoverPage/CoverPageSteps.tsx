@@ -30,7 +30,7 @@ export function Step1Institution({
           onSelect={(uni) => {
             setField("selectedUniId", uni.id);
             setField("institutionName", uni.name);
-            setField("tagline", uni.tagline);
+
           }}
         />
       </div>
@@ -41,16 +41,6 @@ export function Step1Institution({
           value={form.institutionName}
           onChange={(e) => setField("institutionName", e.target.value)}
           placeholder="e.g. Uttara University"
-          className="rounded-xl"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="tagline">Tagline</Label>
-        <Input
-          id="tagline"
-          value={form.tagline}
-          onChange={(e) => setField("tagline", e.target.value)}
-          placeholder="e.g. Excellence in Higher Education and Research"
           className="rounded-xl"
         />
       </div>

@@ -201,13 +201,6 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
   ctx.fillText(form.institutionName, A4_W / 2, cursorY);
   cursorY += 24;
 
-  if (form.tagline) {
-    ctx.fillStyle = "#5f6b7a";
-    ctx.font = "italic 13px Arial";
-    ctx.fillText(form.tagline, A4_W / 2, cursorY);
-    cursorY += 18;
-  }
-
   if (form.department) {
     ctx.fillStyle = "#5f6b7a";
     ctx.font = "12px Arial";
@@ -329,7 +322,7 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
     ctx.textAlign = "left";
     ctx.fillStyle = CHARCOAL;
     ctx.font = "14px Arial";
-    ctx.fillText(form.institutionName || "Institution Name", marginX + 18, boxTop + 160, boxWidth - 36);
+    ctx.fillText(form.institutionName || "Institution", marginX + 18, boxTop + 160, boxWidth - 36);
 
     ctx.fillStyle = PRIMARY_NAVY;
     ctx.font = "700 14px Arial";

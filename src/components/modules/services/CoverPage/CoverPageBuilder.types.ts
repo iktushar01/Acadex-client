@@ -2,7 +2,6 @@ export type University = {
   id: string;
   name: string;
   short: string;
-  tagline: string;
   logo: string;
 };
 
@@ -12,7 +11,6 @@ export type FormState = {
   documentType: DocumentType;
   selectedUniId: string;
   institutionName: string;
-  tagline: string;
   department: string;
   subjectName: string;
   subjectCode: string;
