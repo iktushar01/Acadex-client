@@ -319,17 +319,44 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
     ["Name:", form.teacherName],
     ["Designation:", form.teacherDesignation],
   ], () => {
+    // Institution Name row
+    let footerRowY = boxTop + 160;
+    
     ctx.textAlign = "left";
-    ctx.fillStyle = CHARCOAL;
-    ctx.font = "14px Arial";
-    ctx.fillText(form.institutionName || "Institution", marginX + 18, boxTop + 160, boxWidth - 36);
-
     ctx.fillStyle = PRIMARY_NAVY;
     ctx.font = "700 14px Arial";
-    ctx.fillText("Date:", marginX + 18, boxTop + 198);
+    ctx.fillText("Institution Name:", marginX + 18, footerRowY);
+
+    ctx.fillStyle = form.institutionName ? CHARCOAL : "#9ca3af";
+    ctx.font = "14px Arial";
+    ctx.fillText(form.institutionName || dash, marginX + 116, footerRowY, boxWidth - 136);
+
+    ctx.strokeStyle = "#9ca3af";
+    ctx.setLineDash([2, 5]);
+    ctx.beginPath();
+    ctx.moveTo(marginX + 116, footerRowY + 5);
+    ctx.lineTo(marginX + boxWidth - 18, footerRowY + 5);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Date row
+    footerRowY += 34;
+    ctx.textAlign = "left";
+    ctx.fillStyle = PRIMARY_NAVY;
+    ctx.font = "700 14px Arial";
+    ctx.fillText("Date:", marginX + 18, footerRowY);
+
     ctx.fillStyle = CHARCOAL;
     ctx.font = "14px Arial";
-    ctx.fillText(formatDate(form.submissionDate), marginX + 70, boxTop + 198);
+    ctx.fillText(formatDate(form.submissionDate), marginX + 116, footerRowY);
+
+    ctx.strokeStyle = "#9ca3af";
+    ctx.setLineDash([2, 5]);
+    ctx.beginPath();
+    ctx.moveTo(marginX + 116, footerRowY + 5);
+    ctx.lineTo(marginX + boxWidth - 18, footerRowY + 5);
+    ctx.stroke();
+    ctx.setLineDash([]);
   });
 
   drawInfoBox(marginX + boxWidth + boxGap, "Submitted By", [
