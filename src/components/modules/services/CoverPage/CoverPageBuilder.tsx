@@ -319,13 +319,13 @@ const renderCoverPageCanvas = async (form: FormState, logoUrl: string | null) =>
     ["Name:", form.teacherName],
     ["Designation:", form.teacherDesignation],
   ], () => {
-    // Institution Name row
+    // Institution row
     let footerRowY = boxTop + 160;
     
     ctx.textAlign = "left";
     ctx.fillStyle = PRIMARY_NAVY;
     ctx.font = "700 14px Arial";
-    ctx.fillText("Institution Name:", marginX + 18, footerRowY);
+    ctx.fillText("Institution:", marginX + 18, footerRowY);
 
     ctx.fillStyle = form.institutionName ? CHARCOAL : "#9ca3af";
     ctx.font = "14px Arial";
