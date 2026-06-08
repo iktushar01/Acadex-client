@@ -40,6 +40,7 @@ export const UNIVERSITIES: University[] = [
     short: "BRACU",
     logo: "https://i.ibb.co/xqwm5FDC/Screenshot-2026-04-21-150046.png",
   },
+  
 ];
 
 export const defaultForm = (): FormState => ({

@@ -1,11 +1,13 @@
 "use client";
 
 import type { RefObject } from "react";
-import { CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { A4_H, A4_W, UNIVERSITIES } from "./CoverPageBuilder.constants";
 import { FormState, University } from "./CoverPageBuilder.types";
 import { formatDate, getDocumentLabel, getItemNumberLabel, getItemNumberValue, getItemTitleLabel } from "./CoverPageBuilder.utils";
+import { Input } from "@/components/ui/input";
 
 export function StepBar({ current, total }: { current: number; total: number }) {
   const labels = ["Institution", "Document", "People", "Download"];
@@ -58,36 +60,68 @@ export function UniSelector({
   selectedId: string;
   onSelect: (uni: University) => void;
 }) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredUniversities = UNIVERSITIES.filter((uni) =>
+    uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    uni.short.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-      {UNIVERSITIES.map((uni) => (
-        <button
-          key={uni.id}
-          type="button"
-          onClick={() => onSelect(uni)}
-          className={cn(
-            "flex items-center gap-2 rounded-xl border p-2.5 text-left transition-all hover:border-primary/60 hover:bg-accent",
-            selectedId === uni.id
-              ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-              : "border-border bg-background",
-          )}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={uni.logo}
-            alt={uni.name}
-            crossOrigin="anonymous"
-            className="h-9 w-9 shrink-0 object-contain"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          />
-          <div>
-            <p className="text-xs font-semibold leading-tight">{uni.name}</p>
-            <p className="text-[10px] text-muted-foreground">{uni.short}</p>
+    <div className="space-y-2">
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search universities..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="rounded-xl pl-9"
+        />
+      </div>
+
+      {/* Universities Container with Fixed Height and Scrollbar */}
+      <div className="overflow-y-auto rounded-xl border border-border bg-background p-2" style={{ maxHeight: "320px" }}>
+        {filteredUniversities.length > 0 ? (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {filteredUniversities.map((uni) => (
+              <button
+                key={uni.id}
+                type="button"
+                onClick={() => onSelect(uni)}
+                className={cn(
+                  "flex items-center gap-2 rounded-xl border p-2.5 text-left transition-all hover:border-primary/60 hover:bg-accent",
+                  selectedId === uni.id
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                    : "border-border bg-background",
+                )}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={uni.logo}
+                  alt={uni.name}
+                  crossOrigin="anonymous"
+                  className="h-9 w-9 shrink-0 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+                <div>
+                  <p className="text-xs font-semibold leading-tight">{uni.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{uni.short}</p>
+                </div>
+              </button>
+            ))}
           </div>
-        </button>
-      ))}
+        ) : (
+          <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-muted-foreground/30 bg-muted/50">
+            <div className="text-center">
+              <p className="text-sm font-medium text-muted-foreground">No universities found</p>
+              <p className="text-xs text-muted-foreground/70">Try adjusting your search</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
