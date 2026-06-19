@@ -18,6 +18,7 @@ import type { Subject } from "@/types/classroomSubject.types";
 import { SubjectHeader } from "./SubjectHeader";
 import { SubjectCard } from "./SubjectCard";
 import { SubjectCardSkeleton } from "./SubjectCardSkeleton"; // Import the new file
+import { StudyAssistant } from "@/components/modules/chatbot/StudyAssistant";
 
 export default function ClassroomSubjectPage() {
   const { id } = useParams();
@@ -118,6 +119,8 @@ export default function ClassroomSubjectPage() {
           </div>
         )}
       </div>
+
+      <StudyAssistant classroomId={classroomId} isCR={isCR} />
     </div>
   );
 }

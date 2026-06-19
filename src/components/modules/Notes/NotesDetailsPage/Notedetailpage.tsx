@@ -12,6 +12,7 @@ import { UploaderAvatar } from "@/components/modules/Notes/UploaderAvatar";
 import type { INote } from "@/types/note.types";
 import type { INoteDetailUser } from "@/types/note-detail.types";
 import { formatDate } from "../NotesMainPage";
+import { StudyAssistant } from "@/components/modules/chatbot/StudyAssistant";
 
 const MetaRow = ({
   icon: Icon,
@@ -135,6 +136,12 @@ const NoteDetailPage = ({
           <NoteMetaCard note={note} />
         </aside>
       </div>
+
+      <StudyAssistant
+        classroomId={note.classroomId}
+        subjectId={note.subjectId}
+        noteId={note.id}
+      />
     </PageShell>
   );
 };
