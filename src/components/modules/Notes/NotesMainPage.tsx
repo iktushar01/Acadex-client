@@ -20,6 +20,7 @@ import { useNotes } from "@/hooks/useNotes";
 import { useClassroomRole } from "@/hooks/useClassroomRole";
 import { fetchFolderByIdAction } from "@/actions/_fetchFoldersAction";
 import { formatFileSize } from "@/lib/Noteconstants";
+import { StudyAssistant } from "@/components/modules/chatbot/StudyAssistant";
 
 
 // ── Folder bootstrap state type ────────────────────────────────────────────────
@@ -243,6 +244,15 @@ const NotesPage = () => {
             <NotesPagination meta={meta} onPage={setPage} />
           )}
         </>
+      )}
+
+      {resolvedClassroomId && (
+        <StudyAssistant
+          classroomId={resolvedClassroomId}
+          subjectId={subjectId || undefined}
+          subjectName={subjectName || undefined}
+          isCR={isCR}
+        />
       )}
     </PageShell>
   );

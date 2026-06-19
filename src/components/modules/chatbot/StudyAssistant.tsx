@@ -14,10 +14,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  askChatbotAction,
-  getChatHistoryAction,
-  reindexClassroomNotesAction,
-} from "@/actions/chatbotActions/_chatbotActions";
+  askChatbotClient,
+  getChatHistoryClient,
+  reindexClassroomNotesClient,
+} from "@/lib/chatbot/chatbotClient";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -25,9 +25,11 @@ import type { ChatMessageItem, ChatbotMode } from "@/types/chatbot.types";
 import { cn } from "@/lib/utils";
 
 type StudyAssistantProps = {
-  classroomId: string;
+  classroomId?: string;
   subjectId?: string;
   noteId?: string;
+  subjectName?: string;
+  noteTitle?: string;
   isCR?: boolean;
 };
 
@@ -37,10 +39,27 @@ const MODE_OPTIONS: { value: ChatbotMode; label: string }[] = [
   { value: "quiz", label: "Quiz me" },
 ];
 
+const SUGGESTED_PROMPTS: Record<ChatbotMode, string[]> = {
+  qa: [
+    "What topics are covered in our latest notes?",
+    "Find notes about the hardest topic in this subject.",
+  ],
+  summarize: [
+    "Summarize the key points from this subject's notes.",
+    "Give me a short revision sheet for exam prep.",
+  ],
+  quiz: [
+    "Quiz me on 5 questions from our approved notes.",
+    "Create practice questions with answers at the end.",
+  ],
+};
+
 export function StudyAssistant({
   classroomId,
   subjectId,
   noteId,
+  subjectName,
+  noteTitle,
   isCR = false,
 }: StudyAssistantProps) {
   const [open, setOpen] = useState(false);
@@ -50,36 +69,36 @@ export function StudyAssistant({
   const [loadingHistory, setLoadingHistory] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const isReady = Boolean(classroomId);
+
   const loadHistory = useCallback(async () => {
+    if (!classroomId) return;
+
     setLoadingHistory(true);
     try {
-      const result = await getChatHistoryAction(classroomId);
-      if (result.success && result.data) {
-        setMessages(result.data.messages);
+      const response = await getChatHistoryClient(classroomId);
+      if (response.success && response.data) {
+        setMessages(response.data.messages as ChatMessageItem[]);
       }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Failed to load chat history";
+      toast.error(msg);
     } finally {
       setLoadingHistory(false);
     }
   }, [classroomId]);
 
   useEffect(() => {
-    if (open) {
+    if (open && classroomId) {
       void loadHistory();
     }
-  }, [open, loadHistory]);
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messages]);
+  }, [open, classroomId, loadHistory]);
 
   const askMutation = useMutation({
-    mutationFn: askChatbotAction,
-    onSuccess: (result) => {
-      if (!result.success) {
-        toast.error(result.error);
+    mutationFn: askChatbotClient,
+    onSuccess: (response, variables) => {
+      if (!response.success || !response.data) {
+        toast.error(response.message || "Failed to get an answer");
         return;
       }
 
@@ -89,54 +108,87 @@ export function StudyAssistant({
         {
           id: `local-user-${Date.now()}`,
           role: "user",
-          content: message.trim(),
+          content: variables.message,
           createdAt: now,
         },
         {
           id: `local-assistant-${Date.now()}`,
           role: "assistant",
-          content: result.data.answer,
-          sources: result.data.sources,
+          content: response.data.answer,
+          sources: response.data.sources,
           createdAt: now,
         },
       ]);
       setMessage("");
     },
-    onError: () => {
-      toast.error("Study assistant is unavailable right now.");
+    onError: (error: Error) => {
+      toast.error(error.message || "Study assistant is unavailable right now.");
     },
   });
 
+  useEffect(() => {
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages, askMutation.isPending]);
+
   const reindexMutation = useMutation({
-    mutationFn: () => reindexClassroomNotesAction(classroomId),
-    onSuccess: (result) => {
-      if (!result.success) {
-        toast.error(result.error);
+    mutationFn: () => {
+      if (!classroomId) {
+        throw new Error("Classroom ID is required");
+      }
+      return reindexClassroomNotesClient(classroomId);
+    },
+    onSuccess: (response) => {
+      if (!response.success || !response.data) {
+        toast.error(response.message || "Failed to reindex notes");
         return;
       }
 
       toast.success(
-        `Indexed ${result.data?.notesIndexed ?? 0} notes (${result.data?.chunksIndexed ?? 0} chunks).`,
+        `Indexed ${response.data.notesIndexed} notes (${response.data.chunksIndexed} chunks).`,
       );
     },
-    onError: () => {
-      toast.error("Failed to reindex classroom notes.");
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to reindex classroom notes.");
     },
   });
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    const trimmed = message.trim();
-    if (!trimmed || askMutation.isPending) return;
+  const submitMessage = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || askMutation.isPending || !classroomId) return;
 
     askMutation.mutate({
       classroomId,
       message: trimmed,
-      subjectId,
-      noteId,
+      ...(subjectId ? { subjectId } : {}),
+      ...(noteId ? { noteId } : {}),
       mode,
     });
   };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    submitMessage(message);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      submitMessage(message);
+    }
+  };
+
+  if (!isReady) {
+    return null;
+  }
+
+  const scopeLabel = noteTitle
+    ? `Note: ${noteTitle}`
+    : subjectName
+      ? `Subject: ${subjectName}`
+      : "All classroom notes";
 
   return (
     <>
@@ -168,9 +220,7 @@ export function StudyAssistant({
                   <p className="text-sm font-black uppercase tracking-widest">
                     Study Assistant
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    Answers from approved class notes
-                  </p>
+                  <p className="text-xs text-muted-foreground">{scopeLabel}</p>
                 </div>
               </div>
               <Button
@@ -222,12 +272,24 @@ export function StudyAssistant({
                   Loading conversation...
                 </div>
               ) : messages.length === 0 ? (
-                <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center text-sm text-muted-foreground">
+                <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-center text-sm text-muted-foreground">
                   <MessageSquare className="size-8 text-primary/60" />
                   <p>
                     Ask about your subjects, summaries, or request a quick quiz
                     from approved notes in this classroom.
                   </p>
+                  <div className="flex w-full flex-col gap-2">
+                    {SUGGESTED_PROMPTS[mode].map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        onClick={() => submitMessage(prompt)}
+                        className="rounded-xl border border-border/70 bg-background/60 px-3 py-2 text-left text-xs transition hover:border-primary/40 hover:bg-primary/5"
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 messages.map((entry) => (
@@ -287,6 +349,7 @@ export function StudyAssistant({
                 <Textarea
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
+                  onKeyDown={handleKeyDown}
                   placeholder={
                     mode === "quiz"
                       ? "Ask for a quiz on a topic..."
@@ -311,6 +374,9 @@ export function StudyAssistant({
                   )}
                 </Button>
               </div>
+              <p className="mt-2 text-[10px] text-muted-foreground">
+                Enter to send, Shift+Enter for a new line.
+              </p>
             </form>
           </div>
         </div>

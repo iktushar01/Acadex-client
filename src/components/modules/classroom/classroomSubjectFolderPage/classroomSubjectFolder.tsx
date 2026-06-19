@@ -13,6 +13,7 @@ import Link from "next/link";
 import { FolderCard } from "./FolderCard";
 import { FolderSkeleton } from "./folderSkeleton";
 import { CreateFolderModal } from "./CreateFolderaddModal";
+import { StudyAssistant } from "@/components/modules/chatbot/StudyAssistant";
 
 const SubjectFolderPage = () => {
   const params = useParams();
@@ -187,6 +188,15 @@ const SubjectFolderPage = () => {
           </div>
         )}
       </div>
+
+      {subjectMeta?.classroomId && (
+        <StudyAssistant
+          classroomId={subjectMeta.classroomId}
+          subjectId={subjectId}
+          subjectName={subjectMeta.name}
+          isCR={isCR}
+        />
+      )}
     </div>
   );
 };

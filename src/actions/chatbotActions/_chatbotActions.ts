@@ -1,15 +1,18 @@
 "use server";
 
+import { httpClient } from "@/lib/axios/httpClient";
 import {
-  askChatbot,
-  getChatHistory,
-  reindexClassroomNotes,
-} from "@/services/chatbot/chatbot.service";
-import { AskChatbotPayload } from "@/types/chatbot.types";
+  AskChatbotPayload,
+  AskChatbotResponse,
+  ChatHistoryResponse,
+  ReindexClassroomResponse,
+} from "@/types/chatbot.types";
 
 export const askChatbotAction = async (payload: AskChatbotPayload) => {
   try {
-    const response = await askChatbot(payload);
+    const response = await httpClient.post<AskChatbotResponse>("/chatbot/ask", payload, {
+      timeout: 120_000,
+    });
 
     if (response.success) {
       return { success: true as const, data: response.data, message: response.message };
@@ -33,7 +36,9 @@ export const getChatHistoryAction = async (classroomId: string) => {
       return { success: false as const, error: "Classroom ID is required" };
     }
 
-    const response = await getChatHistory(classroomId);
+    const response = await httpClient.get<ChatHistoryResponse>(
+      `/chatbot/history/${classroomId}`,
+    );
 
     if (response.success) {
       return { success: true as const, data: response.data };
@@ -57,7 +62,11 @@ export const reindexClassroomNotesAction = async (classroomId: string) => {
       return { success: false as const, error: "Classroom ID is required" };
     }
 
-    const response = await reindexClassroomNotes(classroomId);
+    const response = await httpClient.post<ReindexClassroomResponse>(
+      `/chatbot/reindex/${classroomId}`,
+      {},
+      { timeout: 300_000 },
+    );
 
     if (response.success) {
       return {

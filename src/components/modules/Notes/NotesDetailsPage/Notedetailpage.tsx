@@ -141,6 +141,8 @@ const NoteDetailPage = ({
         classroomId={note.classroomId}
         subjectId={note.subjectId}
         noteId={note.id}
+        subjectName={note.subject?.name}
+        noteTitle={note.title}
       />
     </PageShell>
   );
