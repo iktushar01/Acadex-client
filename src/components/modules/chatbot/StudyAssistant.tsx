@@ -14,10 +14,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  askChatbotClient,
-  getChatHistoryClient,
-  reindexClassroomNotesClient,
-} from "@/lib/chatbot/chatbotClient";
+  askChatbotAction,
+  getChatHistoryAction,
+  reindexClassroomNotesAction,
+} from "@/actions/chatbotActions/_chatbotActions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -76,9 +76,11 @@ export function StudyAssistant({
 
     setLoadingHistory(true);
     try {
-      const response = await getChatHistoryClient(classroomId);
+      const response = await getChatHistoryAction(classroomId);
       if (response.success && response.data) {
         setMessages(response.data.messages as ChatMessageItem[]);
+      } else if (!response.success) {
+        toast.error(response.error || "Failed to load chat history");
       }
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : "Failed to load chat history";
@@ -95,9 +97,15 @@ export function StudyAssistant({
   }, [open, classroomId, loadHistory]);
 
   const askMutation = useMutation({
-    mutationFn: askChatbotClient,
+    mutationFn: async (payload: Parameters<typeof askChatbotAction>[0]) => {
+      const result = await askChatbotAction(payload);
+      if (!result.success) {
+        throw new Error(result.error || "Failed to get an answer");
+      }
+      return result;
+    },
     onSuccess: (response, variables) => {
-      if (!response.success || !response.data) {
+      if (!response.data) {
         toast.error(response.message || "Failed to get an answer");
         return;
       }
@@ -134,14 +142,18 @@ export function StudyAssistant({
   }, [messages, askMutation.isPending]);
 
   const reindexMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!classroomId) {
         throw new Error("Classroom ID is required");
       }
-      return reindexClassroomNotesClient(classroomId);
+      const result = await reindexClassroomNotesAction(classroomId);
+      if (!result.success) {
+        throw new Error(result.error || "Failed to reindex notes");
+      }
+      return result;
     },
     onSuccess: (response) => {
-      if (!response.success || !response.data) {
+      if (!response.data) {
         toast.error(response.message || "Failed to reindex notes");
         return;
       }
