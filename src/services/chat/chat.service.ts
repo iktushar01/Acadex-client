@@ -36,3 +36,4 @@ export const deleteChatMessageService = async (
     `/chat/${messageId}`,
   );
 };
+
