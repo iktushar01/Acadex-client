@@ -5,8 +5,8 @@ import Link from "next/link";
 import { ArrowLeft, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ClassroomChat } from "@/components/chat/ClassroomChat";
-import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
-import { getCurrentUserAction } from "@/actions/_getCurrentUserAction";
+import { fetchCurrentUserClient } from "@/lib/authApiClient";
+import { getClientMemberships } from "@/lib/membershipClientCache";
 
 type ClassroomOption = {
   id: string;
@@ -23,23 +23,20 @@ const GroupChatPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [classroomsResult, userResult] = await Promise.all([
-          fetchMyClassroomsAction(),
-          getCurrentUserAction(),
+        const [memberships, userResult] = await Promise.all([
+          getClientMemberships(),
+          fetchCurrentUserClient(),
         ]);
 
-        if (!classroomsResult.success) {
-          setError(classroomsResult.error || "Failed to load your classrooms.");
+        if (!memberships) {
+          setError("Failed to load your classrooms.");
           return;
         }
 
-        const options =
-          classroomsResult.data?.map((membership: {
-            classroom: { id: string; name: string };
-          }) => ({
-            id: membership.classroom.id,
-            name: membership.classroom.name,
-          })) ?? [];
+        const options = memberships.map((membership) => ({
+          id: membership.classroom.id,
+          name: membership.classroom.name,
+        }));
 
         setClassrooms(options);
         setSelectedClassroomId(options[0]?.id ?? "");

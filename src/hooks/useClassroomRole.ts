@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
 import { getClientMemberships } from "@/lib/membershipClientCache";
 
 /**
- * Custom hook to determine if the current user is a CR for a specific classroom.
- * Reuses a short-lived in-memory cache to avoid refetching all classrooms per component.
+ * Determines CR role for a classroom using a cached direct API fetch.
  */
 export const useClassroomRole = (classroomId?: string) => {
   const [isCR, setIsCR] = useState(false);
@@ -19,7 +17,7 @@ export const useClassroomRole = (classroomId?: string) => {
 
     try {
       setRoleLoading(true);
-      const data = await getClientMemberships(fetchMyClassroomsAction);
+      const data = await getClientMemberships();
 
       if (data) {
         const membership = data.find(

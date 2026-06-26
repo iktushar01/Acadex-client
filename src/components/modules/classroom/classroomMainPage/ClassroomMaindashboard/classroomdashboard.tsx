@@ -14,8 +14,10 @@ import { ClassroomSkeleton } from "@/components/modules/classroom/classroomMainP
 import ClassroomNoticeCenter from "@/components/modules/classroom/classroomMainPage/ClassroomMaindashboard/ClassroomNoticeCenter";
 
 // Server Action
-import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
-import { getCurrentNoticeAction } from "@/actions/noticeActions";
+import {
+  fetchCurrentNoticeClient,
+  fetchMyClassroomsClient,
+} from "@/lib/classroomApiClient";
 
 export default function ClassroomDashboard() {
   const [memberships, setMemberships] = useState<Membership[]>([]);
@@ -29,14 +31,14 @@ export default function ClassroomDashboard() {
       setLoading(true);
       try {
         const [classroomResult, noticeResult] = await Promise.all([
-          fetchMyClassroomsAction(),
-          getCurrentNoticeAction(),
+          fetchMyClassroomsClient(),
+          fetchCurrentNoticeClient(),
         ]);
 
         if (classroomResult.success) {
           setMemberships(classroomResult.data || []);
         } else {
-          setError(classroomResult.error as string || "Failed to load classrooms.");
+          setError(classroomResult.message || "Failed to load classrooms.");
         }
 
         if (noticeResult.success) {

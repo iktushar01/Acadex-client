@@ -10,10 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { classroomChannelName } from "@/lib/chat/pusherClient";
 import {
-  deleteChatMessageAction,
-  getChatMessagesAction,
-  sendChatMessageAction,
-} from "@/actions/chatActions/_chatActions";
+  deleteChatMessageClient,
+  getChatMessagesClient,
+  sendChatMessageClient,
+} from "@/lib/chat/chatClient";
 import type { ChatMessage, DeleteChatMessageEvent } from "@/types/chat.types";
 import { useClassroomRole } from "@/hooks/useClassroomRole";
 
@@ -57,9 +57,9 @@ export function ClassroomChat({
   const loadInitialMessages = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await getChatMessagesAction(classroomId);
+      const result = await getChatMessagesClient(classroomId);
       if (!result.success) {
-        throw new Error(result.error || "Failed to load messages");
+        throw new Error("Failed to load messages");
       }
 
       setMessages(result.data ?? []);
@@ -84,11 +84,11 @@ export function ClassroomChat({
 
     setLoadingOlder(true);
     try {
-      const result = await getChatMessagesAction(classroomId, {
+      const result = await getChatMessagesClient(classroomId, {
         cursor: nextCursor,
       });
       if (!result.success) {
-        throw new Error(result.error || "Failed to load older messages");
+        throw new Error("Failed to load older messages");
       }
 
       const older = result.data ?? [];
@@ -177,11 +177,7 @@ export function ClassroomChat({
 
     setSending(true);
     try {
-      const result = await sendChatMessageAction({ classroomId, content });
-      if (!result.success) {
-        throw new Error(result.error || "Failed to send message");
-      }
-
+      const result = await sendChatMessageClient({ classroomId, content });
       const message = result.data;
 
       if (message) {
@@ -205,11 +201,7 @@ export function ClassroomChat({
   const handleDelete = async (messageId: string) => {
     setDeletingId(messageId);
     try {
-      const result = await deleteChatMessageAction(messageId);
-      if (!result.success) {
-        throw new Error(result.error || "Failed to delete message");
-      }
-
+      await deleteChatMessageClient(messageId);
       setMessages((prev) => prev.filter((item) => item.id !== messageId));
     } catch (error) {
       toast.error(

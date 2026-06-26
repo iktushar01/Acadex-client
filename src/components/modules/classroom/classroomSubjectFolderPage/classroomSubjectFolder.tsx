@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { fetchFoldersAction } from "@/actions/_fetchFoldersAction";
 import { fetchSubjectByIdAction } from "@/actions/classroomSubject/_fetchSubjectByIdAction";
-import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
+import { getClientMemberships } from "@/lib/membershipClientCache";
 import { FolderIcon, ArrowLeft, Search, LayoutGrid, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -72,14 +72,15 @@ const SubjectFolderPage = () => {
 
     setRoleLoading(true);
     try {
-      const membershipsResult = await fetchMyClassroomsAction();
-      if (!membershipsResult.success || !membershipsResult.data) {
+      const memberships = await getClientMemberships();
+      if (!memberships) {
         setIsCR(false);
         return;
       }
 
-      const memberships = membershipsResult.data as any[];
-      const match = memberships.find((m: any) => m.classroom?.id === subjectMeta?.classroomId);
+      const match = memberships.find(
+        (m) => m.classroom?.id === subjectMeta?.classroomId,
+      );
       
       if (match) {
         setIsCR(match.memberRole === "CR");

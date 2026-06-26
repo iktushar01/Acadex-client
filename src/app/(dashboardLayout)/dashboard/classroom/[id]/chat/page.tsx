@@ -6,8 +6,8 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ClassroomChat } from "@/components/chat/ClassroomChat";
-import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
-import { getCurrentUserAction } from "@/actions/_getCurrentUserAction";
+import { fetchCurrentUserClient } from "@/lib/authApiClient";
+import { getClientMemberships } from "@/lib/membershipClientCache";
 
 const ClassroomChatRoutePage = () => {
   const { id } = useParams();
@@ -23,14 +23,13 @@ const ClassroomChatRoutePage = () => {
       if (!classroomId) return;
 
       try {
-        const [classroomsResult, userResult] = await Promise.all([
-          fetchMyClassroomsAction(),
-          getCurrentUserAction(),
+        const [memberships, userResult] = await Promise.all([
+          getClientMemberships(),
+          fetchCurrentUserClient(),
         ]);
 
-        const membership = classroomsResult.data?.find(
-          (item: { classroom: { id: string; name: string } }) =>
-            item.classroom.id === classroomId,
+        const membership = memberships?.find(
+          (item) => item.classroom.id === classroomId,
         );
 
         if (!membership) {

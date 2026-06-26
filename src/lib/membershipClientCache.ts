@@ -1,23 +1,16 @@
-type MembershipItem = {
-  classroom: { id: string; name: string };
-  memberRole: string;
-};
+import type { Membership } from "@/types/classroom.types";
+import { fetchMyClassroomsClient } from "@/lib/classroomApiClient";
 
 type MembershipCache = {
-  data: MembershipItem[];
+  data: Membership[];
   fetchedAt: number;
 };
 
 const CACHE_TTL_MS = 60_000;
 let memoryCache: MembershipCache | null = null;
-let inflight: Promise<MembershipItem[] | null> | null = null;
+let inflight: Promise<Membership[] | null> | null = null;
 
-export async function getClientMemberships(
-  fetcher: () => Promise<{
-    success: boolean;
-    data?: MembershipItem[];
-  }>,
-): Promise<MembershipItem[] | null> {
+export async function getClientMemberships(): Promise<Membership[] | null> {
   const now = Date.now();
 
   if (memoryCache && now - memoryCache.fetchedAt < CACHE_TTL_MS) {
@@ -25,7 +18,7 @@ export async function getClientMemberships(
   }
 
   if (!inflight) {
-    inflight = fetcher()
+    inflight = fetchMyClassroomsClient()
       .then((result) => {
         if (result.success && result.data) {
           memoryCache = { data: result.data, fetchedAt: Date.now() };
