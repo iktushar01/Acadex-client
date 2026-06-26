@@ -1,12 +1,16 @@
 import React from "react";
 import {
+  Ban,
   Building2,
   ChevronLeft,
   ChevronRight,
   Eye,
   GraduationCap,
+  PauseCircle,
+  RotateCcw,
   ThumbsDown,
   ThumbsUp,
+  Trash2,
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +41,10 @@ interface ClassroomsTableProps {
   onView: (classroom: Classroom) => void;
   onApprove: (classroom: Classroom) => void;
   onReject: (classroom: Classroom) => void;
+  onDeactivate: (classroom: Classroom) => void;
+  onBan: (classroom: Classroom) => void;
+  onRestore: (classroom: Classroom) => void;
+  onDelete: (classroom: Classroom) => void;
 }
 
 export const ClassroomsTable = ({
@@ -50,6 +58,10 @@ export const ClassroomsTable = ({
   onView,
   onApprove,
   onReject,
+  onDeactivate,
+  onBan,
+  onRestore,
+  onDelete,
 }: ClassroomsTableProps) => (
   <div className="rounded-2xl border border-border bg-card/30 backdrop-blur-sm overflow-hidden shadow-sm transition-opacity duration-300">
     <Table>
@@ -57,7 +69,7 @@ export const ClassroomsTable = ({
         <TableRow className="hover:bg-transparent border-b border-border/50">
           <TableHead className="py-4 pl-6 text-orange-500">Classroom</TableHead>
           <TableHead>Institution</TableHead>
-          <TableHead className="hidden md:table-cell">Requested By</TableHead>
+          <TableHead className="hidden md:table-cell">Created By</TableHead>
           <TableHead className="text-center">Status</TableHead>
           <TableHead className="text-right pr-6">Actions</TableHead>
         </TableRow>
@@ -80,7 +92,6 @@ export const ClassroomsTable = ({
               key={cls.id}
               className="group hover:bg-orange-500/[0.03] border-border/40 transition-colors"
             >
-              {/* Classroom name */}
               <TableCell className="py-4 pl-6">
                 <div className="flex items-center gap-3">
                   <div className="size-9 rounded-xl bg-muted border border-border flex items-center justify-center text-orange-500 shrink-0">
@@ -95,7 +106,6 @@ export const ClassroomsTable = ({
                 </div>
               </TableCell>
 
-              {/* Institution */}
               <TableCell className="text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <Building2 className="size-3 shrink-0" />
@@ -109,7 +119,6 @@ export const ClassroomsTable = ({
                 )}
               </TableCell>
 
-              {/* Requester */}
               <TableCell className="hidden md:table-cell text-xs">
                 {cls.creator ? (
                   <div>
@@ -123,12 +132,10 @@ export const ClassroomsTable = ({
                 )}
               </TableCell>
 
-              {/* Status */}
               <TableCell className="text-center">
                 <StatusBadge status={cls.status} />
               </TableCell>
 
-              {/* Actions */}
               <TableCell className="text-right pr-6">
                 <div className="flex items-center justify-end gap-1">
                   <Button
@@ -142,28 +149,72 @@ export const ClassroomsTable = ({
                   </Button>
 
                   {cls.status === "PENDING" && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-600"
+                        title="Approve legacy request"
+                        onClick={() => onApprove(cls)}
+                      >
+                        <ThumbsUp className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 rounded-lg hover:bg-red-500/10 hover:text-red-500"
+                        title="Reject"
+                        onClick={() => onReject(cls)}
+                      >
+                        <ThumbsDown className="size-3.5" />
+                      </Button>
+                    </>
+                  )}
+
+                  {cls.status === "APPROVED" && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 rounded-lg hover:bg-slate-500/10 hover:text-slate-600"
+                        title="Mark inactive"
+                        onClick={() => onDeactivate(cls)}
+                      >
+                        <PauseCircle className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 rounded-lg hover:bg-rose-500/10 hover:text-rose-600"
+                        title="Ban classroom"
+                        onClick={() => onBan(cls)}
+                      >
+                        <Ban className="size-3.5" />
+                      </Button>
+                    </>
+                  )}
+
+                  {(cls.status === "INACTIVE" || cls.status === "BANNED") && (
                     <Button
                       variant="ghost"
                       size="icon"
                       className="size-8 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-600"
-                      title="Approve"
-                      onClick={() => onApprove(cls)}
+                      title="Restore classroom"
+                      onClick={() => onRestore(cls)}
                     >
-                      <ThumbsUp className="size-3.5" />
+                      <RotateCcw className="size-3.5" />
                     </Button>
                   )}
 
-                  {cls.status === "PENDING" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 rounded-lg hover:bg-red-500/10 hover:text-red-500"
-                      title="Reject"
-                      onClick={() => onReject(cls)}
-                    >
-                      <ThumbsDown className="size-3.5" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 rounded-lg hover:bg-red-500/10 hover:text-red-500"
+                    title="Delete permanently"
+                    onClick={() => onDelete(cls)}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>
@@ -188,7 +239,6 @@ export const ClassroomsTable = ({
       </TableBody>
     </Table>
 
-    {/* PAGINATION */}
     {meta && meta.totalPages > 1 && (
       <div className="p-4 border-t border-border/50 bg-muted/20 flex items-center justify-between">
         <p className="text-[11px] text-muted-foreground font-medium">

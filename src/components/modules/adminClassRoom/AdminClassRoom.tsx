@@ -7,24 +7,32 @@ import {
   getAllClassroomsAction,
   approveClassroomAction,
   rejectClassroomAction,
+  updateClassroomStatusAction,
+  deleteClassroomAction,
 } from "@/actions/_getAllClassroomsAction";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 import { ClassroomsTable } from "./Classroomstable";
-import { DetailDialog, ApproveDialog, RejectDialog } from "./Dialogs";
+import {
+  DetailDialog,
+  ApproveDialog,
+  RejectDialog,
+  DeleteDialog,
+  StatusDialog,
+} from "./Dialogs";
 import { Classroom } from "@/types/classroom.types";
-
-// ─── Status filter options ────────────────────────────────────────────────────
 
 const STATUS_OPTIONS = [
   { value: "", label: "All Status" },
+  { value: "APPROVED", label: "Active" },
+  { value: "INACTIVE", label: "Inactive" },
+  { value: "BANNED", label: "Banned" },
   { value: "PENDING", label: "Pending" },
-  { value: "APPROVED", label: "Approved" },
   { value: "REJECTED", label: "Rejected" },
 ] as const;
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+type StatusAction = "INACTIVE" | "BANNED" | "APPROVED";
 
 const AdminClassRoom = () => {
   const queryClient = useQueryClient();
@@ -33,12 +41,15 @@ const AdminClassRoom = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
 
-  // Dialog states
   const [detailTarget, setDetailTarget] = useState<Classroom | null>(null);
   const [approveTarget, setApproveTarget] = useState<Classroom | null>(null);
   const [rejectTarget, setRejectTarget] = useState<Classroom | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Classroom | null>(null);
+  const [statusTarget, setStatusTarget] = useState<{
+    classroom: Classroom;
+    status: StatusAction;
+  } | null>(null);
 
-  // ── Data fetching ──────────────────────────────────────────────────────────
   const { data, isLoading, isPlaceholderData } = useQuery({
     queryKey: ["admin-classrooms", page, searchTerm, statusFilter],
     queryFn: () =>
@@ -46,7 +57,14 @@ const AdminClassRoom = () => {
         page,
         limit: 10,
         searchTerm: searchTerm || undefined,
-        status: (statusFilter as "PENDING" | "APPROVED" | "REJECTED" | "") || undefined,
+        status:
+          (statusFilter as
+            | "PENDING"
+            | "APPROVED"
+            | "REJECTED"
+            | "INACTIVE"
+            | "BANNED"
+            | "") || undefined,
       }),
     placeholderData: (prev) => prev,
   });
@@ -54,13 +72,17 @@ const AdminClassRoom = () => {
   const classrooms: Classroom[] = (data?.data as Classroom[]) ?? [];
   const meta = data?.meta;
 
-  // ── Approve mutation ───────────────────────────────────────────────────────
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-classrooms"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
+  };
+
   const approveMutation = useMutation({
     mutationFn: (classroomId: string) => approveClassroomAction(classroomId),
     onSuccess: (result) => {
       if (result.success) {
         toast.success("Classroom approved successfully!");
-        queryClient.invalidateQueries({ queryKey: ["admin-classrooms"] });
+        invalidate();
         setApproveTarget(null);
       } else {
         toast.error(result.message || "Failed to approve classroom.");
@@ -69,7 +91,6 @@ const AdminClassRoom = () => {
     onError: () => toast.error("Something went wrong. Please try again."),
   });
 
-  // ── Reject mutation ────────────────────────────────────────────────────────
   const rejectMutation = useMutation({
     mutationFn: ({
       classroomId,
@@ -81,10 +102,46 @@ const AdminClassRoom = () => {
     onSuccess: (result) => {
       if (result.success) {
         toast.success("Classroom rejected.");
-        queryClient.invalidateQueries({ queryKey: ["admin-classrooms"] });
+        invalidate();
         setRejectTarget(null);
       } else {
         toast.error(result.message || "Failed to reject classroom.");
+      }
+    },
+    onError: () => toast.error("Something went wrong. Please try again."),
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: ({
+      classroomId,
+      status,
+      reason,
+    }: {
+      classroomId: string;
+      status: StatusAction;
+      reason?: string;
+    }) => updateClassroomStatusAction(classroomId, status, reason),
+    onSuccess: (result) => {
+      if (result.success) {
+        toast.success(result.message || "Classroom status updated.");
+        invalidate();
+        setStatusTarget(null);
+      } else {
+        toast.error(result.message || "Failed to update classroom.");
+      }
+    },
+    onError: () => toast.error("Something went wrong. Please try again."),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (classroomId: string) => deleteClassroomAction(classroomId),
+    onSuccess: (result) => {
+      if (result.success) {
+        toast.success(result.message || "Classroom deleted.");
+        invalidate();
+        setDeleteTarget(null);
+      } else {
+        toast.error(result.message || "Failed to delete classroom.");
       }
     },
     onError: () => toast.error("Something went wrong. Please try again."),
@@ -96,7 +153,6 @@ const AdminClassRoom = () => {
         className="p-6 space-y-6 animate-in fade-in duration-500"
         style={{ opacity: isPlaceholderData ? 0.6 : 1 }}
       >
-        {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6 border-border/50">
           <div>
             <h1 className="text-3xl font-black uppercase italic tracking-tighter">
@@ -109,9 +165,7 @@ const AdminClassRoom = () => {
             </p>
           </div>
 
-          {/* FILTERS */}
           <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-            {/* Status filter pills */}
             <div className="flex gap-1 flex-wrap">
               {STATUS_OPTIONS.map((opt) => (
                 <button
@@ -120,22 +174,19 @@ const AdminClassRoom = () => {
                     setStatusFilter(opt.value);
                     setPage(1);
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${statusFilter === opt.value
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                    statusFilter === opt.value
                       ? "bg-orange-500 text-white"
                       : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                    }`}
+                  }`}
                 >
                   {opt.label}
                 </button>
               ))}
             </div>
 
-            {/* Search */}
             <div className="relative w-full sm:w-64 flex items-center">
-              {/* Added flex and items-center to the container for better baseline support */}
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70"
-              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70" />
               <Input
                 placeholder="Search classrooms..."
                 className="pl-9 h-10 rounded-full bg-muted/20 border-white/10 text-sm focus-visible:ring-orange-500/50 placeholder:text-muted-foreground/50"
@@ -158,7 +209,6 @@ const AdminClassRoom = () => {
           </div>
         </div>
 
-        {/* TABLE */}
         <ClassroomsTable
           classrooms={classrooms}
           isLoading={isLoading}
@@ -170,10 +220,19 @@ const AdminClassRoom = () => {
           onView={setDetailTarget}
           onApprove={setApproveTarget}
           onReject={setRejectTarget}
+          onDeactivate={(classroom) =>
+            setStatusTarget({ classroom, status: "INACTIVE" })
+          }
+          onBan={(classroom) =>
+            setStatusTarget({ classroom, status: "BANNED" })
+          }
+          onRestore={(classroom) =>
+            setStatusTarget({ classroom, status: "APPROVED" })
+          }
+          onDelete={setDeleteTarget}
         />
       </div>
 
-      {/* DIALOGS */}
       <DetailDialog
         open={!!detailTarget}
         classroom={detailTarget}
@@ -199,6 +258,32 @@ const AdminClassRoom = () => {
           rejectMutation.mutate({ classroomId: rejectTarget.id, reason })
         }
         isPending={rejectMutation.isPending}
+      />
+
+      <StatusDialog
+        open={!!statusTarget}
+        classroom={statusTarget?.classroom ?? null}
+        status={statusTarget?.status ?? "INACTIVE"}
+        onClose={() => setStatusTarget(null)}
+        onConfirm={(reason) =>
+          statusTarget &&
+          statusMutation.mutate({
+            classroomId: statusTarget.classroom.id,
+            status: statusTarget.status,
+            reason,
+          })
+        }
+        isPending={statusMutation.isPending}
+      />
+
+      <DeleteDialog
+        open={!!deleteTarget}
+        classroom={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() =>
+          deleteTarget && deleteMutation.mutate(deleteTarget.id)
+        }
+        isPending={deleteMutation.isPending}
       />
     </>
   );

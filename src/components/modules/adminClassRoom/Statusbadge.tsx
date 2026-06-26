@@ -1,5 +1,11 @@
 import React from "react";
-import { CheckCircle, Clock, XCircle } from "lucide-react";
+import {
+  Ban,
+  CheckCircle,
+  Clock,
+  PauseCircle,
+  XCircle,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export const StatusBadge = ({ status }: { status: string }) => {
@@ -15,12 +21,22 @@ export const StatusBadge = ({ status }: { status: string }) => {
     APPROVED: {
       className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
       icon: <CheckCircle className="size-3" />,
-      label: "Approved",
+      label: "Active",
     },
     REJECTED: {
       className: "bg-red-500/10 text-red-500 border-red-500/30",
       icon: <XCircle className="size-3" />,
       label: "Rejected",
+    },
+    INACTIVE: {
+      className: "bg-slate-500/10 text-slate-600 border-slate-500/30",
+      icon: <PauseCircle className="size-3" />,
+      label: "Inactive",
+    },
+    BANNED: {
+      className: "bg-rose-500/10 text-rose-600 border-rose-500/30",
+      icon: <Ban className="size-3" />,
+      label: "Banned",
     },
   };
 

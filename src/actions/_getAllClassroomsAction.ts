@@ -78,3 +78,41 @@ export async function rejectClassroomAction(
     };
   }
 }
+
+export async function updateClassroomStatusAction(
+  classroomId: string,
+  status: "APPROVED" | "INACTIVE" | "BANNED",
+  reason?: string,
+) {
+  try {
+    const result = await ClassroomService.updateStatus(classroomId, status, reason);
+    return {
+      success: result.success ?? true,
+      data: result.data ?? null,
+      message: result.message ?? "Classroom status updated.",
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Failed to update classroom status.",
+      data: null,
+    };
+  }
+}
+
+export async function deleteClassroomAction(classroomId: string) {
+  try {
+    const result = await ClassroomService.delete(classroomId);
+    return {
+      success: result.success ?? true,
+      data: result.data ?? null,
+      message: result.message ?? "Classroom deleted.",
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Failed to delete classroom.",
+      data: null,
+    };
+  }
+}

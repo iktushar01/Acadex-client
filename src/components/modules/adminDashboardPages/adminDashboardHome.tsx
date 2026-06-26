@@ -21,7 +21,9 @@ import {
   Database,
   Fingerprint,
   Terminal,
-  Server
+  Server,
+  DollarSign,
+  Heart,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -47,6 +49,8 @@ type DashboardStatsResponse = {
       pending: number;
       approved: number;
       rejected: number;
+      inactive: number;
+      banned: number;
     };
     contentSummary: {
       subjects: number;
@@ -60,7 +64,7 @@ type DashboardStatsResponse = {
       id: string;
       name: string;
       institutionName: string;
-      status: "PENDING" | "APPROVED" | "REJECTED";
+      status: "PENDING" | "APPROVED" | "REJECTED" | "INACTIVE" | "BANNED";
       createdAt: string;
       creator: {
         id: string;
@@ -68,6 +72,19 @@ type DashboardStatsResponse = {
         email: string;
       };
     }>;
+    donationSummary: {
+      configured: boolean;
+      totalAmountCents: number;
+      totalDonations: number;
+      currency: string;
+      recentDonations: Array<{
+        id: string;
+        amountCents: number;
+        currency: string;
+        createdAt: string;
+        email: string | null;
+      }>;
+    };
   };
 };
 
@@ -148,8 +165,19 @@ const AdminDashboardHome = () => {
   const moderationPressure = useMemo(() => {
     if (!stats) return 0;
     const total = stats.classroomSummary.total || 1;
-    const pending = stats.classroomSummary.pending;
-    return Math.round((pending / total) * 100);
+    const flagged =
+      (stats.classroomSummary.inactive ?? 0) +
+      (stats.classroomSummary.banned ?? 0) +
+      (stats.classroomSummary.pending ?? 0);
+    return Math.round((flagged / total) * 100);
+  }, [stats]);
+
+  const donationTotal = useMemo(() => {
+    const cents = stats?.donationSummary.totalAmountCents ?? 0;
+    return (cents / 100).toLocaleString(undefined, {
+      style: "currency",
+      currency: "USD",
+    });
   }, [stats]);
 
   return (
@@ -205,7 +233,7 @@ const AdminDashboardHome = () => {
         <MetricCard
           label="Total Classrooms"
           value={stats?.classroomSummary.total ?? 0}
-          meta={`${stats?.classroomSummary.pending ?? 0} awaiting review`}
+          meta={`${stats?.classroomSummary.approved ?? 0} active`}
           icon={Building2}
           loading={statsQuery.isLoading}
         />
@@ -224,10 +252,14 @@ const AdminDashboardHome = () => {
           loading={statsQuery.isLoading}
         />
         <MetricCard
-          label="Administrator"
-          value={stats?.adminSummary.totalAdminAccounts ?? 0}
-          meta={`${stats?.adminSummary.totalSuperAdmins ?? 0} root users`}
-          icon={UserCog}
+          label="Stripe Support"
+          value={donationTotal}
+          meta={
+            stats?.donationSummary.configured
+              ? `${stats?.donationSummary.totalDonations ?? 0} donations received`
+              : "Stripe not configured"
+          }
+          icon={DollarSign}
           loading={statsQuery.isLoading}
         />
       </div>
@@ -240,8 +272,8 @@ const AdminDashboardHome = () => {
           <div className="mb-10 flex items-start justify-between">
             <SectionHeader 
               label="Pipeline Pulse" 
-              title="Moderation Pressure" 
-              description="Real-time analysis of pending requests vs platform capacity."
+              title="Classroom Health" 
+              description="Active, inactive, banned, and note moderation overview."
             />
             <div 
               className="flex size-14 items-center justify-center rounded-2xl"
@@ -270,23 +302,68 @@ const AdminDashboardHome = () => {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
-              <AdvancedStatusBox label="Approved" value={stats?.classroomSummary.approved ?? 0} type="success" />
-              <AdvancedStatusBox label="Rejected" value={stats?.classroomSummary.rejected ?? 0} type="danger" />
-              <AdvancedStatusBox label="Pending Notes" value={stats?.contentSummary.pendingNotes ?? 0} type="warning" />
+              <AdvancedStatusBox label="Active" value={stats?.classroomSummary.approved ?? 0} type="success" />
+              <AdvancedStatusBox label="Inactive" value={stats?.classroomSummary.inactive ?? 0} type="warning" />
+              <AdvancedStatusBox label="Banned" value={stats?.classroomSummary.banned ?? 0} type="danger" />
             </div>
           </div>
         </Card>
 
-        {/* Workspace Hub */}
         <div className="flex flex-col gap-6">
+          <SectionHeader label="Support" title="Stripe Donations" icon={Heart} />
+
+          <Card className="admin-panel rounded-[2rem] border-border/40 bg-card/20 p-6 shadow-xl">
+            <div className="space-y-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  Total Received
+                </p>
+                <p className="text-3xl font-black tracking-tight">{donationTotal}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-xl bg-muted/30 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Donations</p>
+                  <p className="font-black">{stats?.donationSummary.totalDonations ?? 0}</p>
+                </div>
+                <div className="rounded-xl bg-muted/30 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Stripe</p>
+                  <p className="font-black">
+                    {stats?.donationSummary.configured ? "Connected" : "Not set up"}
+                  </p>
+                </div>
+              </div>
+
+              {(stats?.donationSummary.recentDonations ?? []).length > 0 && (
+                <div className="space-y-2 border-t border-border/40 pt-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Recent Payments
+                  </p>
+                  {(stats?.donationSummary.recentDonations ?? []).slice(0, 5).map((donation) => (
+                    <div
+                      key={donation.id}
+                      className="flex items-center justify-between rounded-xl bg-background/40 px-3 py-2 text-xs"
+                    >
+                      <span className="font-medium truncate max-w-[55%]">
+                        {donation.email ?? "Anonymous"}
+                      </span>
+                      <span className="font-black text-orange-500">
+                        ${(donation.amountCents / 100).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+
           <SectionHeader label="Endpoints" title="Workspaces" icon={Server} />
           
           <RouteTerminal 
             title="Moderation Hub" 
-            desc="Control classroom ingress"
+            desc="Manage classrooms"
             href="/admin/classrooms-management"
             icon={FolderKanban}
-            count={stats?.classroomSummary.pending ?? 0}
+            count={stats?.classroomSummary.total ?? 0}
           />
           
           <RouteTerminal 

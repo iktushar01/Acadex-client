@@ -225,3 +225,134 @@ export const DetailDialog = ({ open, classroom, onClose }: DetailDialogProps) =>
     </DialogContent>
   </Dialog>
 );
+
+// ─── Status Dialog ────────────────────────────────────────────────────────────
+
+interface StatusDialogProps {
+  open: boolean;
+  classroom: Classroom | null;
+  status: "APPROVED" | "INACTIVE" | "BANNED";
+  onClose: () => void;
+  onConfirm: (reason?: string) => void;
+  isPending: boolean;
+}
+
+const statusCopy = {
+  INACTIVE: {
+    title: "Mark Classroom Inactive",
+    description: "Students will not be able to join or use this classroom until it is restored.",
+    confirm: "Mark Inactive",
+    destructive: false,
+  },
+  BANNED: {
+    title: "Ban Classroom",
+    description: "This classroom will be blocked immediately. Use this for policy violations.",
+    confirm: "Ban Classroom",
+    destructive: true,
+  },
+  APPROVED: {
+    title: "Restore Classroom",
+    description: "This classroom will become active again and members can continue using it.",
+    confirm: "Restore Classroom",
+    destructive: false,
+  },
+};
+
+export const StatusDialog = ({
+  open,
+  classroom,
+  status,
+  onClose,
+  onConfirm,
+  isPending,
+}: StatusDialogProps) => {
+  const [reason, setReason] = useState("");
+  const copy = statusCopy[status];
+
+  const handleClose = () => {
+    setReason("");
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{copy.title}</DialogTitle>
+          <DialogDescription>
+            {copy.description}{" "}
+            <span className="font-semibold text-foreground">{classroom?.name}</span>
+          </DialogDescription>
+        </DialogHeader>
+
+        {(status === "INACTIVE" || status === "BANNED") && (
+          <div className="space-y-2">
+            <Textarea
+              placeholder="Optional reason for audit trail..."
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              className="resize-none"
+            />
+          </div>
+        )}
+
+        <DialogFooter className="gap-2">
+          <Button variant="ghost" onClick={handleClose} disabled={isPending}>
+            Cancel
+          </Button>
+          <Button
+            variant={copy.destructive ? "destructive" : "default"}
+            onClick={() => onConfirm(reason.trim() || undefined)}
+            disabled={isPending}
+          >
+            {isPending ? "Saving..." : copy.confirm}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// ─── Delete Dialog ────────────────────────────────────────────────────────────
+
+interface DeleteDialogProps {
+  open: boolean;
+  classroom: Classroom | null;
+  onClose: () => void;
+  onConfirm: () => void;
+  isPending: boolean;
+}
+
+export const DeleteDialog = ({
+  open,
+  classroom,
+  onClose,
+  onConfirm,
+  isPending,
+}: DeleteDialogProps) => (
+  <Dialog open={open} onOpenChange={onClose}>
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2 text-destructive">
+          <AlertTriangle className="size-5" />
+          Delete Classroom Permanently
+        </DialogTitle>
+        <DialogDescription>
+          This will permanently delete{" "}
+          <span className="font-semibold text-foreground">{classroom?.name}</span>,
+          including subjects, notes, memberships, and chat history. This cannot be undone.
+        </DialogDescription>
+      </DialogHeader>
+
+      <DialogFooter className="gap-2">
+        <Button variant="ghost" onClick={onClose} disabled={isPending}>
+          Cancel
+        </Button>
+        <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
+          {isPending ? "Deleting..." : "Delete Forever"}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);

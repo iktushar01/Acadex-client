@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { 
   BookOpen, Building2, GraduationCap, Layers, 
-  Users, FileText, Sparkles, Hash, Clock, CheckCircle2, Copy, School 
+  Users, FileText, Sparkles, Hash, CheckCircle2, Copy, School 
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -33,14 +33,14 @@ const CreateClassroomPage = () => {
       const result = await createClassroomAction(value as CreateClassroomValues);
       if (result.success) {
         setSubmittedData(result.data);
-        toast.success("Classroom request sent!");
+        toast.success("Classroom created! You are now the class representative.");
       } else {
         toast.error(result.message);
       }
     },
   });
 
-  // ── RENDER: SUCCESS / PENDING STATE ──
+  // ── RENDER: SUCCESS STATE ──
   if (submittedData) {
     return (
       <div className="container mx-auto max-w-2xl px-4 py-20 animate-in zoom-in-95 duration-500">
@@ -48,15 +48,14 @@ const CreateClassroomPage = () => {
           <div className="relative mx-auto size-24">
             <div className="absolute inset-0 bg-green-500/20 blur-2xl rounded-full animate-pulse" />
             <div className="relative size-full rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-              <Clock className="size-10 text-green-600" />
+              <CheckCircle2 className="size-10 text-green-600" />
             </div>
-            <CheckCircle2 className="absolute -bottom-1 -right-1 size-8 text-green-600 fill-background" />
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Request Received!</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Classroom Created!</h1>
             <p className="text-muted-foreground font-medium text-sm px-6">
-              Your classroom <span className="text-foreground font-bold">{submittedData.name}</span> is being reviewed by the administration at {submittedData.institutionName}.
+              <span className="text-foreground font-bold">{submittedData.name}</span> is live at {submittedData.institutionName}. You are the class representative and can start adding subjects and notes right away.
             </p>
           </div>
 

@@ -107,4 +107,21 @@ export const ClassroomService = {
       body: JSON.stringify({ rejectionReason }),
     });
   },
+
+  async updateStatus(
+    classroomId: string,
+    status: "APPROVED" | "INACTIVE" | "BANNED",
+    reason?: string,
+  ) {
+    return classroomFetch(`/classrooms/${classroomId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status, ...(reason ? { reason } : {}) }),
+    });
+  },
+
+  async delete(classroomId: string) {
+    return classroomFetch(`/classrooms/${classroomId}`, {
+      method: "DELETE",
+    });
+  },
 };

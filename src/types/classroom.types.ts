@@ -8,7 +8,7 @@ export interface Classroom {
   groupName?: string | null;
   description?: string | null;
   joinCode: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  status: "PENDING" | "APPROVED" | "REJECTED" | "INACTIVE" | "BANNED";
   rejectionReason?: string | null;
   createdAt: string;
   creator: { id: string; name: string; email: string; image?: string | null };

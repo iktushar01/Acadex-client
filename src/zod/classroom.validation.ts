@@ -1,7 +1,13 @@
 import { z } from "zod";
 
 // --- Base Enums ---
-export const classroomStatusEnum = z.enum(["PENDING", "APPROVED", "REJECTED"]);
+export const classroomStatusEnum = z.enum([
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+  "INACTIVE",
+  "BANNED",
+]);
 export const institutionLevelEnum = z.enum(["SCHOOL", "COLLEGE", "UNIVERSITY"]);
 
 // --- Validations ---
