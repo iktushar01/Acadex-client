@@ -1,72 +1,86 @@
 # Acadex Client
 
-Acadex Client is the modern web application for Acadex, a classroom-first study platform where students can join classrooms, organize subjects and folders, upload notes, track leaderboard activity, save favorites, and collaborate in a cleaner academic workflow.
+The web frontend for **Acadex** — a classroom-first study platform where students join digital classrooms, share notes, chat in real time, and study with an AI assistant grounded in their class materials.
 
-## Live URLs
+| | |
+|---|---|
+| **Live** | [acadex-client.vercel.app](https://acadex-client.vercel.app) |
+| **API** | [acadex-server.vercel.app/api/v1](https://acadex-server.vercel.app/api/v1) |
+| **Full docs** | [DOCUMENTATION.md](./DOCUMENTATION.md) |
 
-- Production App: [https://acadex-client.vercel.app](https://acadex-client.vercel.app)
-- Production API: [https://acadex-server.vercel.app/api/v1](https://acadex-server.vercel.app/api/v1)
+---
 
-## Features
+## At a glance
 
-- Email/password and Google sign-in flow
-- Role-aware dashboard experience for students, CRs, admins, and super admins
-- Classroom creation, join flow, and classroom management
-- Subject and folder organization for structured study materials
-- Note upload, approval-aware browsing, and note detail pages
-- Favorites, comments, and leaderboard experiences
-- Notice center and admin management screens
-- Responsive UI built with reusable component patterns
+- **Classroom hub** — join with a code, organize subjects/folders, share PDF and image notes  
+- **CR moderation** — class representatives approve uploads and manage curriculum  
+- **Real-time chat** — Pusher-powered group chat per classroom  
+- **AI Study Assistant** — streaming RAG Q&A over approved class notes  
+- **Student tools** — GPA calculator, timetables, flashcards, cover pages, exam planner  
+- **Admin panel** — platform stats, classroom moderation, global notices  
 
-## Technologies Used
+**Stack:** Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · TanStack Query · Pusher · Vercel
 
-- Next.js 16 App Router
-- React 19
-- TypeScript
-- Tailwind CSS 4
-- TanStack Query
-- TanStack React Form
-- Axios
-- Radix UI and shadcn/ui patterns
-- Framer Motion
-- Zod
-- Vercel deployment
+---
 
-## Setup Instructions
-
-### 1. Install dependencies
+## Quick start
 
 ```bash
-npm install
+pnpm install
 ```
 
-### 2. Create your environment file
-
-Create `Acadex-client/.env.local` with values similar to:
+Create `.env.local`:
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:5000/api/v1
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ACCESS_TOKEN_SECRET=your_access_token_secret
+
+# Optional — real-time chat
+NEXT_PUBLIC_PUSHER_KEY=your_pusher_key
+NEXT_PUBLIC_PUSHER_CLUSTER=ap1
 ```
-
-Notes:
-
-- `ACCESS_TOKEN_SECRET` should match the backend `ACCESS_TOKEN_SECRET`
-- If your deployment still uses `JWT_ACCESS_SECRET`, keep it identical to the backend access token secret
-- Some services also support `NEXT_PUBLIC_API_URL` as a fallback, but `NEXT_PUBLIC_API_BASE_URL` is the main value used across the app
-
-### 3. Start the development server
 
 ```bash
-npm run dev
+pnpm dev    # http://localhost:3000
 ```
 
-The client will be available at [http://localhost:3000](http://localhost:3000).
+Requires [Acadex Server](../Acadex-server) running locally on port 5000.
 
-### 4. Build for production
+---
 
-```bash
-npm run build
-npm run start
+## Documentation
+
+| Document | Audience | Contents |
+|----------|----------|----------|
+| **[DOCUMENTATION.md](./DOCUMENTATION.md)** | Users, recruiters, developers | Product overview, user flows, features, architecture, deployment |
+| **[/Developer](https://acadex-client.vercel.app/Developer)** | Contributors | Interactive setup guide in the app |
+
+**Server docs:** [Acadex-server/DOCUMENTATION.md](../Acadex-server/DOCUMENTATION.md)
+
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Development server |
+| `pnpm build` | Production build |
+| `pnpm start` | Serve production build |
+| `pnpm lint` | ESLint |
+
+---
+
+## Repository layout
+
 ```
+src/
+├── app/           # Pages & API routes (App Router)
+├── actions/       # Server Actions
+├── services/      # API clients
+├── components/    # UI modules
+├── hooks/         # Client hooks
+└── lib/           # Auth, HTTP, utilities
+```
+
+See [DOCUMENTATION.md](./DOCUMENTATION.md) for detailed architecture and user journeys.
