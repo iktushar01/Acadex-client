@@ -52,7 +52,7 @@ const ClassroomChatRoutePage = () => {
   }, [classroomId]);
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full flex-col gap-4 px-4 py-6 sm:px-6">
       <div className="space-y-1">
         <Link href={`/dashboard/classroom/${classroomId}`}>
           <Button variant="ghost" size="sm" className="mb-1 -ml-2 h-8 px-2">

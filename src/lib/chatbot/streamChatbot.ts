@@ -5,29 +5,14 @@ import type {
   StreamEvent,
 } from "@/types/chatbot.types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-const getAccessToken = (): string | null => {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]+)/);
-  return match?.[1] ? decodeURIComponent(match[1]) : null;
-};
-
 export async function* streamChatbotAsk(
   payload: AskChatbotPayload,
 ): AsyncGenerator<StreamEvent> {
-  if (!API_BASE_URL) {
-    throw new Error("API base URL is not configured");
-  }
-
-  const accessToken = getAccessToken();
-
-  const response = await fetch(`${API_BASE_URL}/chatbot/ask/stream`, {
+  const response = await fetch("/api/chatbot/ask/stream", {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     },
     body: JSON.stringify(payload),
   });
