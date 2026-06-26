@@ -5,6 +5,7 @@ import Banner from "./banner";
 import Features from "./Features";
 import HowItWork from "./howitwork";
 import FeedBack from "./feedback";
+import SupportUs from "./supportUs";
 
 const Home = () => {
     return (
@@ -13,6 +14,7 @@ const Home = () => {
             <Features/>
             <HowItWork />
             <About/>
+            <SupportUs />
             <FeedBack />
         </div>
     );
