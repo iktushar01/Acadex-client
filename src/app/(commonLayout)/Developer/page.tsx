@@ -20,10 +20,12 @@ import {
   ChevronDown,
   ChevronUp,
   Globe,
+  MessageSquare,
+  Bot,
+  CreditCard,
 } from "lucide-react";
 import { toast } from "sonner";
 
-// ─── COPY BUTTON ─────────────────────────────────────────────────────────────
 const CopyButton = ({ text, label }: { text: string; label: string }) => {
   const [copied, setCopied] = useState(false);
 
@@ -52,7 +54,6 @@ const CopyButton = ({ text, label }: { text: string; label: string }) => {
   );
 };
 
-// ─── CODE BLOCK ──────────────────────────────────────────────────────────────
 const CodeBlock = ({ code, label, lang = "bash" }: { code: string; label: string; lang?: string }) => (
   <div className="rounded-xl overflow-hidden border border-border bg-card shadow-sm">
     <div className="flex items-center justify-between px-5 py-2.5 border-b border-border bg-muted/50">
@@ -70,7 +71,6 @@ const CodeBlock = ({ code, label, lang = "bash" }: { code: string; label: string
   </div>
 );
 
-// ─── ENV LINE ────────────────────────────────────────────────────────────────
 type EnvVar = { key: string; value: string; comment?: string };
 
 const EnvLine = ({ v }: { v: EnvVar }) => {
@@ -86,7 +86,6 @@ const EnvLine = ({ v }: { v: EnvVar }) => {
   );
 };
 
-// ─── ENV BLOCK ───────────────────────────────────────────────────────────────
 const EnvBlock = ({ vars, label }: { vars: EnvVar[]; label: string }) => {
   const fullText = vars
     .map((v) => (v.comment ? `\n# ${v.comment}\n${v.key}=${v.value}` : `${v.key}=${v.value}`))
@@ -121,7 +120,6 @@ const EnvBlock = ({ vars, label }: { vars: EnvVar[]; label: string }) => {
   );
 };
 
-// ─── ENV GROUP ACCORDION ─────────────────────────────────────────────────────
 const EnvGroupAccordion = ({
   icon, title, vars, label,
 }: {
@@ -154,14 +152,12 @@ const EnvGroupAccordion = ({
   );
 };
 
-// ─── STEP BADGE ──────────────────────────────────────────────────────────────
 const StepBadge = ({ n }: { n: number }) => (
   <div className="shrink-0 size-8 rounded-xl flex items-center justify-center text-sm font-black bg-primary/10 text-primary border border-primary/20">
     {n}
   </div>
 );
 
-// ─── SECTION HEADER ──────────────────────────────────────────────────────────
 const SectionHeader = ({ icon, title, sub }: { icon: React.ReactNode; title: string; sub: string }) => (
   <div className="flex items-center gap-4 mb-8">
     <div className="p-3.5 rounded-xl bg-primary/10 border border-primary/20 text-primary">{icon}</div>
@@ -172,7 +168,6 @@ const SectionHeader = ({ icon, title, sub }: { icon: React.ReactNode; title: str
   </div>
 );
 
-// ─── COPY ALL BACKEND ENV ─────────────────────────────────────────────────────
 function CopyAllBackendEnv({ groups }: { groups: { vars: EnvVar[]; title: string }[] }) {
   const [copied, setCopied] = useState(false);
   const fullText = groups
@@ -207,18 +202,21 @@ function CopyAllBackendEnv({ groups }: { groups: { vars: EnvVar[]; title: string
   );
 }
 
-// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function DevelopersPage() {
   const clientRepo = "https://github.com/iktushar01/Acadex-client.git";
   const serverRepo = "https://github.com/iktushar01/Acadex-server.git";
+  const liveClient = "https://acadex-client.vercel.app";
+  const liveApi = "https://acadex-server.vercel.app/api/v1";
 
-  const cloneClientCmd = `git clone ${clientRepo}\ncd Acadex-client\nnpm install\nnpm run dev`;
-  const cloneServerCmd = `git clone ${serverRepo}\ncd Acadex-server\nnpm install\nnpx prisma generate\nnpx prisma db push\nnpm run dev`;
+  const cloneClientCmd = `git clone ${clientRepo}\ncd Acadex-client\npnpm install\npnpm dev`;
+  const cloneServerCmd = `git clone ${serverRepo}\ncd Acadex-server\npnpm install\npnpm exec prisma generate\npnpm exec prisma db push\npnpm dev`;
 
   const frontendEnvVars: EnvVar[] = [
     { key: "NEXT_PUBLIC_API_BASE_URL", value: "http://localhost:5000/api/v1", comment: "Backend API base URL" },
-    { key: "NEXT_PUBLIC_BASE_URL", value: "http://localhost:3000" },
-    { key: "JWT_ACCESS_SECRET", value: "your_access_token_secret" },
+    { key: "NEXT_PUBLIC_BASE_URL", value: "http://localhost:3000", comment: "Frontend origin" },
+    { key: "ACCESS_TOKEN_SECRET", value: "your_access_token_secret", comment: "Must match server ACCESS_TOKEN_SECRET" },
+    { key: "NEXT_PUBLIC_PUSHER_KEY", value: "your_pusher_key", comment: "Real-time classroom chat (optional locally)" },
+    { key: "NEXT_PUBLIC_PUSHER_CLUSTER", value: "ap2" },
   ];
 
   const backendEnvGroups: { icon: React.ReactNode; title: string; label: string; vars: EnvVar[] }[] = [
@@ -229,6 +227,7 @@ export default function DevelopersPage() {
       vars: [
         { key: "PORT", value: "5000", comment: "Server" },
         { key: "NODE_ENV", value: "development" },
+        { key: "FRONTEND_URL", value: "http://localhost:3000" },
       ],
     },
     {
@@ -236,7 +235,7 @@ export default function DevelopersPage() {
       title: "Database (Neon PostgreSQL)",
       label: "Database ENV",
       vars: [
-        { key: "DATABASE_URL", value: "your_database_url", comment: "Database" },
+        { key: "DATABASE_URL", value: "your_neon_pooler_url", comment: "Use Neon pooled URL (-pooler) on Vercel" },
       ],
     },
     {
@@ -246,7 +245,6 @@ export default function DevelopersPage() {
       vars: [
         { key: "BETTER_AUTH_SECRET", value: "your_better_auth_secret", comment: "Better Auth" },
         { key: "BETTER_AUTH_URL", value: "http://localhost:5000" },
-        { key: "FRONTEND_URL", value: "http://localhost:3000" },
         { key: "ACCESS_TOKEN_SECRET", value: "your_access_token_secret", comment: "JWT" },
         { key: "REFRESH_TOKEN_SECRET", value: "your_refresh_token_secret" },
         { key: "ACCESS_TOKEN_EXPIRES_IN", value: "1d" },
@@ -290,18 +288,51 @@ export default function DevelopersPage() {
         { key: "IMGBB_API_KEY", value: "your_imgbb_api_key", comment: "ImgBB" },
       ],
     },
+    {
+      icon: <MessageSquare className="size-4" />,
+      title: "Real-time Chat (Pusher)",
+      label: "Pusher ENV",
+      vars: [
+        { key: "PUSHER_APP_ID", value: "your_pusher_app_id", comment: "Pusher" },
+        { key: "PUSHER_KEY", value: "your_pusher_key" },
+        { key: "PUSHER_SECRET", value: "your_pusher_secret" },
+        { key: "PUSHER_CLUSTER", value: "ap2" },
+      ],
+    },
+    {
+      icon: <Bot className="size-4" />,
+      title: "Study Assistant (OpenRouter + pgvector)",
+      label: "Chatbot ENV",
+      vars: [
+        { key: "OPENROUTER_API_KEY", value: "your_openrouter_api_key", comment: "AI assistant" },
+        { key: "OPENROUTER_BASE_URL", value: "https://openrouter.ai/api/v1" },
+        { key: "OPENROUTER_EMBEDDING_MODEL", value: "nvidia/llama-nemotron-embed-vl-1b-v2:free" },
+        { key: "OPENROUTER_LLM_MODEL", value: "nvidia/nemotron-3-super-120b-a12b:free" },
+        { key: "CHATBOT_EMBEDDING_DIMENSION", value: "2048" },
+        { key: "CHATBOT_TOP_K", value: "8" },
+        { key: "CHATBOT_RATE_LIMIT_MAX", value: "25" },
+      ],
+    },
+    {
+      icon: <CreditCard className="size-4" />,
+      title: "Support Payments (Stripe)",
+      label: "Stripe ENV",
+      vars: [
+        { key: "STRIPE_SECRET_KEY", value: "sk_test_your_stripe_secret_key", comment: "Optional — support page" },
+        { key: "STRIPE_WEBHOOK_SECRET", value: "whsec_your_stripe_webhook_secret" },
+      ],
+    },
   ];
 
   const techBadges = [
-    "Next.js 14", "TypeScript", "Tailwind CSS", "Shadcn UI",
-    "Express.js", "Prisma ORM", "PostgreSQL", "Better Auth",
-    "Cloudinary", "Google OAuth",
+    "Next.js 16", "React 19", "TypeScript", "Tailwind CSS 4", "Shadcn UI",
+    "Express 5", "Prisma 7", "PostgreSQL", "pgvector", "Better Auth",
+    "Pusher", "OpenRouter", "Cloudinary", "Stripe",
   ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
 
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden border-b border-border">
         <div
           className="absolute inset-0 opacity-30"
@@ -321,9 +352,10 @@ export default function DevelopersPage() {
             Build with <span className="text-primary">Acadex</span>
           </h1>
 
-          <p className="text-muted-foreground text-lg max-w-xl leading-relaxed mb-8">
-            A full-stack note-sharing platform. Clone the repos, wire up your environment, and start
-            shipping. Everything you need is right here.
+          <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed mb-8">
+            A full-stack classroom platform for note sharing, live group chat, CR-led moderation,
+            and an AI study assistant grounded in your class materials. Clone both repos, configure
+            your environment, and run locally — or explore the live deployment.
           </p>
 
           <div className="flex flex-wrap gap-2 mb-10">
@@ -335,27 +367,29 @@ export default function DevelopersPage() {
           </div>
 
           <div className="flex flex-wrap gap-4">
-            <a href={clientRepo} target="_blank"
+            <a href={clientRepo} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm transition-all hover:opacity-90 shadow-md">
               <Layout className="size-4" /> Client Repo <ExternalLink className="size-3 opacity-70" />
             </a>
-            <a href={serverRepo} target="_blank"
+            <a href={serverRepo} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-2 px-5 py-3 rounded-xl bg-secondary text-secondary-foreground font-bold text-sm transition-all hover:bg-muted border border-border">
               <Server className="size-4" /> Server Repo <ExternalLink className="size-3 opacity-70" />
+            </a>
+            <a href={liveClient} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border font-bold text-sm transition-all hover:border-primary/40">
+              <Globe className="size-4" /> Live App <ExternalLink className="size-3 opacity-70" />
             </a>
           </div>
         </div>
       </div>
 
-      {/* ── MAIN CONTENT ─────────────────────────────────────────────────── */}
       <div className="max-w-5xl mx-auto px-6 py-20 space-y-20">
 
-        {/* ── FRONTEND SETUP ───────────────────────────────────────────── */}
         <section>
           <SectionHeader
             icon={<Layout className="size-5" />}
             title="Frontend Setup"
-            sub="Next.js 14 · TypeScript · Tailwind CSS · Shadcn UI"
+            sub="Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · Shadcn UI"
           />
           <div className="space-y-7">
 
@@ -366,6 +400,9 @@ export default function DevelopersPage() {
                   <Terminal className="size-4 text-primary" /> Clone & Install
                 </p>
                 <CodeBlock code={cloneClientCmd} label="Frontend Clone Command" />
+                <p className="text-xs text-muted-foreground">
+                  Requires Node.js 20+. <code className="font-mono">npm install</code> works if you prefer npm over pnpm.
+                </p>
               </div>
             </div>
 
@@ -386,7 +423,7 @@ export default function DevelopersPage() {
                 <p className="font-bold text-foreground flex items-center gap-2 text-sm">
                   <Zap className="size-4 text-primary" /> Run Dev Server
                 </p>
-                <CodeBlock code="npm run dev" label="Frontend Dev" />
+                <CodeBlock code="pnpm dev" label="Frontend Dev" />
                 <p className="text-xs text-muted-foreground">
                   App running at <span className="text-primary font-mono">http://localhost:3000</span>
                 </p>
@@ -398,12 +435,11 @@ export default function DevelopersPage() {
 
         <div className="border-t border-border" />
 
-        {/* ── BACKEND SETUP ────────────────────────────────────────────── */}
         <section>
           <SectionHeader
             icon={<Database className="size-5" />}
             title="Backend Setup"
-            sub="Express.js · Prisma · PostgreSQL (Neon) · Better Auth"
+            sub="Express 5 · Prisma 7 · PostgreSQL (Neon) · Better Auth · Pusher · pgvector"
           />
           <div className="space-y-7">
 
@@ -426,11 +462,12 @@ export default function DevelopersPage() {
                   <span className="text-muted-foreground font-normal">— expand each group to copy</span>
                 </p>
 
-                {/* Placeholder notice */}
                 <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-primary/5 border border-primary/20 text-sm text-muted-foreground">
                   <AlertCircle className="size-4 text-primary mt-0.5 shrink-0" />
                   <span>
-                    Values shown as <span className="font-mono text-primary/80 italic">your_*</span> are placeholders — replace them with your own credentials before running.
+                    Values shown as <span className="font-mono text-primary/80 italic">your_*</span> are placeholders.
+                    Pusher and OpenRouter are required for group chat and the study assistant.
+                    On Vercel, use Neon&apos;s <span className="font-mono">-pooler</span> connection string and deploy both repos to the <span className="font-mono">sin1</span> region for best latency with ap-southeast-1 databases.
                   </span>
                 </div>
 
@@ -449,7 +486,7 @@ export default function DevelopersPage() {
                 <p className="font-bold text-foreground flex items-center gap-2 text-sm">
                   <Zap className="size-4 text-primary" /> Start the Server
                 </p>
-                <CodeBlock code="npm run dev" label="Backend Dev" />
+                <CodeBlock code="pnpm dev" label="Backend Dev" />
                 <p className="text-xs text-muted-foreground">
                   API available at <span className="text-primary font-mono">http://localhost:5000/api/v1</span>
                 </p>
@@ -461,38 +498,50 @@ export default function DevelopersPage() {
 
         <div className="border-t border-border" />
 
-        {/* ── QUICK REFERENCE ──────────────────────────────────────────── */}
         <section>
           <h3 className="text-xl font-black mb-5 text-foreground">Quick Reference</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { icon: <Globe className="size-4" />, title: "Frontend", value: "http://localhost:3000" },
-              { icon: <Server className="size-4" />, title: "Backend", value: "http://localhost:5000" },
+              { icon: <Globe className="size-4" />, title: "Local Frontend", value: "http://localhost:3000" },
+              { icon: <Server className="size-4" />, title: "Local Backend", value: "http://localhost:5000" },
               { icon: <Database className="size-4" />, title: "API Base", value: "/api/v1" },
+              { icon: <Globe className="size-4" />, title: "Live Frontend", value: "acadex-client.vercel.app" },
+              { icon: <Server className="size-4" />, title: "Live API", value: "acadex-server.vercel.app/api/v1" },
+              { icon: <MessageSquare className="size-4" />, title: "Key Features", value: "Notes · Chat · AI · Tools" },
             ].map((item) => (
               <div key={item.title}
                 className="rounded-xl border border-border bg-card p-5 flex items-center gap-4 hover:border-primary/40 hover:bg-accent transition-colors">
                 <div className="p-2.5 rounded-xl bg-primary/10 text-primary">{item.icon}</div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase font-bold tracking-wide">{item.title}</p>
-                  <code className="text-sm font-mono text-foreground">{item.value}</code>
+                  <code className="text-sm font-mono text-foreground break-all">{item.value}</code>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── FOOTER ───────────────────────────────────────────────────── */}
+        <section className="rounded-2xl border border-border bg-muted/30 p-6">
+          <h3 className="text-lg font-black mb-3 text-foreground">Architecture at a glance</h3>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>• <strong className="text-foreground">Auth:</strong> Better Auth + JWT in httpOnly cookies on the client domain; browser calls use a token bridge (<code className="font-mono text-xs">/api/auth/token</code>) for direct API access.</li>
+            <li>• <strong className="text-foreground">Notes:</strong> Upload → CR approval → classroom visibility with folders, subjects, comments, and favorites.</li>
+            <li>• <strong className="text-foreground">Chat:</strong> Membership-gated group messages via REST + Pusher real-time events.</li>
+            <li>• <strong className="text-foreground">Study assistant:</strong> RAG over indexed note chunks using pgvector embeddings and OpenRouter models.</li>
+            <li>• <strong className="text-foreground">Docs:</strong> See <code className="font-mono text-xs">DOCUMENTATION.md</code> in each repo for full product and API details.</li>
+          </ul>
+        </section>
+
         <footer className="pt-10 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-muted-foreground text-sm">
             Licensed under <span className="text-primary font-bold">MIT</span>. Fork it. Ship it. Own it.
           </p>
           <div className="flex gap-6">
-            <a href={clientRepo} target="_blank"
+            <a href={clientRepo} target="_blank" rel="noopener noreferrer"
               className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 font-semibold">
               Client Repo <ExternalLink className="size-3" />
             </a>
-            <a href={serverRepo} target="_blank"
+            <a href={serverRepo} target="_blank" rel="noopener noreferrer"
               className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 font-semibold">
               Server Repo <ExternalLink className="size-3" />
             </a>
