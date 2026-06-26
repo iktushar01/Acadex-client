@@ -11,8 +11,13 @@ export const getStudentSidebarData = async (): Promise<SidebarData> => {
     label: membership.classroom.name,
     icon: "BookOpen",
     href: `/dashboard/classroom/${membership.classroom.id}`,
-    // Optional: Add a badge if they are a CR
     badge: membership.memberRole === "CR" ? "CR" : undefined
+  }));
+
+  const classroomChatItems: NavItem[] = (result.data || []).map((membership: any) => ({
+    label: `${membership.classroom.name} Chat`,
+    icon: "MessageSquare",
+    href: `/dashboard/classroom/${membership.classroom.id}/chat`,
   }));
 
   // 3. Return the full SidebarData structure
@@ -42,10 +47,16 @@ export const getStudentSidebarData = async (): Promise<SidebarData> => {
       },
       {
         title: "Messages",
-        items: [
-          { label: "Messages", icon: "MessageSquare", href: "/dashboard/classroom/Group-chat"},
-        ],
-        
+        items:
+          classroomChatItems.length > 0
+            ? classroomChatItems
+            : ([
+                {
+                  label: "Messages",
+                  icon: "MessageSquare",
+                  href: "/dashboard/classroom/Group-chat",
+                },
+              ] as NavItem[]),
       },
       {
       title: "System",

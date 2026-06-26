@@ -18,6 +18,7 @@ const GroupChatPage = () => {
   const [selectedClassroomId, setSelectedClassroomId] = useState<string>("");
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -26,6 +27,11 @@ const GroupChatPage = () => {
           fetchMyClassroomsAction(),
           getCurrentUserAction(),
         ]);
+
+        if (!classroomsResult.success) {
+          setError(classroomsResult.error || "Failed to load your classrooms.");
+          return;
+        }
 
         const options =
           classroomsResult.data?.map((membership: {
@@ -38,8 +44,9 @@ const GroupChatPage = () => {
         setClassrooms(options);
         setSelectedClassroomId(options[0]?.id ?? "");
         setCurrentUserId(userResult.data?.id);
-      } catch (error) {
-        console.error("Failed to load chat page data:", error);
+      } catch (loadError) {
+        console.error("Failed to load chat page data:", loadError);
+        setError("Failed to load classroom chat.");
       } finally {
         setLoading(false);
       }
@@ -91,6 +98,13 @@ const GroupChatPage = () => {
       {loading ? (
         <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed">
           <p className="text-sm text-muted-foreground">Loading chat...</p>
+        </div>
+      ) : error ? (
+        <div className="flex h-64 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-4 text-center">
+          <p className="text-sm text-muted-foreground">{error}</p>
+          <Link href="/dashboard/classroom">
+            <Button variant="outline">Go to classrooms</Button>
+          </Link>
         </div>
       ) : classrooms.length === 0 ? (
         <div className="flex h-64 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-4 text-center">

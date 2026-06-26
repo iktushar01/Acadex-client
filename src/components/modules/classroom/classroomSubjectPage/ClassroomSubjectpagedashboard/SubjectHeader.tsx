@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, Plus } from "lucide-react";
+import { LayoutGrid, MessageSquare, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -22,13 +22,24 @@ export const SubjectHeader = ({ isCR, classroomId }: SubjectHeaderProps) => {
         </h1>
       </div>
 
-      {isCR && (
-        <Link href={`/dashboard/classroom/subject/${classroomId}/add`}>
-          <Button className="rounded-2xl font-bold h-12 px-6 bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all active:scale-95">
-            <Plus className="mr-2 h-5 w-5" /> Add Subject
+      <div className="flex flex-wrap items-center gap-3">
+        <Link href={`/dashboard/classroom/${classroomId}/chat`}>
+          <Button
+            variant="outline"
+            className="rounded-2xl font-bold h-12 px-6 border-primary/30 hover:bg-primary/5"
+          >
+            <MessageSquare className="mr-2 h-5 w-5" /> Group Chat
           </Button>
         </Link>
-      )}
+
+        {isCR && (
+          <Link href={`/dashboard/classroom/subject/${classroomId}/add`}>
+            <Button className="rounded-2xl font-bold h-12 px-6 bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all active:scale-95">
+              <Plus className="mr-2 h-5 w-5" /> Add Subject
+            </Button>
+          </Link>
+        )}
+      </div>
     </header>
   );
 };
