@@ -84,6 +84,7 @@ type DashboardStatsResponse = {
         createdAt: string;
         email: string | null;
       }>;
+      error?: string;
     };
   };
 };
@@ -158,6 +159,8 @@ const AdminDashboardHome = () => {
     queryKey: ["admin-dashboard-stats"],
     queryFn: fetchDashboardStats,
     retry: false,
+    refetchOnWindowFocus: true,
+    staleTime: 30_000,
   });
 
   const stats = statsQuery.data?.data;
@@ -332,6 +335,12 @@ const AdminDashboardHome = () => {
                   </p>
                 </div>
               </div>
+
+              {stats?.donationSummary.error && (
+                <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                  {stats.donationSummary.error}
+                </p>
+              )}
 
               {(stats?.donationSummary.recentDonations ?? []).length > 0 && (
                 <div className="space-y-2 border-t border-border/40 pt-4">
