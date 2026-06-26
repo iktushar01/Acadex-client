@@ -16,9 +16,11 @@ export const getChatMessagesService = async (
   if (options?.cursor) params.cursor = options.cursor;
   if (options?.limit) params.limit = options.limit;
 
-  return httpClient.get<ChatMessage[]>("/chat/messages", {
+  const result = await httpClient.get<ChatMessage[]>("/chat/messages", {
     params,
-  }) as Promise<ChatMessagesResponse>;
+  });
+
+  return result as unknown as ChatMessagesResponse;
 };
 
 export const sendChatMessageService = async (
