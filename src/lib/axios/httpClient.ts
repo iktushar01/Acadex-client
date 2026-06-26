@@ -15,7 +15,8 @@ async function tryRefreshToken(
     accessToken: string,
     refreshToken: string
 ): Promise<void> {
-    if (!(await isTokenExpiringSoon(accessToken))) {
+    // Only refresh in the last minute of token life — avoids an extra API hop on every request
+    if (!(await isTokenExpiringSoon(accessToken, 60))) {
         return;
     }
 
@@ -37,14 +38,17 @@ async function tryRefreshToken(
  */
 const axiosInstance = async (customConfig?: AxiosRequestConfig) => {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
+    let accessToken = cookieStore.get("accessToken")?.value;
     const refreshToken = cookieStore.get("refreshToken")?.value;
 
     if (accessToken && refreshToken) {
         await tryRefreshToken(accessToken, refreshToken);
+        const refreshedStore = await cookies();
+        accessToken = refreshedStore.get("accessToken")?.value ?? accessToken;
     }
 
-    const cookieHeader = cookieStore
+    const finalCookieStore = await cookies();
+    const cookieHeader = finalCookieStore
         .getAll()
         .map((cookie) => `${cookie.name}=${cookie.value}`)
         .join("; ");

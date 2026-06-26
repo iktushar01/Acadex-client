@@ -1,9 +1,9 @@
 import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
+import { getCachedMyClassrooms } from "@/lib/classroomMembershipCache";
 import { SidebarData, NavItem } from "@/types/sidebar";
 
 export const getStudentSidebarData = async (): Promise<SidebarData> => {
-  // 1. Fetch real data from your API via the Server Action
-  const result = await fetchMyClassroomsAction();
+  const result = await getCachedMyClassrooms();
 
   // 2. Map the API "memberships" to Sidebar "items"
   // Based on your Postman: label = classroom.name, href = classroom.id

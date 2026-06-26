@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchMyClassroomsAction } from "@/actions/classroomActions/_fetchMyClassroomsAction";
+import { getClientMemberships } from "@/lib/membershipClientCache";
 
 /**
  * Custom hook to determine if the current user is a CR for a specific classroom.
- * @param classroomId The ID of the classroom to check against.
+ * Reuses a short-lived in-memory cache to avoid refetching all classrooms per component.
  */
 export const useClassroomRole = (classroomId?: string) => {
   const [isCR, setIsCR] = useState(false);
@@ -18,12 +19,11 @@ export const useClassroomRole = (classroomId?: string) => {
 
     try {
       setRoleLoading(true);
-      const result = await fetchMyClassroomsAction();
+      const data = await getClientMemberships(fetchMyClassroomsAction);
 
-      if (result.success && result.data) {
-        // Find the specific classroom membership from the API data
-        const membership = result.data.find(
-          (m: any) => m.classroom.id === classroomId
+      if (data) {
+        const membership = data.find(
+          (item) => item.classroom.id === classroomId,
         );
 
         const role = membership?.memberRole || null;
@@ -39,7 +39,7 @@ export const useClassroomRole = (classroomId?: string) => {
   }, [classroomId]);
 
   useEffect(() => {
-    checkRole();
+    void checkRole();
   }, [checkRole]);
 
   return { isCR, roleLoading, userRole, refreshRole: checkRole };
