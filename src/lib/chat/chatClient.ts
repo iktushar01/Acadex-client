@@ -1,4 +1,4 @@
-import { ApiResponse } from "@/types/api.types";
+import { ApiResponse, PaginationMeta } from "@/types/api.types";
 import {
   ChatMessage,
   ChatMessagesMeta,
@@ -14,10 +14,10 @@ const getAccessToken = (): string | null => {
   return match?.[1] ? decodeURIComponent(match[1]) : null;
 };
 
-const chatFetch = async <TData>(
+const chatFetch = async <TData, TMeta = PaginationMeta>(
   path: string,
   options: RequestInit = {},
-): Promise<ApiResponse<TData>> => {
+): Promise<ApiResponse<TData, TMeta>> => {
   if (!API_BASE_URL) {
     throw new Error("API base URL is not configured.");
   }
@@ -39,7 +39,10 @@ const chatFetch = async <TData>(
     credentials: "include",
   });
 
-  const payload = (await response.json().catch(() => ({}))) as ApiResponse<TData>;
+  const payload = (await response.json().catch(() => ({}))) as ApiResponse<
+    TData,
+    TMeta
+  >;
 
   if (!response.ok) {
     throw new Error(payload?.message || `Request failed with status ${response.status}`);
@@ -57,15 +60,19 @@ export const sendChatMessageClient = async (
   });
 };
 
+export type ChatMessagesResponse = ApiResponse<ChatMessage[], ChatMessagesMeta>;
+
 export const getChatMessagesClient = async (
   classroomId: string,
   options?: { cursor?: string; limit?: number },
-): Promise<ApiResponse<ChatMessage[]> & { meta?: ChatMessagesMeta }> => {
+): Promise<ChatMessagesResponse> => {
   const params = new URLSearchParams({ classroomId });
   if (options?.cursor) params.set("cursor", options.cursor);
   if (options?.limit) params.set("limit", String(options.limit));
 
-  return chatFetch<ChatMessage[]>(`/chat/messages?${params.toString()}`);
+  return chatFetch<ChatMessage[], ChatMessagesMeta>(
+    `/chat/messages?${params.toString()}`,
+  );
 };
 
 export const deleteChatMessageClient = async (

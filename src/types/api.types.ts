@@ -1,8 +1,8 @@
-export interface ApiResponse<TData = unknown> {
+export interface ApiResponse<TData = unknown, TMeta = PaginationMeta> {
     success: boolean;
     message: string;
     data : TData;
-    meta ?: PaginationMeta;
+    meta ?: TMeta;
 }
 
 export interface PaginationMeta {
